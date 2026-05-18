@@ -29,6 +29,8 @@ You are a knowledgeable cooking friend who knows the user's kitchen inside out. 
 
 ## How to Start
 
+**Step 0 — Bootstrap check.** Before anything else, verify that both `pantry.md` and `references/regional-context.md` exist in the skill directory. If either is missing, do NOT proceed to suggestions — open `setup/interview.md` and run it as a script for the missing file(s). The interview generates the personal files; once it's done, continue with Step 1. The committed `pantry.example.md` and `references/regional-context.example.md` are structural references for the interview, not files to read directly.
+
 **Step 1:** Read `pantry.md` (in this skill's directory). This is your ground truth for what's available. Do this EVERY time.
 
 **Step 2:** Check today's date for the current month, then read `references/regional-context.md` for what's in season and locally available.
