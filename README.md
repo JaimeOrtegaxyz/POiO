@@ -14,35 +14,37 @@
 
 ---
 
-> **Heads up:** an early idea, only lightly tested with one cook (the author) in one kitchen. Treat it as a sketch, not a product.
+> **Heads up:** an early idea, lightly tested in exactly one kitchen by exactly one cook (me). Treat it as a sketch, not a product.
 
 ## What is POiO?
 
 I fucking love chicken.
 
-POiO is a cooking companion that knows what's in your pantry, what's in season where you live, and how to talk about food without sounding like a recipe site. You tell it what you have; it tells you what to make. Today it runs as a Claude Code skill. The longer-term aim is a small ambient device in the kitchen: an e-ink screen showing today's suggestion, your pantry status, and the shopping list.
+But I hate the dance. Open the fridge, open some recipe app, scroll past sponsored content, find a recipe that calls for buttermilk and tarragon, close it, open another one, give up, eat cereal. I just want a friend who knows what's in my pantry, knows what's at the mercado this month, and tells me what to cook.
 
-The protein is always chicken. That's deliberate.
+So I made POiO. Three little markdown files (the stuff in your kitchen, what's growing where you live, a flavor cheat sheet) and an assistant that reads them and has opinions. You tell it what you have. It tells you what to make. The protein is always chicken because that's the whole point.
+
+Today it lives as a Claude Code skill. Down the road it'll be a small e-ink screen by the stove with today's suggestion, your pantry status, and the shopping list. Roadmap below.
 
 ## Roadmap
 
-POiO is being built in three stages. Each stage is a real, usable thing.
+Three stages. Each one is a real, usable thing on its own.
 
 ### Stage 1: Claude Code skill *(this repo, today)*
 
-A skill that lives in `~/.claude/skills/poio` (symlinked from this repo). Invoke it with `/poio` or just ask about cooking. It reads your pantry, your regional context, and a global flavor reference, then suggests dishes, walks you through recipes, or builds a shopping list.
+Lives in `~/.claude/skills/poio` as a symlink to this repo. Type `/poio` in a Claude Code session, or just start talking about food. It reads your pantry, your regional context, and a flavor reference, then suggests dishes, walks you through a recipe, or builds you a shopping list.
 
-This is the testbed for the pantry model, the suggestion logic, and the recipe format before any other surface is built.
+Stage 1 is where the pantry model, the suggestion logic, and the recipe format get stress-tested before any of it gets wrapped in an app or burned to a microcontroller.
 
 ### Stage 2: Local web app
 
-A self-hosted app you run on your own machine. A Python HTTP engine exposing the same suggestion / recipe / shopping-list endpoints, plus a thin browser UI on `localhost`. Same markdown files as canonical data. Bring your own Anthropic key.
+POiO out of Claude Code. A small Python server you run on your own machine, exposing the same suggestion / recipe / shopping-list endpoints, plus a thin browser UI on `localhost`. Same markdown files as the source of truth. Bring your own Anthropic key.
 
-Stage 2 takes POiO out of Claude Code so non-technical cooks can use it, and locks in the HTTP API that Stage 3 will eventually call.
+Two reasons for Stage 2: get POiO in front of cooks who don't live in a terminal, and lock down the HTTP API the eventual hardware will call.
 
 ### Stage 3: Ambient kitchen device
 
-An Inkplate 10 e-ink display (9.7", ESP32, battery-powered) mounted in the kitchen, polling the same self-hosted engine over Wi-Fi. Glanceable suggestion of the day, pantry status, shopping list. Open hardware, no vendor cloud. See [`hardware/PLAN.md`](hardware/PLAN.md).
+A small e-ink display (Inkplate 10, 9.7", battery-powered) on the kitchen wall, glancing at the same self-hosted server over Wi-Fi. Today's suggestion, what's running low, what's on the shopping list. Open hardware, no vendor cloud, no subscription. See [`hardware/PLAN.md`](hardware/PLAN.md).
 
 ## Architecture
 
