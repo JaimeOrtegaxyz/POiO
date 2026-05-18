@@ -1,6 +1,6 @@
 # Bootstrap Interview
 
-This is the onboarding script poio runs the first time it's used. It collects just enough information to generate the two personal files the assistant relies on:
+This is the onboarding script POiO runs the first time it's used. It collects just enough information to generate the two personal files the assistant relies on:
 
 - `pantry.md` — what the user has in their kitchen
 - `references/regional-context.md` — what's in season where they live
@@ -13,7 +13,7 @@ This file is the single source of truth for onboarding. Stage 1 (the Claude skil
 
 ## When to run the interview
 
-Before doing anything else in a poio session, check:
+Before doing anything else in a POiO session, check:
 
 1. Does `pantry.md` exist in the skill's directory?
 2. Does `references/regional-context.md` exist?

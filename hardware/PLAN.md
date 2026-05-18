@@ -1,6 +1,6 @@
 # hardware
 
-Notes and plan for running poio on a physical device in the kitchen.
+Notes and plan for running POiO on a physical device in the kitchen.
 
 ## Direction
 
