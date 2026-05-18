@@ -20,8 +20,6 @@
 
 I fucking love chicken.
 
-But I hate the dance. Open the fridge, open some recipe app, scroll past sponsored content, find a recipe that calls for buttermilk and tarragon, close it, open another one, give up, eat cereal. I just want a friend who knows what's in my pantry, knows what's at the mercado this month, and tells me what to cook.
-
 So I made POiO. Three little markdown files (the stuff in your kitchen, what's growing where you live, a flavor cheat sheet) and an assistant that reads them and has opinions. You tell it what you have. It tells you what to make. The protein is always chicken because that's the whole point.
 
 Today it lives as a Claude Code skill. Down the road it'll be a small e-ink screen by the stove with today's suggestion, your pantry status, and the shopping list. Roadmap below.
