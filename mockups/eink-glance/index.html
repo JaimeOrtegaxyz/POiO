@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>POiO — E-ink Glance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="device-frame">
+  <div class="screen" id="screen">
+
+    <!-- ============ MASTHEAD ============ -->
+    <header class="masthead">
+      <div class="masthead-left">
+        <div class="kicker">No. 143 &middot; The Kitchen Wall</div>
+        <h1 class="brand">POiO</h1>
+        <div class="tagline">A chicken assistant &middot; pantry-aware &middot; season-aware</div>
+      </div>
+      <div class="masthead-right">
+        <div class="meta-row"><span class="meta-k">Today</span><span class="meta-v" id="today-date">Tue &middot; 19 May 2026</span></div>
+        <div class="meta-row"><span class="meta-k">Season</span><span class="meta-v">mango season, just starting</span></div>
+        <div class="meta-row"><span class="meta-k">Region</span><span class="meta-v">Guadalajara, MX</span></div>
+        <div class="meta-row"><span class="meta-k">Last look</span><span class="meta-v">06:14 this morning</span></div>
+      </div>
+    </header>
+
+    <!-- ============ NAV ============ -->
+    <nav class="tabs" role="tablist" aria-label="POiO sections">
+      <button class="tab active" role="tab" id="tab-today"       aria-selected="true"  aria-controls="view-today"       data-view="today"       data-key="1"><span class="tab-key">1</span>Today</button>
+      <button class="tab"        role="tab" id="tab-suggestions" aria-selected="false" aria-controls="view-suggestions" data-view="suggestions" data-key="2"><span class="tab-key">2</span>Suggestions</button>
+      <button class="tab"        role="tab" id="tab-recipe"      aria-selected="false" aria-controls="view-recipe"      data-view="recipe"      data-key="3"><span class="tab-key">3</span>Recipe</button>
+      <button class="tab"        role="tab" id="tab-pantry"      aria-selected="false" aria-controls="view-pantry"      data-view="pantry"      data-key="4"><span class="tab-key">4</span>Pantry</button>
+      <button class="tab"        role="tab" id="tab-shopping"    aria-selected="false" aria-controls="view-shopping"    data-view="shopping"    data-key="5"><span class="tab-key">5</span>Shopping</button>
+    </nav>
+
+    <!-- ============ TODAY ============ -->
+    <section class="view active" id="view-today" role="tabpanel" aria-labelledby="tab-today" tabindex="0">
+      <div class="today-grid">
+        <article class="hero">
+          <div class="hero-kicker">Tonight &middot; a Tuesday cook</div>
+          <h2 class="hero-title">Chipotle &amp; Media Crema<br />Thighs over Charred Elote Rice</h2>
+          <p class="hero-vibe"><em>Smoky and creamy, lime-bright, weeknight-fast. The kind of bowl that tastes like you tried harder than you did.</em></p>
+
+          <div class="hero-stats">
+            <div class="stat"><span class="stat-k">Time</span><span class="stat-v">15 prep &middot; 35 total</span></div>
+            <div class="stat"><span class="stat-k">Serves</span><span class="stat-v">3</span></div>
+            <div class="stat"><span class="stat-k">Method</span><span class="stat-v">Stovetop + broiler</span></div>
+            <div class="stat"><span class="stat-k">Pantry</span><span class="stat-v">You have everything</span></div>
+          </div>
+
+          <div class="hero-bar"></div>
+
+          <div class="hero-callouts">
+            <div class="callout">
+              <div class="callout-h">Star tonight</div>
+              <div class="callout-b">Chipotle in adobo &mdash; a tablespoon does the lifting.</div>
+            </div>
+            <div class="callout">
+              <div class="callout-h">Acid finish</div>
+              <div class="callout-b">Lime, hard squeeze, right before the cilantro.</div>
+            </div>
+            <div class="callout">
+              <div class="callout-h">Texture hit</div>
+              <div class="callout-b">Pickled red onion + crumbled cotija on top.</div>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <button class="link-button" data-view="recipe">Open full recipe &rarr;</button>
+            <button class="link-button link-button-quiet" data-view="suggestions">Not this &mdash; show me others</button>
+          </div>
+
+          <!-- Ask POiO — single intent entry. Glance surface, one input only. -->
+          <form class="ask-bar" id="ask-form" aria-label="Ask POiO">
+            <label class="ask-label" for="ask-input">Ask POiO</label>
+            <input
+              class="ask-input"
+              id="ask-input"
+              type="text"
+              autocomplete="off"
+              placeholder="what should I cook? &middot; I bought poblanos &middot; make me a chipotle-lime bowl" />
+            <button class="ask-send" type="submit" aria-label="Send">&rarr;</button>
+          </form>
+          <div class="ask-echo" id="ask-echo" hidden></div>
+        </article>
+
+        <aside class="side-stack">
+          <section class="panel">
+            <h3 class="panel-h">Pantry, at a glance</h3>
+            <div class="snapshot" id="snapshot">
+              <!-- bars rendered from JS so widths match the real counts -->
+            </div>
+            <div class="snapshot-note" id="snapshot-note">
+              Strong on dried chiles, soy, and ginger. A little light on Mediterranean dairy &mdash; nothing urgent.
+            </div>
+          </section>
+
+          <section class="panel">
+            <h3 class="panel-h">Shopping list</h3>
+            <div class="big-number" id="shop-count">9 <span class="big-unit">things to grab</span></div>
+            <ul class="mini-list">
+              <li><span class="dot dot-out"></span>Limes <em>&middot; the workhorse acid</em></li>
+              <li><span class="dot dot-out"></span>Cilantro <em>&middot; restock</em></li>
+              <li><span class="dot dot-low"></span>Crema <em>&middot; top up</em></li>
+              <li><span class="dot dot-new"></span>Mangoes <em>&middot; peaking</em></li>
+              <li><span class="more">+ 5 more</span></li>
+            </ul>
+            <button class="link-button" data-view="shopping">See the full list &rarr;</button>
+          </section>
+
+          <section class="panel panel-quiet">
+            <h3 class="panel-h">In season this week</h3>
+            <p class="seasonal-line">Mango (just starting), zucchini, first elote, squash blossoms, all the chiles frescos.</p>
+          </section>
+        </aside>
+      </div>
+
+      <footer class="rule-footer">
+        <span>Glance &middot; not a screen to scroll</span>
+        <span class="dots">&middot; &middot; &middot;</span>
+        <span>Keys: <kbd>1</kbd>&ndash;<kbd>5</kbd> to switch &middot; <kbd>/</kbd> to ask &middot; <kbd>?</kbd> for help</span>
+      </footer>
+    </section>
+
+    <!-- ============ SUGGESTIONS ============ -->
+    <section class="view" id="view-suggestions" role="tabpanel" aria-labelledby="tab-suggestions" tabindex="0">
+      <div class="view-head">
+        <div class="view-kicker">What should I cook?</div>
+        <h2 class="view-title">Six directions for tonight</h2>
+        <p class="view-sub">Your pantry is loud on dried chiles, soy, ginger, and limes. Mangoes are just starting at the tianguis &mdash; one suggestion leans into them. Pick one with <kbd>j</kbd>/<kbd>k</kbd> and <kbd>enter</kbd>, or click.</p>
+      </div>
+
+      <ol class="suggest-list" id="suggest-list">
+        <li class="suggest" tabindex="0" data-idx="0">
+          <div class="suggest-num">01</div>
+          <div class="suggest-body">
+            <h3 class="suggest-title">Chipotle &amp; Media Crema Thighs over Charred Elote Rice <span class="pill">tonight&rsquo;s pick</span></h3>
+            <p class="suggest-hook">Smoky and creamy, lime-bright. Bone-in thighs under the broiler until the skin catches.</p>
+            <div class="suggest-meta">
+              <span class="m">35 min</span>
+              <span class="m">Latin</span>
+              <span class="m">Stovetop + broiler</span>
+              <span class="m m-flag">You have everything</span>
+            </div>
+            <div class="narrow" data-narrow-for="0" hidden>
+              <div class="narrow-q">One question to land the recipe:</div>
+              <div class="narrow-opts" role="group" aria-label="Narrowing choice">
+                <button class="narrow-opt" data-choice="char">Crunchy and charred</button>
+                <button class="narrow-opt" data-choice="saucy">Saucy and tender</button>
+              </div>
+              <div class="narrow-hint">&hellip; or hit <kbd>enter</kbd> on the picked option and we&rsquo;ll open the recipe.</div>
+            </div>
+          </div>
+        </li>
+
+        <li class="suggest" tabindex="0" data-idx="1">
+          <div class="suggest-num">02</div>
+          <div class="suggest-body">
+            <h3 class="suggest-title">15-min Gochujang-Lime Chicken Rice Bowl</h3>
+            <p class="suggest-hook">Fastest thing you can do tonight. Boneless thighs, sticky glaze, smashed cucumber on the side.</p>
+            <div class="suggest-meta">
+              <span class="m">18 min</span>
+              <span class="m">East Asian</span>
+              <span class="m">Stovetop</span>
+              <span class="m m-flag">Quick</span>
+              <span class="m m-warn">Gochujang &mdash; out</span>
+            </div>
+            <div class="narrow" data-narrow-for="1" hidden>
+              <div class="narrow-q">You&rsquo;re out of gochujang &mdash; want to swap, or skip this one?</div>
+              <div class="narrow-opts" role="group" aria-label="Narrowing choice">
+                <button class="narrow-opt" data-choice="swap">Swap to chile-honey glaze</button>
+                <button class="narrow-opt" data-choice="skip">Skip &mdash; pick another</button>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <li class="suggest" tabindex="0" data-idx="2">
+          <div class="suggest-num">03</div>
+          <div class="suggest-body">
+            <h3 class="suggest-title">Mango-Habanero Tacos al Pastor-ish</h3>
+            <p class="suggest-hook">Mangoes are at peak. Achiote-stained boneless thighs, fresh mango pico, charred onion, salsa macha drizzle.</p>
+            <div class="suggest-meta">
+              <span class="m">30 min</span>
+              <span class="m">Latin</span>
+              <span class="m">Stovetop + plancha</span>
+              <span class="m m-flag">Seasonal</span>
+            </div>
+            <div class="narrow" data-narrow-for="2" hidden>
+              <div class="narrow-q">Salsa macha is <em>low</em> &mdash; build around it, or stretch with a thinner drizzle?</div>
+              <div class="narrow-opts" role="group" aria-label="Narrowing choice">
+                <button class="narrow-opt" data-choice="full">Full pour, finish the jar</button>
+                <button class="narrow-opt" data-choice="stretch">Stretch it &mdash; just a drizzle</button>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <li class="suggest" tabindex="0" data-idx="3">
+          <div class="suggest-num">04</div>
+          <div class="suggest-body">
+            <h3 class="suggest-title">Overnight Slow-Cooker Chile Colorado Thighs</h3>
+            <p class="suggest-hook">Set it tonight, eat it tomorrow. Guajillo + ancho adobo, bone-in thighs, falls apart, makes three meals.</p>
+            <div class="suggest-meta">
+              <span class="m">10 min active &middot; 8 hr slow</span>
+              <span class="m">Latin</span>
+              <span class="m">Slow cooker</span>
+              <span class="m m-flag">Batch-then-riff</span>
+            </div>
+            <div class="narrow" data-narrow-for="3" hidden>
+              <div class="narrow-q">Riff-ready: where do leftovers go first &mdash; tacos, or burritos with rice?</div>
+              <div class="narrow-opts" role="group" aria-label="Narrowing choice">
+                <button class="narrow-opt" data-choice="tacos">Tacos with the pickled onion</button>
+                <button class="narrow-opt" data-choice="burritos">Burritos with rice and beans</button>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <li class="suggest" tabindex="0" data-idx="4">
+          <div class="suggest-num">05</div>
+          <div class="suggest-body">
+            <h3 class="suggest-title">Za&rsquo;atar Yoghurt Thigh Traybake with Charred Cabbage</h3>
+            <p class="suggest-hook">One tray, high heat. Yoghurt-spice marinade clings and chars. Tahini-lemon drizzle to finish.</p>
+            <div class="suggest-meta">
+              <span class="m">40 min</span>
+              <span class="m">Middle Eastern</span>
+              <span class="m">Oven</span>
+              <span class="m m-flag">Cabbage &middot; plenty</span>
+              <span class="m m-warn">Tahini &mdash; out</span>
+            </div>
+            <div class="narrow" data-narrow-for="4" hidden>
+              <div class="narrow-q">No tahini &mdash; finish with thinned yoghurt and lemon instead?</div>
+              <div class="narrow-opts" role="group" aria-label="Narrowing choice">
+                <button class="narrow-opt" data-choice="yoghurt">Yes, lemon-yoghurt finish</button>
+                <button class="narrow-opt" data-choice="defer">No &mdash; save it for when I&rsquo;ve shopped</button>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <li class="suggest" tabindex="0" data-idx="5">
+          <div class="suggest-num">06</div>
+          <div class="suggest-body">
+            <h3 class="suggest-title">Caldo Tlalpe&ntilde;o with Epazote &amp; Chipotle</h3>
+            <p class="suggest-hook">Brothy and restorative, chickpea-thick. Garnish bar at the table: avocado, lime, queso fresco, cilantro, rice on the side.</p>
+            <div class="suggest-meta">
+              <span class="m">45 min</span>
+              <span class="m">Latin</span>
+              <span class="m">One-pot</span>
+              <span class="m m-warn">Epazote &mdash; out</span>
+            </div>
+            <div class="narrow" data-narrow-for="5" hidden>
+              <div class="narrow-q">Epazote is out &mdash; lean on cilantro stems and a bay leaf, or wait till you grab some?</div>
+              <div class="narrow-opts" role="group" aria-label="Narrowing choice">
+                <button class="narrow-opt" data-choice="lean">Lean on what you&rsquo;ve got</button>
+                <button class="narrow-opt" data-choice="wait">Wait &mdash; add epazote to shopping</button>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <footer class="rule-footer">
+        <span>Pick one &mdash; we&rsquo;ll narrow it down with a single question.</span>
+        <span class="dots">&middot; &middot; &middot;</span>
+        <span>6 of ~40 we could go with tonight</span>
+      </footer>
+    </section>
+
+    <!-- ============ RECIPE ============ -->
+    <section class="view" id="view-recipe" role="tabpanel" aria-labelledby="tab-recipe" tabindex="0">
+      <article class="recipe">
+        <header class="recipe-head">
+          <div class="recipe-kicker">Recipe &middot; tonight &middot; 19 May 2026</div>
+          <h2 class="recipe-title">Chipotle &amp; Media Crema Thighs<br /><span class="recipe-sub">over Charred Elote Rice</span></h2>
+          <p class="recipe-vibe"><em>Smoky and creamy, lime-bright, weeknight-fast. The chipotle does the heavy lifting; the media crema rounds it off. Char on the corn is non-negotiable.</em></p>
+          <div class="recipe-stats">
+            <div class="stat"><span class="stat-k">Time</span><span class="stat-v">15 prep + 35 total</span></div>
+            <div class="stat"><span class="stat-k">Serves</span><span class="stat-v">3</span></div>
+            <div class="stat"><span class="stat-k">Method</span><span class="stat-v">Stovetop + broiler</span></div>
+            <div class="stat"><span class="stat-k">Flavor</span><span class="stat-v">Latin / Mexican</span></div>
+          </div>
+        </header>
+
+        <div class="recipe-grid">
+          <aside class="ingredients">
+            <h3 class="section-h">What you need</h3>
+
+            <h4 class="ing-cat">Protein</h4>
+            <ul class="ing-list">
+              <li><span class="ing-q">6</span> bone-in, skin-on chicken thighs</li>
+            </ul>
+
+            <h4 class="ing-cat">Veg &amp; aromatics</h4>
+            <ul class="ing-list">
+              <li><span class="ing-q">2 ears</span> elote (or 1.5 cups frozen corn)</li>
+              <li><span class="ing-q">1</span> white onion &mdash; half diced, half thin half-moons</li>
+              <li><span class="ing-q">4</span> cloves garlic, smashed</li>
+              <li><span class="ing-q">1</span> small red onion (for pickling)</li>
+              <li><span class="ing-q">1 bunch</span> cilantro</li>
+              <li><span class="ing-q">3</span> limes</li>
+            </ul>
+
+            <h4 class="ing-cat">Pantry &amp; spices</h4>
+            <ul class="ing-list">
+              <li><strong><span class="ing-q">2 tbsp</span> chipotles in adobo (chopped) + 1 tsp adobo sauce</strong></li>
+              <li><span class="ing-q">1 cup</span> long-grain white rice</li>
+              <li><span class="ing-q">1 tsp</span> ground cumin</li>
+              <li><span class="ing-q">1 tsp</span> Mexican oregano</li>
+              <li><span class="ing-q">2 tbsp</span> neutral oil</li>
+              <li>Kosher salt, black pepper</li>
+            </ul>
+
+            <h4 class="ing-cat">For the finish</h4>
+            <ul class="ing-list">
+              <li><span class="ing-q">1/2 cup</span> media crema</li>
+              <li><span class="ing-q">1/3 cup</span> cotija, crumbled <span class="low-tag">low</span></li>
+              <li>Salsa macha (optional, drizzle)</li>
+              <li>Flaky salt</li>
+            </ul>
+          </aside>
+
+          <section class="method">
+            <h3 class="section-h">Method</h3>
+            <ol class="method-list">
+              <li>
+                <span class="step-n">1</span>
+                <div class="step-b"><strong>Pickle the onion first, walk away.</strong> Thin half-moons of red onion in a small bowl with the juice of 1 lime, a pinch of salt, a pinch of sugar. Let it sit while you cook &mdash; it&rsquo;ll be neon pink and crunchy in 20 minutes.</div>
+              </li>
+              <li>
+                <span class="step-n">2</span>
+                <div class="step-b"><strong>Season the thighs hard.</strong> Pat dry. Salt generously on both sides, then a dusting of cumin, oregano, and black pepper. Skin-side up, set aside.</div>
+              </li>
+              <li>
+                <span class="step-n">3</span>
+                <div class="step-b"><strong>Char the elote dry.</strong> Hot, dry skillet. Strip the kernels off the cobs straight into the pan and don&rsquo;t stir for 90 seconds. You want black spots, blistered edges, the smell of summer. <em>Char it until it catches.</em> Stir, char again, then dump into a bowl with a squeeze of lime.</div>
+              </li>
+              <li>
+                <span class="step-n">4</span>
+                <div class="step-b"><strong>Build the rice.</strong> Same pan, 1 tbsp oil over medium. Diced white onion + garlic, cook until translucent and just starting to catch &mdash; 4 minutes. Add rice, toast 1 minute until it smells nutty and you can&rsquo;t help leaning in. Pour in 1 3/4 cups water, salt, bring to a boil, cover, low heat 15 minutes. Off heat, rest 5. Fold the charred corn back in.</div>
+              </li>
+              <li>
+                <span class="step-n">5</span>
+                <div class="step-b"><strong>Crisp the thighs.</strong> Heavy skillet (cast iron if you have it), 1 tbsp oil, screaming hot. Thighs skin-side down, press them flat for the first minute. Don&rsquo;t move them for 7 minutes &mdash; you want the skin <em>golden and crackling</em>. Flip, 4 more minutes. Pull, rest skin-side up on a plate.</div>
+              </li>
+              <li>
+                <span class="step-n">6</span>
+                <div class="step-b"><strong>Build the chipotle crema.</strong> Same pan, fat still in it, heat down. Half-moon white onion, soften 2 minutes. Off heat. Stir in the chopped chipotle + adobo, then the media crema. It&rsquo;ll loosen with the rendered fat and turn the colour of a wet brick. Taste &mdash; squeeze of lime if it needs lift, salt if it needs salt.</div>
+              </li>
+              <li>
+                <span class="step-n">7</span>
+                <div class="step-b"><strong>Broil to finish (optional but worth it).</strong> Return the thighs skin-up to the pan, slide under the broiler 90 seconds until the skin catches an extra char. Just watch it &mdash; broilers are personal.</div>
+              </li>
+            </ol>
+
+            <h3 class="section-h">The finish</h3>
+            <p class="finish-p">Bed of elote rice. Thigh on top, skin-up. Spoon the chipotle crema around &mdash; not on the skin, you&rsquo;ll soften it. Pile the pickled onion. Cotija crumble. Cilantro torn over generously. Salsa macha drizzle if you&rsquo;ve got it. Final hard squeeze of lime, flaky salt, and eat immediately while the skin is still loud.</p>
+
+            <h3 class="section-h">Pantry notes</h3>
+            <ul class="notes-list">
+              <li>Cotija is <strong>low</strong> &mdash; queso fresco crumbles work, or skip if you must.</li>
+              <li>No media crema? Equal parts Greek yoghurt + cream, or sour cream thinned with milk.</li>
+              <li>Keeps 3 days in the fridge. Reheat the rice with a splash of water, the thigh gently in a covered pan.</li>
+              <li>Leftovers: shred any remaining thigh into tomorrow&rsquo;s tacos with the pickled onion.</li>
+              <li>This uses about <strong>2 tbsp chipotles in adobo</strong> &mdash; roughly a third of the can. Still <code>plenty</code>.</li>
+            </ul>
+          </section>
+        </div>
+      </article>
+
+      <footer class="rule-footer">
+        <span>Printed-paper layout. Designed for glance, not scroll.</span>
+        <span class="dots">&middot; &middot; &middot;</span>
+        <span>Recipe ID 0519-CHIP</span>
+      </footer>
+    </section>
+
+    <!-- ============ PANTRY ============ -->
+    <section class="view" id="view-pantry" role="tabpanel" aria-labelledby="tab-pantry" tabindex="0">
+      <div class="view-head">
+        <div class="view-kicker">What&rsquo;s in the kitchen</div>
+        <h2 class="view-title">Your pantry, today</h2>
+        <p class="view-sub" id="pantry-sub">Reading the shelves now &hellip;</p>
+
+        <div class="filters" id="pantry-filters" role="group" aria-label="Filter pantry by status">
+          <button class="filter active" data-filter="all">All <span class="filter-n" data-count="all">&middot;</span></button>
+          <button class="filter" data-filter="plenty">Plenty <span class="filter-n" data-count="plenty">&middot;</span></button>
+          <button class="filter" data-filter="low">Low <span class="filter-n" data-count="low">&middot;</span></button>
+          <button class="filter" data-filter="out">Out <span class="filter-n" data-count="out">&middot;</span></button>
+        </div>
+      </div>
+
+      <!-- "Use these first" — surfaces low items at the top, gives them somewhere to go -->
+      <section class="pantry-priority" id="pantry-priority">
+        <header class="priority-h">
+          <h3 class="priority-title">Use these first</h3>
+          <span class="priority-sub">running low &middot; cook before they slip to <em>out</em></span>
+        </header>
+        <ul class="priority-list" id="priority-list"></ul>
+      </section>
+
+      <div class="pantry-columns" id="pantry-columns">
+        <!-- Rendered from JS so the snapshot counts and filters stay in sync with the data. -->
+      </div>
+
+      <footer class="rule-footer">
+        <span>Source of truth: <code>pantry.md</code></span>
+        <span class="dots">&middot; &middot; &middot;</span>
+        <span>Click a status pill to cycle (preview only)</span>
+      </footer>
+    </section>
+
+    <!-- ============ SHOPPING ============ -->
+    <section class="view" id="view-shopping" role="tabpanel" aria-labelledby="tab-shopping" tabindex="0">
+      <div class="view-head">
+        <div class="view-kicker">Going to the store</div>
+        <h2 class="view-title">Shopping list &middot; this week</h2>
+        <p class="view-sub">Pulled from what&rsquo;s low, what&rsquo;s out, what&rsquo;s peaking at the tianguis, and two ideas to widen the range.</p>
+      </div>
+
+      <div class="shop-grid">
+
+        <section class="shop-panel">
+          <header class="shop-h">
+            <h3 class="shop-title">Restock</h3>
+            <span class="shop-sub">out &middot; you always need these</span>
+          </header>
+          <ul class="shop-list">
+            <li><span class="check-box"></span><span class="shop-name">Limes</span><span class="shop-note">a kilo &mdash; the workhorse acid, non-negotiable</span></li>
+            <li><span class="check-box"></span><span class="shop-name">Cilantro</span><span class="shop-note">two bunches</span></li>
+            <li><span class="check-box"></span><span class="shop-name">Queso Oaxaca</span><span class="shop-note">block, not shredded &mdash; pulls into strings the right way</span></li>
+            <li><span class="check-box"></span><span class="shop-name">Bolillo</span><span class="shop-note">5&ndash;6, from the panader&iacute;a if you can</span></li>
+            <li><span class="check-box"></span><span class="shop-name">Chile pasilla</span><span class="shop-note">small bag, mercado</span></li>
+          </ul>
+        </section>
+
+        <section class="shop-panel">
+          <header class="shop-h">
+            <h3 class="shop-title">Top up</h3>
+            <span class="shop-sub">low &middot; will run out this week</span>
+          </header>
+          <ul class="shop-list">
+            <li><span class="check-box"></span><span class="shop-name">Crema</span><span class="shop-note">small tub</span></li>
+            <li><span class="check-box"></span><span class="shop-name">Cotija</span><span class="shop-note">a wedge, the salty crumbly one</span></li>
+            <li><span class="check-box"></span><span class="shop-name">Avocado</span><span class="shop-note">3, semi-firm &mdash; they ripen in a paper bag overnight</span></li>
+            <li><span class="check-box"></span><span class="shop-name">Canela</span><span class="shop-note">true Ceylon if the mercado has it</span></li>
+            <li><span class="check-box"></span><span class="shop-name">Salsa macha</span><span class="shop-note">jar &mdash; the good one with sesame and peanuts</span></li>
+          </ul>
+        </section>
+
+        <section class="shop-panel">
+          <header class="shop-h">
+            <h3 class="shop-title">Seasonal picks</h3>
+            <span class="shop-sub">May &middot; pre-rainy is peaking</span>
+          </header>
+          <ul class="shop-list">
+            <li>
+              <span class="check-box"></span>
+              <span class="shop-name">Mangoes &middot; Ataulfo</span>
+              <span class="shop-note">just starting &mdash; unlocks mango-habanero tacos, mango pico, a bright fresh salsa over grilled thighs</span>
+            </li>
+            <li>
+              <span class="check-box"></span>
+              <span class="shop-name">Squash blossoms (flor de calabaza)</span>
+              <span class="shop-note">two bunches &mdash; quesadillas alongside braised chicken, or stuff and pan-fry till they sigh</span>
+            </li>
+            <li>
+              <span class="check-box"></span>
+              <span class="shop-name">First elote of the season</span>
+              <span class="shop-note">char it dry until it catches, fold into rice; bowls all week</span>
+            </li>
+            <li>
+              <span class="check-box"></span>
+              <span class="shop-name">Quelites or verdolagas</span>
+              <span class="shop-note">if the tianguis has them &mdash; wilted into broth with thighs</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="shop-panel">
+          <header class="shop-h">
+            <h3 class="shop-title">Unlock new dishes</h3>
+            <span class="shop-sub">not in the pantry &middot; would widen the range</span>
+          </header>
+          <ul class="shop-list">
+            <li>
+              <span class="check-box"></span>
+              <span class="shop-name">Gochujang</span>
+              <span class="shop-note">Korean-style sticky glazes &mdash; fermented, sweet, a little funky. Pair it with chipotle and you&rsquo;ve got Korean-Mexican fusion that actually makes sense. Soriana&rsquo;s Asian aisle, or an import store.</span>
+            </li>
+            <li>
+              <span class="check-box"></span>
+              <span class="shop-name">Tahini</span>
+              <span class="shop-note">Opens up the Middle Eastern half of the style guide &mdash; drizzles on traybakes, yoghurt-tahini sauce for charred cabbage and thighs. Costco has the best price.</span>
+            </li>
+            <li>
+              <span class="check-box"></span>
+              <span class="shop-name">Preserved lemon</span>
+              <span class="shop-note">A jar will last six months. Drops a whole North-African register into the kitchen &mdash; tagines, chicken with olives, a brightness no fresh lemon can match.</span>
+            </li>
+          </ul>
+        </section>
+
+      </div>
+
+      <footer class="rule-footer">
+        <span>15 items total &middot; ~ MX$ 480</span>
+        <span class="dots">&middot; &middot; &middot;</span>
+        <span>Print friendly &middot; <kbd>cmd</kbd>-<kbd>P</kbd></span>
+      </footer>
+    </section>
+
+    <!-- Help overlay — keyboard cheatsheet -->
+    <div class="help-overlay" id="help-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="help-h">
+      <div class="help-card">
+        <header class="help-head">
+          <h3 id="help-h" class="help-title">Keyboard</h3>
+          <button class="help-close" id="help-close" aria-label="Close">&times;</button>
+        </header>
+        <dl class="help-list">
+          <dt><kbd>1</kbd>&hellip;<kbd>5</kbd></dt><dd>switch view</dd>
+          <dt><kbd>j</kbd> / <kbd>k</kbd></dt><dd>next / previous item</dd>
+          <dt><kbd>&uarr;</kbd> / <kbd>&darr;</kbd></dt><dd>next / previous item</dd>
+          <dt><kbd>enter</kbd></dt><dd>pick the focused suggestion</dd>
+          <dt><kbd>/</kbd></dt><dd>focus the Ask POiO field</dd>
+          <dt><kbd>p</kbd></dt><dd>jump to pantry filters</dd>
+          <dt><kbd>esc</kbd></dt><dd>close this, or unfocus the ask field</dd>
+          <dt><kbd>?</kbd></dt><dd>open this help</dd>
+        </dl>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Device chrome (visible only on desktop, simulates the Inkplate 10 bezel) -->
+  <div class="device-label">Inkplate 10 &middot; 9.7&quot; e-ink &middot; 1200&times;825 &middot; preview</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

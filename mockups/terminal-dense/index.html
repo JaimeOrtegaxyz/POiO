@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>poio :: terminal-dense</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body data-theme="light">
+
+<!-- ============================================================== -->
+<!--   HEADER BAR                                                    -->
+<!-- ============================================================== -->
+<header id="topbar">
+  <span class="brand">POiO</span>
+  <span class="sep">::</span>
+  <span class="ctx" id="ctx-region">Guadalajara, MX</span>
+  <span class="sep">::</span>
+  <span class="ctx" id="ctx-date">2026-05-19 · Tue</span>
+  <span class="sep">::</span>
+  <span class="ctx" id="ctx-season">late spring</span>
+
+  <span class="spacer"></span>
+
+  <nav id="tabs" aria-label="views">
+    <button class="tab" data-view="today"       data-key="1"><span class="num">1</span> today</button>
+    <button class="tab" data-view="suggestions" data-key="2"><span class="num">2</span> suggestions</button>
+    <button class="tab" data-view="recipe"      data-key="3"><span class="num">3</span> recipe</button>
+    <button class="tab" data-view="pantry"      data-key="4"><span class="num">4</span> pantry</button>
+    <button class="tab" data-view="shopping"    data-key="5"><span class="num">5</span> shopping</button>
+  </nav>
+
+  <span class="ctx mono-mute" id="ctx-clock">--:--:--</span>
+</header>
+
+<!-- ============================================================== -->
+<!--   MAIN AREA                                                     -->
+<!-- ============================================================== -->
+<main id="stage">
+
+  <!-- ---------- VIEW 1 :: TODAY ----------------------------------- -->
+  <section class="view" id="view-today" data-view="today">
+    <div class="grid grid-today">
+
+      <div class="pane pane-tall">
+        <div class="pane-head">
+          <span class="pane-title">today's dish</span>
+          <span class="pane-meta">picked 06:12 · pantry-derived</span>
+        </div>
+        <div class="pane-body">
+          <div class="dish-hero">
+            <div class="dish-name">Chipotle-Honey Smashed Thighs, Charred Elote Bowl</div>
+            <div class="dish-vibe">Sticky, smoky, with a bright lime-crema swoosh. A weeknight bowl that eats like a weekend — char the glaze until it catches at the edges and turns lacquered.</div>
+
+            <table class="kv">
+              <tr><td>cuisine</td><td>latin · fusion accent</td></tr>
+              <tr><td>method</td><td>cast iron smash + oven 8 min</td></tr>
+              <tr><td>active</td><td>20 min</td></tr>
+              <tr><td>total</td><td>35 min</td></tr>
+              <tr><td>serves</td><td>2</td></tr>
+              <tr><td>star</td><td><b>chipotle in adobo</b> &nbsp;<span class="ok">plenty</span></td></tr>
+              <tr><td>uses low</td><td>media crema <span class="warn">low</span>, cilantro <span class="warn">low</span></td></tr>
+              <tr><td>uses out</td><td>—</td></tr>
+            </table>
+
+            <div class="hint">
+              <span class="key">[3]</span> open full recipe &nbsp;
+              <span class="key">[s]</span> swap &nbsp;
+              <span class="key">[m]</span> mark cooked
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">pantry</span>
+          <span class="pane-meta">snapshot</span>
+        </div>
+        <div class="pane-body">
+          <div class="stats-row" id="today-stats">
+            <!-- filled by JS -->
+          </div>
+          <div class="bar-track" title="stock health" id="today-bar">
+            <!-- filled by JS -->
+          </div>
+          <div class="legend" id="today-legend">
+            <!-- filled by JS -->
+          </div>
+
+          <div class="mini-block">
+            <div class="mini-title">running low</div>
+            <ul class="thin" id="today-low">
+              <!-- filled by JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">shopping</span>
+          <span class="pane-meta">queued</span>
+        </div>
+        <div class="pane-body">
+          <div class="stats-row" id="today-shop-stats">
+            <!-- filled by JS -->
+          </div>
+          <table class="kv tight" id="today-shop-kv">
+            <!-- filled by JS -->
+          </table>
+          <div class="hint"><span class="key">[5]</span> open list</div>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">tianguis · may</span>
+          <span class="pane-meta">what's good right now</span>
+        </div>
+        <div class="pane-body">
+          <ul class="thin">
+            <li><span class="ok">●</span> mangoes — peaking, ataulfo are the move</li>
+            <li><span class="ok">●</span> nopales — abundant, charred slaw weather</li>
+            <li><span class="ok">●</span> tomatillos — bright, firm, screaming for salsa verde</li>
+            <li><span class="warn">◐</span> elote — early, getting sweeter every week</li>
+            <li><span class="warn">◐</span> jicama — fine, not best</li>
+            <li><span class="bad">○</span> chayote — end of run</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pane pane-wide">
+        <div class="pane-head">
+          <span class="pane-title">recent cooks</span>
+          <span class="pane-meta">last 7 days · 5 entries</span>
+        </div>
+        <div class="pane-body">
+          <table class="data tight">
+            <thead><tr><th>date</th><th>dish</th><th>cuisine</th><th>cut</th><th>time</th><th>note</th></tr></thead>
+            <tbody>
+              <tr><td>05-18</td><td>Tinga de pollo tacos</td>           <td>latin</td>     <td>thigh (bone)</td>  <td>45m</td><td>shredded base went 3 days</td></tr>
+              <tr><td>05-15</td><td>Gochujang-glazed drumsticks</td>     <td>fusion</td>    <td>drumstick</td>     <td>30m</td><td>glaze caught hard, repeat</td></tr>
+              <tr><td>05-14</td><td>Lemon-garlic traybake w/ potato</td> <td>mediterranean</td> <td>thigh (bone)</td>  <td>50m</td><td>good, not memorable</td></tr>
+              <tr><td>05-12</td><td>Coconut-curry shredded bowl</td>     <td>se asian</td>  <td>breast</td>        <td>40m</td><td>poached, very tender</td></tr>
+              <tr><td>05-11</td><td>Salsa verde enchiladas</td>          <td>latin</td>     <td>shredded</td>      <td>35m</td><td>tomatillo / cotija / done</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ---------- VIEW 2 :: SUGGESTIONS ----------------------------- -->
+  <section class="view" id="view-suggestions" data-view="suggestions" hidden>
+    <div class="grid grid-list-detail">
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">suggestions · 7 dishes</span>
+          <span class="pane-meta">pantry-feasible · seasonal-aware</span>
+        </div>
+        <div class="pane-body no-pad">
+          <table class="data selectable" id="sug-table">
+            <thead>
+              <tr>
+                <th class="num-col">#</th>
+                <th>dish</th>
+                <th>cuisine</th>
+                <th>cut</th>
+                <th>method</th>
+                <th>time</th>
+                <th>tag</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-idx="0" class="sel">
+                <td class="num-col">1</td>
+                <td>Chipotle-Honey Smashed Thighs, Charred Elote Bowl</td>
+                <td>latin · fusion</td><td>thigh (boneless)</td><td>smash + oven</td><td>35m</td>
+                <td class="tag tag-pick">today's pick</td>
+              </tr>
+              <tr data-idx="1">
+                <td class="num-col">2</td>
+                <td>Salsa Macha Crispy Tinga Tacos</td>
+                <td>latin</td><td>thigh (bone)</td><td>braise + shred</td><td>55m</td>
+                <td class="tag tag-slow">slow</td>
+              </tr>
+              <tr data-idx="2">
+                <td class="num-col">3</td>
+                <td>Coconut-Lime Curry, Jasmine Rice</td>
+                <td>se asian</td><td>thigh (boneless)</td><td>one-pot</td><td>30m</td>
+                <td class="tag">weeknight</td>
+              </tr>
+              <tr data-idx="3">
+                <td class="num-col">4</td>
+                <td>Za'atar Spatchcock, Lemon-Tahini Drizzle</td>
+                <td>middle east</td><td>whole bird</td><td>oven 220°C</td><td>1h 10m</td>
+                <td class="tag tag-weekend">weekend</td>
+              </tr>
+              <tr data-idx="4">
+                <td class="num-col">5</td>
+                <td>Mango-Habanero Glazed Drumsticks</td>
+                <td>fusion</td><td>drumstick</td><td>oven + glaze</td><td>40m</td>
+                <td class="tag tag-bold">adventurous</td>
+              </tr>
+              <tr data-idx="5">
+                <td class="num-col">6</td>
+                <td>15-Min Gochujang Stir-Fry Bowl</td>
+                <td>fusion · korean</td><td>thigh (boneless)</td><td>wok / stir-fry</td><td>15m</td>
+                <td class="tag tag-fast">quick</td>
+              </tr>
+              <tr data-idx="6">
+                <td class="num-col">7</td>
+                <td>Slow Cooker Chile-Ancho Pulled, Riff All Week</td>
+                <td>latin</td><td>thigh (bone)</td><td>slow cooker</td><td>6h</td>
+                <td class="tag tag-batch">batch</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">hook</span>
+          <span class="pane-meta" id="sug-meta">1 / 7</span>
+        </div>
+        <div class="pane-body" id="sug-detail">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ---------- VIEW 3 :: RECIPE ---------------------------------- -->
+  <section class="view" id="view-recipe" data-view="recipe" hidden>
+    <div class="grid grid-recipe">
+
+      <div class="pane pane-wide">
+        <div class="pane-head">
+          <span class="pane-title">recipe</span>
+          <span class="pane-meta">latin · fusion accent · serves 2</span>
+        </div>
+        <div class="pane-body recipe">
+
+<h1 class="recipe-title">Chipotle-Honey Smashed Thighs, Charred Elote Bowl</h1>
+<div class="recipe-sub">latin · fusion accent &nbsp;·&nbsp; serves 2 &nbsp;·&nbsp; 20 min active / 35 min total &nbsp;·&nbsp; cast iron + oven 220°C</div>
+
+<p class="vibe">
+Sticky, smoky thighs smashed flat for max surface area, glazed with chipotle and honey until they catch at the edges and turn lacquered. Served over charred elote, lime crema, and a fistful of cilantro. A weeknight bowl that drinks like a weekend.
+</p>
+
+<h3 class="rh">what you need</h3>
+
+<div class="cols-2">
+  <div>
+    <div class="rh-sub">protein</div>
+    <ul class="thin">
+      <li>4 boneless chicken thighs (~500 g) <span class="ok">plenty</span></li>
+    </ul>
+
+    <div class="rh-sub">veg &amp; aromatics</div>
+    <ul class="thin">
+      <li>2 ears elote <span class="ok">plenty</span></li>
+      <li>½ white onion, thin half-moons <span class="ok">plenty</span></li>
+      <li>3 garlic cloves, smashed <span class="ok">plenty</span></li>
+      <li>1 jalapeño, sliced thin for pickle <span class="ok">plenty</span></li>
+      <li>small handful cilantro, leaves <span class="warn">low</span></li>
+    </ul>
+  </div>
+  <div>
+    <div class="rh-sub">pantry &amp; spices</div>
+    <ul class="thin">
+      <li>1 tbsp Mexican oregano <span class="ok">plenty</span></li>
+      <li>1 tsp cumin (ground)</li>
+      <li>½ tsp smoked paprika</li>
+      <li>kosher salt, black pepper</li>
+      <li>vegetable oil for the pan</li>
+    </ul>
+
+    <div class="rh-sub">for the glaze</div>
+    <ul class="thin">
+      <li><b>2 chipotles in adobo + 1 tbsp of the sauce</b></li>
+      <li>2 tbsp honey</li>
+      <li>1 tbsp apple cider vinegar</li>
+      <li>1 tsp soy sauce <span class="dim">(secret umami)</span></li>
+    </ul>
+
+    <div class="rh-sub">for the lime crema</div>
+    <ul class="thin">
+      <li>3 tbsp media crema <span class="warn">low — use it</span></li>
+      <li>juice of ½ lime</li>
+      <li>pinch of salt</li>
+    </ul>
+  </div>
+</div>
+
+<h3 class="rh">method</h3>
+<ol class="method">
+  <li><b>Quick pickle.</b> Drop the jalapeño slices and a few onion half-moons into a small bowl. Squeeze ½ lime over them, pinch of salt, pinch of sugar. Leave them be — they'll turn neon pink and bright by the time you plate up.</li>
+  <li><b>Build the glaze.</b> Blend the chipotles, adobo, honey, vinegar, soy, and a splash of water until smooth. It should pour like warm syrup. Taste — it should hit smoke first, then sweet, then a slow burn.</li>
+  <li><b>Smash the thighs.</b> Pat them bone-dry, season hard with salt, pepper, cumin, oregano, smoked paprika. Press them flat with the bottom of a heavy pan — you want surface area for char.</li>
+  <li><b>Sear.</b> Hot cast iron, slick of oil. Lay the thighs down. Don't touch them for 3 minutes. Listen for the sizzle to mellow — that's when they're ready to flip. Another 2 minutes on the second side until deep golden and crackling.</li>
+  <li><b>Glaze + finish in oven.</b> Brush the chipotle-honey glaze on generously. Slide the pan into a 220°C oven for 6–8 minutes, brushing one more time halfway through. They're done when the glaze catches and looks almost-burnt at the edges. That's where the flavor lives.</li>
+  <li><b>Char the elote.</b> While the chicken finishes, char the corn directly on a dry skillet over high heat, turning until black spots bloom on every side. You want the kitchen smelling toasted and a little smoky. Slice the kernels off in sheets.</li>
+  <li><b>Crema.</b> Whisk media crema with lime juice and salt until pourable. It should taste like the cold counterpoint to everything else on the plate.</li>
+</ol>
+
+<h3 class="rh">the finish</h3>
+<p class="finish-block">
+Bed of charred elote in a wide bowl. Lay the thighs on top, sticky side up. Swoosh the lime crema across with the back of a spoon — drag it, don't dollop. Pile the quick-pickled onions and jalapeños on top like confetti. Shower of cilantro. Final squeeze of lime right before it hits the table — non-negotiable. Eat with a fork in one hand and a warm corn tortilla in the other.
+</p>
+
+<h3 class="rh">pantry notes</h3>
+<ul class="thin">
+  <li><span class="warn">low</span> media crema → swap for Greek yoghurt thinned with milk, or crema mexicana + a splash of water.</li>
+  <li>no chipotle in adobo? sub 1 tbsp gochujang + ½ tsp smoked paprika. Different DNA, same smoke-sweet-fermented register.</li>
+  <li>batch: double the glaze. Keeps 2 weeks in the fridge — brush on drumsticks, traybakes, even a fried egg.</li>
+  <li>leftovers: shred the cold thigh into tomorrow's tacos with the pickled onions still in the fridge.</li>
+</ul>
+
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">ingredient check</span>
+          <span class="pane-meta">pantry diff</span>
+        </div>
+        <div class="pane-body">
+          <table class="data tight">
+            <thead><tr><th>ingredient</th><th>status</th></tr></thead>
+            <tbody id="recipe-check-tbody">
+              <!-- filled by JS from PANTRY -->
+            </tbody>
+          </table>
+          <div class="hint" id="recipe-check-summary">all required items in stock</div>
+
+          <div class="mini-block">
+            <div class="mini-title">technique flags</div>
+            <ul class="thin">
+              <li>texture contrast → smash + raw pickle</li>
+              <li>acid finish → lime squeeze, crema</li>
+              <li>spice layering → marinade + glaze + fresh</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ---------- VIEW 4 :: PANTRY ---------------------------------- -->
+  <section class="view" id="view-pantry" data-view="pantry" hidden>
+    <div class="grid grid-single">
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">pantry · <span id="pantry-total">71</span> items</span>
+          <span class="pane-meta">
+            <span id="pantry-counts">— plenty · — low · — out</span>
+          </span>
+        </div>
+
+        <div class="toolbar">
+          <span class="tb-label">filter</span>
+          <button class="chip filter-chip sel" data-filter="all">all</button>
+          <button class="chip filter-chip" data-filter="plenty">plenty</button>
+          <button class="chip filter-chip" data-filter="low">low</button>
+          <button class="chip filter-chip" data-filter="out">out</button>
+          <span class="tb-sep">│</span>
+          <span class="tb-label">cat</span>
+          <button class="chip cat-chip sel" data-cat="all">all</button>
+          <button class="chip cat-chip" data-cat="proteins">proteins</button>
+          <button class="chip cat-chip" data-cat="spices">spices</button>
+          <button class="chip cat-chip" data-cat="chiles">chiles</button>
+          <button class="chip cat-chip" data-cat="oils">oils/acids</button>
+          <button class="chip cat-chip" data-cat="sauces">sauces</button>
+          <button class="chip cat-chip" data-cat="veg">veg</button>
+          <button class="chip cat-chip" data-cat="herbs">herbs</button>
+          <button class="chip cat-chip" data-cat="grains">grains</button>
+          <button class="chip cat-chip" data-cat="dairy">dairy</button>
+          <span class="tb-sep">│</span>
+          <span class="tb-label">sort</span>
+          <button class="chip sort-chip sel" data-sort="status">status</button>
+          <button class="chip sort-chip" data-sort="name">name</button>
+          <button class="chip sort-chip" data-sort="cat">category</button>
+          <span class="spacer"></span>
+          <span class="hint inline"><span class="key">/</span> find &nbsp; <span class="key">j/k</span> nav &nbsp; <span class="key">space</span> cycle status</span>
+        </div>
+
+        <div class="pane-body no-pad scroll">
+          <table class="data selectable" id="pantry-table">
+            <thead>
+              <tr>
+                <th class="num-col">#</th>
+                <th>item</th>
+                <th>category</th>
+                <th>status</th>
+                <th>note</th>
+              </tr>
+            </thead>
+            <tbody id="pantry-tbody">
+              <!-- filled by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------- VIEW 5 :: SHOPPING -------------------------------- -->
+  <section class="view" id="view-shopping" data-view="shopping" hidden>
+    <div class="grid grid-shopping">
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">restock</span>
+          <span class="pane-meta bad">out · staple</span>
+        </div>
+        <div class="pane-body">
+          <ul class="check-list" id="shop-restock">
+            <!-- filled by JS from PANTRY (out + staple-flagged) -->
+          </ul>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">top up</span>
+          <span class="pane-meta warn">low · frequent</span>
+        </div>
+        <div class="pane-body">
+          <ul class="check-list" id="shop-topup">
+            <!-- filled by JS from PANTRY (low) -->
+          </ul>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">seasonal picks</span>
+          <span class="pane-meta ok">tianguis · may</span>
+        </div>
+        <div class="pane-body">
+          <ul class="check-list">
+            <li>
+              <span class="cb">[ ]</span> mangoes <span class="ok">peaking</span>
+              <div class="sub-line">→ unlocks <b>mango-habanero glazed drumsticks</b>. Sweet meets habanero floral heat, lacquered in the oven.</div>
+            </li>
+            <li>
+              <span class="cb">[ ]</span> nopales <span class="ok">abundant</span>
+              <div class="sub-line">→ unlocks <b>nopales-charred slaw</b> over shredded chicken tacos. Char them on the comal until they squeak.</div>
+            </li>
+            <li>
+              <span class="cb">[ ]</span> tomatillos <span class="ok">bright</span>
+              <div class="sub-line">→ unlocks <b>salsa verde enchiladas</b> with crema and cotija. Roast the tomatillos until they collapse and turn olive.</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="pane-head">
+          <span class="pane-title">unlock new dishes</span>
+          <span class="pane-meta accent">+2 ingredients</span>
+        </div>
+        <div class="pane-body">
+          <ul class="check-list">
+            <li>
+              <span class="cb">[ ]</span> <b>gochujang</b> <span class="dim">(asian aisle, La Comer or Asian super)</span>
+              <div class="sub-line">→ opens Korean-style glazes: sticky, sweet, a little funky. Shares smoke-sweet-fermented DNA with chipotle — bridges into fusion fast.</div>
+            </li>
+            <li>
+              <span class="cb">[ ]</span> <b>preserved lemons</b> <span class="dim">(jar, specialty)</span>
+              <div class="sub-line">→ opens North African and tagine territory. Acid bomb that doesn't fade like fresh juice. Two pieces flavor a whole braise.</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================================================== -->
+<!--   COMMAND PALETTE / FIND OVERLAY                                -->
+<!-- ============================================================== -->
+<div id="overlay" hidden>
+  <div class="overlay-box">
+    <div class="overlay-head">
+      <span class="prompt">/</span>
+      <input id="overlay-input" placeholder="filter pantry items…" autocomplete="off" spellcheck="false" />
+      <span class="hint inline"><span class="key">esc</span> close · <span class="key">enter</span> apply</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================== -->
+<!--   STATUS BAR                                                    -->
+<!-- ============================================================== -->
+<footer id="statusbar" data-mode="NORMAL">
+  <span class="sb-mode" id="sb-mode">NORMAL</span>
+  <span class="sb-sep">│</span>
+  <span class="sb-view" id="sb-view">today</span>
+  <span class="sb-sep">│</span>
+  <span class="sb-hint" id="sb-hint">
+    <span class="key">1-5</span> view ·
+    <span class="key">j/k</span> ↓↑ ·
+    <span class="key">enter</span> open ·
+    <span class="key">/</span> find ·
+    <span class="key">t</span> theme ·
+    <span class="key">?</span> help
+  </span>
+  <span class="spacer"></span>
+  <span class="sb-right" id="sb-right">poio v0.2 · stage 1</span>
+</footer>
+
+<!-- ============================================================== -->
+<!--   HELP MODAL                                                    -->
+<!-- ============================================================== -->
+<div id="help" hidden>
+  <div class="help-box pane">
+    <div class="pane-head"><span class="pane-title">help · keybindings</span><span class="pane-meta">esc to close</span></div>
+    <div class="pane-body">
+      <div class="cols-2">
+        <div>
+          <div class="rh-sub">navigation</div>
+          <table class="kv">
+            <tr><td><span class="key">1</span> .. <span class="key">5</span></td><td>switch view</td></tr>
+            <tr><td><span class="key">h</span> / <span class="key">l</span></td><td>prev / next view</td></tr>
+            <tr><td><span class="key">tab</span> / <span class="key">shift-tab</span></td><td>cycle views</td></tr>
+            <tr><td><span class="key">j</span> / <span class="key">k</span></td><td>down / up in list</td></tr>
+            <tr><td><span class="key">↓</span> / <span class="key">↑</span></td><td>same</td></tr>
+            <tr><td><span class="key">g</span> / <span class="key">G</span></td><td>top / bottom</td></tr>
+            <tr><td><span class="key">enter</span></td><td>open / activate</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="rh-sub">actions</div>
+          <table class="kv">
+            <tr><td><span class="key">/</span></td><td>find in pantry</td></tr>
+            <tr><td><span class="key">space</span></td><td>cycle pantry status</td></tr>
+            <tr><td><span class="key">a</span></td><td>answer narrowing question (suggestions)</td></tr>
+            <tr><td><span class="key">s</span></td><td>swap today's suggestion</td></tr>
+            <tr><td><span class="key">m</span></td><td>mark cooked</td></tr>
+            <tr><td><span class="key">t</span></td><td>toggle theme (light / dark)</td></tr>
+            <tr><td><span class="key">?</span></td><td>this help</td></tr>
+            <tr><td><span class="key">esc</span></td><td>close overlay / help</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
