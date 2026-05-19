@@ -22,7 +22,7 @@ I fucking love chicken.
 
 So I made POiO. Three little markdown files (the stuff in your kitchen, what's growing where you live, a flavor cheat sheet) and an assistant that reads them and has opinions. You tell it what you have. It tells you what to make. The protein is always chicken because that's the whole point.
 
-Today it lives as a Claude Code skill. Down the road it'll be a small e-ink screen by the stove with today's suggestion, your pantry status, and the shopping list. Roadmap below.
+Today it lives as a Claude Code skill. Down the road it'll be a small chicken-shaped countertop companion that walks you through tonight's recipe step by step, clucking at you along the way. Roadmap below.
 
 ## Roadmap
 
@@ -40,9 +40,11 @@ POiO out of Claude Code. A small Python server you run on your own machine, expo
 
 Two reasons for Stage 2: get POiO in front of cooks who don't live in a terminal, and lock down the HTTP API the eventual hardware will call.
 
-### Stage 3: Ambient kitchen device
+### Stage 3: Kitchen companion device
 
-A small e-ink display (Inkplate 10, 9.7", battery-powered) on the kitchen wall, glancing at the same self-hosted server over Wi-Fi. Today's suggestion, what's running low, what's on the shopping list. Open hardware, no vendor cloud, no subscription. See [`hardware/PLAN.md`](hardware/PLAN.md).
+A small chicken-shaped countertop device, palm-sized, battery-powered, with a 4" screen, a rotary encoder, two buttons, and a soft "eye" you press to wake it. Walks you through a recipe step by step, taps-to-advance when your hands are covered in raw chicken, clucks at you when the timer's up. Talks to the same self-hosted server the web app uses. Open hardware, no vendor cloud, no subscription. Targeting a ~$50 electronics BOM — honest retail range is $79–99 lean DTC or $129–199 properly shipped.
+
+See [`hardware/PLAN.md`](hardware/PLAN.md) for the product direction and [`hardware/PROTOTYPE.md`](hardware/PROTOTYPE.md) for the bench parts list.
 
 ## Architecture
 
@@ -53,7 +55,7 @@ The same shape across all three stages, with thinner or thicker clients:
 │  CLIENTS  (thin, swappable)                 │
 │  • Stage 1: Claude Code skill (SKILL.md)    │
 │  • Stage 2: local web app                   │
-│  • Stage 3: Inkplate 10 firmware            │
+│  • Stage 3: countertop device firmware      │
 └──────────────────┬──────────────────────────┘
                    │ HTTP / JSON  (Stage 2+)
                    ▼
@@ -112,7 +114,9 @@ poio/
 ├── setup/
 │   └── interview.md                      # Onboarding script (reused across all stages)
 ├── hardware/
-│   └── PLAN.md                           # Stage 3 thinking
+│   ├── PLAN.md                           # Stage 3 product direction
+│   └── PROTOTYPE.md                      # Bench parts list / bake-off rig
+├── mockups/                              # WIP Stage-2 web UI explorations
 ├── assets/                               # Logo, animation
 └── LICENSE                               # MIT
 ```
