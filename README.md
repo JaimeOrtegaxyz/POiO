@@ -24,9 +24,21 @@ So I made POiO. Three little markdown files (the stuff in your kitchen, what's g
 
 Today it lives as a Claude Code skill. Down the road it'll be a small chicken-shaped countertop companion that walks you through tonight's recipe step by step, clucking at you along the way. Roadmap below.
 
+## The bet
+
+POiO is partly a kitchen toy and partly a bet on where things are going.
+
+The bet is this: AI is about to stop being a *service* and start being a *component* — something you buy once, baked into an object, the way a motor is baked into a blender. Not a thing you rent by the month, not a thing that phones a cloud to work, not a thing that dies when a company sunsets it. Just a part, in a box, on your counter, that's yours.
+
+That future isn't quite here. Build POiO with fully on-device intelligence *today* and it'd be too slow, too expensive, not smart enough — maybe all three. But the hardware that makes it cheap, fast, and smart enough is coming. It has to: the whole industry needs those parts to exist, so the market will drag them into being. The only real question is when, and nobody knows.
+
+So POiO is a stab at imagining a product that the future will fully enable — and pointing at it now. It doesn't need the endgame hardware to be useful (the stages below are each real and buildable with what exists). But naming the destination is half the point. The cuteness is the Trojan horse; the argument underneath is that small, delightful, single-purpose AI appliances should belong to the people who own them.
+
+A useful thing about being narrow: the general-purpose "local assistant" future is years out, but POiO doesn't need a general model. It needs a chicken-recipe companion. The future arrives early for narrow products — a tiny model that's *only* good at "suggest a dish from these six things and walk me through it" can cross the line into delightful long before the everything-machine does.
+
 ## Roadmap
 
-Three stages. Each one is a real, usable thing on its own.
+Three buildable stages, each a real and usable thing on its own — plus a fourth that's the horizon they're aimed at.
 
 ### Stage 1: Claude Code skill *(this repo, today)*
 
@@ -45,6 +57,12 @@ Two reasons for Stage 2: get POiO in front of cooks who don't live in a terminal
 A small chicken-shaped countertop device, palm-sized, battery-powered, with a 4" screen, a rotary encoder, two buttons, and a soft "eye" you press to wake it. Walks you through a recipe step by step, taps-to-advance when your hands are covered in raw chicken, clucks at you when the timer's up. Talks to the same self-hosted server the web app uses. Open hardware, no vendor cloud, no subscription. Targeting a ~$50 electronics BOM — honest retail range is $79–99 lean DTC or $129–199 properly shipped.
 
 See [`hardware/PLAN.md`](hardware/PLAN.md) for the product direction and [`hardware/PROTOTYPE.md`](hardware/PROTOTYPE.md) for the bench parts list.
+
+### Stage 4: The brain moves in *(the endgame)*
+
+Same chicken, same personality, but the intelligence lives *inside* it. No self-hosted server, no Anthropic key, no network round-trip — a tiny model running on-device, on a chip cheap and frugal enough to sit in a battery-powered appliance. Ask it what to make, and it just answers, on the counter, owing nothing to anyone's cloud.
+
+This is the stage that explains the whole project. It's also the one that doesn't fully exist yet: the hardware to do it well, cheaply, at appliance power budgets is still on its way. POiO doesn't wait for it. The earlier stages keep the brain *swappable* — a socket, not a commitment — so the day the right part lands, it's a board swap, not a redesign. Until then, pointing clearly at this future is itself part of POiO's job.
 
 ## Architecture
 
@@ -77,6 +95,8 @@ The same shape across all three stages, with thinner or thicker clients:
 ```
 
 In Stage 1 the skill plays both client and engine, reading markdown directly and calling Claude through Claude Code. From Stage 2 onward, the engine runs as its own process; clients only talk to it over HTTP. Markdown stays the source of truth at every stage.
+
+Keeping the engine behind a clean HTTP boundary is also what makes Stage 4 a swap rather than a rewrite: the brain is whatever answers at that boundary. Today it's a Python process calling a cloud model; the endgame moves that same role onto a chip inside the device. The clients and the data don't care which.
 
 ## Quickstart (Stage 1)
 

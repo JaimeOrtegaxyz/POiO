@@ -8,6 +8,14 @@ A small, chicken-shaped countertop companion. Palm-sized, battery-powered, built
 
 Not the wall-mounted ambient glance device the earlier plan called for (see [Earlier direction](#earlier-direction-archived) below). That product was a dashboard; this one is a buddy on the counter.
 
+## The endgame (Stage 4)
+
+Everything below builds a *thin-client* device: the brain stays on a self-hosted server, the chicken polls it over HTTP. That's the right call for what's buildable today, and it's not going away — it's the version that ships.
+
+But it's aimed at a horizon. The endgame is the same device with the **intelligence on-device**: a small model running on a chip inside the shell, no server, no cloud, no key — an AI appliance you own outright, like a blender owns its motor. The hardware to do that *well* (smart enough, fast enough, cheap enough, at battery-powered appliance power budgets) isn't here yet, but it's clearly coming; the market needs those parts to exist. POiO doesn't wait for it.
+
+What this means for the design now: **keep the brain swappable.** The device talks to "the engine" over a clean HTTP boundary (see the firmware shape below). Today that engine is a Python process on a Pi calling a cloud model. The endgame moves that same role onto silicon inside the device. As long as the boundary stays clean, that's a board swap, not a redesign — so nothing in the Stage-3 build should hard-assume the brain lives off-device. Pointing at this future is part of the product's intent, not a someday-maybe.
+
 ## Form factor
 
 - Chicken-shaped 3D-printed (proto) → injection-molded (volume) shell, yellow, palm-sized.
