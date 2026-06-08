@@ -2,6 +2,8 @@
 
 Notes and plan for running POiO on a physical device in the kitchen.
 
+> **License:** physical design files in this directory (the `.3dm` model, and future schematics, PCB layouts, meshes, and BOMs) are licensed under [CERN-OHL-S-2.0](../LICENSES/CERN-OHL-S-2.0.txt) — strongly reciprocal open hardware. The prose in these `.md` files is [CC-BY-SA-4.0](../LICENSES/CC-BY-SA-4.0.txt). See the root [`LICENSE`](../LICENSE).
+
 ## Direction
 
 A small, chicken-shaped countertop companion. Palm-sized, battery-powered, built around a 4" screen with a rotary encoder and a couple of buttons. Walks you through a recipe step by step, with personality — clucks at you, glows softly, taps-to-advance when your hands are covered in raw chicken. Polls the same self-hosted server the web app uses.

@@ -1,21 +1,34 @@
-MIT License
+POiO is released under three licenses, one per kind of material, because a
+software license alone does not cleanly cover hardware design files or written
+content. Copyright (c) 2026 Jaime Ortega.
 
-Copyright (c) 2026 Jaime Ortega
+  Software   — the skill, the engine, firmware, build scripts, and any source
+               code in this repository.
+               License: Apache License 2.0
+               Full text: LICENSES/Apache-2.0.txt
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+  Hardware   — physical design files: the Rhino model (hardware/*.3dm),
+               schematics, PCB layouts, 3D-printable meshes (STL/STEP), BOMs,
+               and mechanical drawings.
+               License: CERN Open Hardware Licence Version 2 — Strongly
+               Reciprocal (CERN-OHL-S-2.0)
+               Full text: LICENSES/CERN-OHL-S-2.0.txt
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  Content    — written and creative material: documentation (README, the
+               hardware plans), recipe data, the style guide, reference text,
+               logos, and other assets.
+               License: Creative Commons Attribution-ShareAlike 4.0
+               International (CC-BY-SA-4.0)
+               Full text: LICENSES/CC-BY-SA-4.0.txt
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+All three are reciprocal / share-alike: you are free to use, modify, and sell
+POiO and works based on it, provided your derivatives stay open under the same
+license and credit the original. Trademarks (the "POiO" name and logo) are not
+licensed for use in a way that implies endorsement.
+
+As the sole copyright holder, Jaime Ortega may also offer POiO under other terms;
+the licenses above govern this public release only.
+
+When the license for a particular file is ambiguous, the buckets above decide it:
+source code is Apache-2.0, physical-design files are CERN-OHL-S-2.0, and
+everything else (prose, data, assets) is CC-BY-SA-4.0.
