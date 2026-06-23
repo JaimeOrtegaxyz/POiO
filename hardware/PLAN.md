@@ -6,7 +6,7 @@ Notes and plan for running POiO on a physical device in the kitchen.
 
 ## Direction
 
-A small, chicken-shaped countertop companion. Palm-sized, battery-powered, built around a 4" screen with a rotary encoder and a couple of buttons. Walks you through a recipe step by step, with personality — clucks at you, glows softly, taps-to-advance when your hands are covered in raw chicken. Polls the same self-hosted server the web app uses.
+A small, chicken-shaped countertop companion. Palm-sized, battery-powered, built around a 4.2" e-paper screen with a rotary encoder and a couple of buttons. Walks you through a recipe step by step, with personality — clucks at you, glows softly, taps-to-advance when your hands are covered in raw chicken. Polls the same self-hosted server the web app uses.
 
 Not the wall-mounted ambient glance device the earlier plan called for (see [Earlier direction](#earlier-direction-archived) below). That product was a dashboard; this one is a buddy on the counter.
 
@@ -21,25 +21,24 @@ What this means for the design now: **keep the brain swappable.** The device tal
 ## Form factor
 
 - Chicken-shaped 3D-printed (proto) → injection-molded (volume) shell, yellow, palm-sized.
-- ~4" screen front and center.
+- ~4.2" mono e-paper screen (4:3) front and center.
 - Rotary encoder with push, flanked by two tactile buttons.
 - A soft TPU "eye" on the head that presses a tactile button behind it. Doubles as power / wake.
 - Small speaker grille hidden in the body.
 
 ## Components
 
-### Screen — bake-off, undecided
+### Screen
 
-Two candidates being prototyped side-by-side. See [`PROTOTYPE.md`](PROTOTYPE.md) for parts and ordering.
+**4.2" 400×300 plain mono e-paper.** A Waveshare 4.2" module (~$35), paper-like under any kitchen light, dithered B&W food imagery, 4:3 aspect — square e-paper doesn't exist in commodity panels above ~2", and the horizontal proportion suits a recipe step better anyway. It holds its image with zero power between updates, which is what earns the months-not-hours battery story below.
 
-- **4" 480×480 IPS LCD (square).** Waveshare ESP32-S3-Touch-LCD-4 (or Sunton ESP32-S3-4848S040) dev board, $28–33. Vivid color, instant response. Square aspect matches the desired look. Battery target on a custom final PCB: ~weeks with wake-on-PIR + aggressive auto-sleep — see [Power](#power) for the honest version.
-- **4.2" 400×300 plain mono e-paper.** Waveshare module, $35 panel + $15 ESP32 driver board = $50 bundled. Paper-like under any kitchen light, dithered B&W food imagery, 4:3 (not square — closest e-paper gets at this size, square e-paper doesn't exist in commodity panels above ~2"). **Critical:** the plain mono module, *not* the (B) tri-color variant, which is full-refresh-only and ruins the stepper UX.
+**Critical:** the plain *mono* module, **not** the (B) tri-color (black/white/red) variant. Tri-color is full-refresh-only at multiple seconds per update, which ruins the recipe stepper. Plain mono does a partial refresh in ~0.4 s with no flash — fast enough to tap through steps.
 
-Decision is by feel after the prototype is built — both have a path to a sellable BOM, both run the same firmware with a `#ifdef` flag on the display driver.
+See [`PROTOTYPE.md`](PROTOTYPE.md) for the parts and ordering.
 
 ### MCU
 
-ESP32-S3. PSRAM useful for the LCD framebuffer (~460 KB), trivially handled for e-paper (~15 KB). Built-in capacitive touch pins (unused here but nice option) and BLE for future phone pairing.
+ESP32-S3. The e-paper framebuffer is tiny (~15 KB), so the display doesn't need PSRAM — it stays free for audio buffers and recipe data. Built-in capacitive-touch pins (a $0 path for the slider input in the final product) and BLE for future phone pairing.
 
 ### Input
 
@@ -67,49 +66,49 @@ Also a passive piezo buzzer ($0.30) for low-power timer chirps when the speaker 
 
 ### Presence
 
-PIR module (HC-SR501 mini or AM312, ~$1.50). Wake screen on approach so the LCD isn't constantly lit. Paired with the accelerometer's tilt-to-wake as cheap redundancy. Listed in the prototype but easy to drop if it doesn't earn its keep in testing.
+PIR module (HC-SR501 mini or AM312, ~$1.50). The e-paper holds its image with no power, so this isn't about saving a backlight — it wakes the chicken from deep sleep on approach so it can greet you (a cluck, a glow, tonight's step already on screen) as you walk up, instead of waiting for a button press. Paired with the accelerometer's tilt-to-wake as cheap redundancy. Easy to drop if it doesn't earn its keep in testing.
 
 ### Power
 
-LiPo, 3000 mAh (e-paper) or 5000 mAh (LCD), with a TP4056 charger and USB-C input. Wireless Qi charging considered and skipped for v1 (nice for greasy-hands kitchen use but adds ~$4–5 BOM for marginal benefit at this stage).
+LiPo, 3000 mAh, with a TP4056 charger and USB-C input. Wireless Qi charging considered and skipped for v1 (nice for greasy-hands kitchen use but adds ~$4–5 BOM for marginal benefit at this stage).
 
 Battery-life targets are split honestly between prototype and production:
 
-- **Final product (custom PCB, power-managed ESP32-S3 SoM):** weeks for the LCD path (with PIR-wake + auto-sleep keeping the backlight off most of the time) and months for the e-paper path (deep-sleep MCU + display only drawing power during refresh). These numbers depend on a custom PCB doing real power management, not a generic dev board.
-- **Prototype (Waveshare dev boards on a breadboard):** hours to a day on a charge. The Waveshare ESP32 e-paper driver board pulls 50–150 mA active and ~2 mA in low-power mode — orders of magnitude worse than what a final PCB will manage. The prototype is for screen + input feel-testing, not for validating battery life.
+- **Final product (custom PCB, power-managed ESP32-S3 SoM):** months between charges — the e-paper holds its image with zero draw, so the MCU deep-sleeps and the panel only pulls power during a refresh. This depends on a custom PCB doing real power management, not a generic dev board.
+- **Prototype (dev board + e-paper module on a breadboard):** hours to a day on a charge. The bench rig pulls tens to low-hundreds of mA active — orders of magnitude worse than what a final PCB will manage. The prototype is for input + stepper feel-testing, not for validating battery life.
 
 ## Sellable BOM target
 
-Aiming for **~$45–55 electronics BOM** at small-batch quantities, with two honest scenarios for what that supports at retail. Either screen lands in the same envelope:
+Aiming for a **~$55 electronics BOM** at small-batch quantities, with two honest scenarios for what that supports at retail:
 
-| | LCD path | E-paper path |
-|---|---|---|
-| Screen | $20 | $30 |
-| MCU (XIAO ESP32-S3) | $5 | $5 |
-| Battery + charger | $11 | $6 |
-| Inputs (encoder + 2 btn + eye) | $2.50 | $2.50 |
-| Speaker + I²S amp | $4 | $4 |
-| Accelerometer (LIS3DH) | $1 | $1 |
-| PIR | $1.50 | $1.50 |
-| 2× WS2812 | $1 | $1 |
-| Piezo buzzer | $0.30 | $0.30 |
-| PCB + shell + misc | $5 | $5 |
-| **Electronics BOM total** | **~$51** | **~$56** |
+| Item | Cost |
+|---|---|
+| Screen (4.2" mono e-paper) | $30 |
+| MCU (ESP32-S3 module) | $5 |
+| Battery + charger | $6 |
+| Inputs (encoder + 2 btn + eye, wired to GPIO) | $2.50 |
+| Speaker + I²S amp | $4 |
+| Accelerometer (LIS3DH) | $1 |
+| PIR | $1.50 |
+| 2× WS2812 | $1 |
+| Piezo buzzer | $0.30 |
+| PCB + shell + misc | $5 |
+| **Electronics BOM total** | **~$56** |
 
 ### Two retail scenarios
 
 The electronics BOM is the floor. What you can actually charge depends on how the product ships:
 
-- **Lean direct-to-consumer (single-founder, online-only, no retail, exempt-volume FCC):** $79–99 retail is reachable. Assumes ~$50 BOM + ~$10–15 assembly/packaging/shipping per unit, ~30–40% margin, and that you absorb support and returns yourself. Works at small volumes (hundreds to low thousands).
-- **Properly shipped product (FCC + CE certification, retail distribution, customer support, returns, marketing):** $129–199 retail is the honest range. The $50 BOM is unchanged but everything else around it adds cost, and retail channels want their own 30–40% margin on top.
+- **Lean direct-to-consumer (single-founder, online-only, no retail, exempt-volume FCC):** $79–99 retail is reachable. Assumes the ~$56 BOM + ~$10–15 assembly/packaging/shipping per unit, ~30–40% margin, and that you absorb support and returns yourself. Works at small volumes (hundreds to low thousands).
+- **Properly shipped product (FCC + CE certification, retail distribution, customer support, returns, marketing):** $129–199 retail is the honest range. The ~$56 BOM is unchanged but everything else around it adds cost, and retail channels want their own 30–40% margin on top.
 
 These numbers are directional, not a finance plan. The point: don't anchor on the $79 figure as if shipping a real product is free.
 
 ## Firmware shape
 
-- ESP32-S3, ESP-IDF or Arduino + LVGL.
-- One project, two compile targets, `#ifdef SCREEN_EPAPER` switches the display driver layer (~200 LOC). Audio, gesture detection, recipe state machine, PIR wake, encoder/button handling — all shared.
-- **I²C-first peripheral strategy** to fit within the LCD board's tight GPIO budget (see [`PROTOTYPE.md`](PROTOTYPE.md#pin-budget-reality-ic-first)). LIS3DH, CAP1188, Seesaw rotary encoder, MCP23017 button expander all share the I²C bus.
+- ESP32-S3, Arduino or ESP-IDF. The mono e-paper UI is drawn with GxEPD2 + Adafruit GFX — the standard mono e-paper stack; LVGL is overkill for a partial-refresh mono panel.
+- The display driver is one isolated module behind a clean interface; audio, gesture detection, the recipe state machine, PIR wake, and encoder/button handling sit on top of it. Keeping the panel behind that seam means a future screen swap is a module change, not a rewrite.
+- **Peripheral wiring.** The e-paper drives over SPI (~6 pins) and leaves the ESP32-S3's GPIO budget wide open, so the encoder and buttons wire straight to GPIO. Only the two natively-I²C parts — the LIS3DH accelerometer and the CAP1188 touch slider — share the I²C bus. No I/O expander needed (see [`PROTOTYPE.md`](PROTOTYPE.md#wiring-gpio-is-comfortable)).
 - Talks HTTP/JSON to the Stage-2 self-hosted server. Device is a thin client; the engine and pantry stay on the server.
 - Recipe data: SKILL.md today defines a *human-readable markdown* recipe format. Before the device can render steppered recipes, that needs a structured-JSON stepper schema (steps array, durations, timer cues, ingredient deltas). Designing that schema is a Stage-2 task, not Stage-3.
 
@@ -123,11 +122,10 @@ The hardware bake-off can start before the Stage-2 server exists, but be clear a
 - ⏳ Wi-Fi onboarding flow on device — open question (BLE pairing vs. captive portal)
 - ⏳ OTA update path — defer past v1
 
-The prototype will run against **fixture recipes baked into firmware** until the Stage-2 server and stepper schema land. That's fine for the kitchen-feel bake-off, which is about screen + inputs + audio + lighting, not the data path.
+The prototype will run against **fixture recipes baked into firmware** until the Stage-2 server and stepper schema land. That's fine for the kitchen-feel bake-off, which is about inputs + audio + lighting + how the e-paper stepper reads, not the data path.
 
 ## Open questions
 
-- **Screen.** LCD square vs. e-paper 4:3 — the prototype bake-off answers this.
 - **Voice.** Pre-recorded clucks/lines only, or on-device TTS for arbitrary step text? Pre-recorded for v1 is the safe call.
 - **Server location.** Local on a Pi / Mac mini in the kitchen, or hosted? Probably local for v1 — privacy + no monthly cost.
 - **Onboarding.** Wi-Fi setup via BLE pairing from a phone, or a captive portal? BLE is nicer but more firmware.
@@ -144,6 +142,6 @@ See [`PROTOTYPE.md`](PROTOTYPE.md) for the full parts list, SKUs, sources, and o
 
 The original Stage-3 plan was an Inkplate 10 (9.7" monochrome e-ink, ESP32, ~$150) mounted on the kitchen wall as an ambient glance display — today's suggestion, pantry status, shopping list. That product was a dashboard, not a buddy: read-only, low-interaction, optimized for reading from across the room.
 
-The kitchen-companion direction replaced it because it's a stronger product story (something with personality you reach for, not a screen that sits in your peripheral vision), supports a lower BOM (~$51 vs $150 for just the screen module), and gives the audio + gesture + lighting features room to matter. The ambient-glance idea isn't dead — it could come back as a v2 or a second product — but it's not what's being built now.
+The kitchen-companion direction replaced it because it's a stronger product story (something with personality you reach for, not a screen that sits in your peripheral vision), supports a lower BOM (~$56 vs $150 for just the screen module), and gives the audio + gesture + lighting features room to matter. The ambient-glance idea isn't dead — it could come back as a v2 or a second product — but it's not what's being built now.
 
 The `mockups/eink-glance/` web prototype was built against the earlier direction and remains in the repo as part of the design history (see [`mockups/README.md`](../mockups/README.md)).
