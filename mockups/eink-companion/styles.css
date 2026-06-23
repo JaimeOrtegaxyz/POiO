@@ -1,0 +1,126 @@
+/* POiO e-paper companion — 400×300 reference build.
+   Implements hardware/UI-LANGUAGE.md. Two tones, two typefaces,
+   dither/hatch for status, zero animation in the screen itself. */
+
+:root{
+  --ink:#1a1816;
+  --paper:#f4efe4;
+  --desk:#e6dcc6;     /* lifts the device off the page */
+  --shell:#f2c84b;    /* yellow shell, per the hardware */
+  --shell-dk:#e0b633;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;min-height:100vh;}
+body{
+  background:var(--desk);
+  color:var(--ink);
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  -webkit-font-smoothing:antialiased;
+}
+
+.stage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;}
+.rig{display:flex;align-items:center;gap:56px;flex-wrap:wrap;justify-content:center;}
+
+/* ---------- device chrome ---------- */
+.device{zoom:1.7;}
+.bezel{
+  position:relative;
+  background:var(--shell);
+  border:1px solid var(--shell-dk);
+  border-radius:18px 18px 14px 14px;
+  padding:30px 16px 16px;
+  box-shadow:0 10px 24px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.eye{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:15px;height:15px;border-radius:50%;
+  background:var(--ink);box-shadow:0 0 0 4px var(--shell-dk);cursor:pointer;
+}
+.controls{display:flex;gap:7px;justify-content:center;margin-top:14px;}
+.ctl{
+  font-family:"JetBrains Mono",monospace;font-size:11px;
+  background:var(--shell-dk);color:var(--ink);
+  border:1px solid rgba(0,0,0,.18);border-radius:7px;
+  padding:7px 9px;cursor:pointer;
+}
+.ctl:active{transform:translateY(1px);}
+.ctl-press{font-weight:700;}
+.ctl-tap{margin-left:5px;}
+
+/* ---------- the screen ---------- */
+.screen{
+  width:400px;height:300px;
+  background:var(--paper);border:1px solid var(--ink);
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+}
+.screen.flash{filter:invert(1);}   /* e-paper full-refresh, ~90ms */
+
+.masthead{
+  height:32px;flex:0 0 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 14px;border-bottom:1px solid var(--ink);
+}
+.brand{font-family:"Spectral",serif;font-weight:600;font-size:17px;}
+.context{font-size:10px;letter-spacing:.16em;text-transform:uppercase;}
+.meta{font-size:10px;opacity:.85;}
+
+.body{flex:1 1 auto;padding:14px;position:relative;overflow:hidden;}
+
+.affordances{
+  height:28px;flex:0 0 28px;
+  display:flex;align-items:center;gap:16px;
+  padding:0 14px;border-top:1px solid var(--ink);font-size:11px;
+}
+.affordances b{font-weight:700;}
+
+/* ---------- shared ---------- */
+.kicker{font-size:10px;letter-spacing:.16em;text-transform:uppercase;}
+.sw{display:inline-block;width:13px;height:13px;border:1px solid var(--ink);flex:0 0 13px;}
+.sw.plenty{background:var(--ink);}
+.sw.low{background-image:repeating-linear-gradient(45deg,var(--ink) 0 1px,transparent 1px 4px);}
+.sw.out{background-image:radial-gradient(var(--ink) .8px,transparent 1px);background-size:4px 4px;}
+.caret{width:10px;flex:0 0 10px;display:inline-block;}
+.row-hl .nm{font-weight:600;}
+
+/* ---------- today ---------- */
+.dish{font-family:"Spectral",serif;font-weight:600;font-size:34px;line-height:1.04;margin:8px 0 2px;}
+.vibe{font-family:"Spectral",serif;font-style:italic;font-size:16px;line-height:1.2;}
+.tnight-status{display:flex;align-items:center;gap:7px;font-size:12px;margin-top:12px;}
+.menu{display:flex;gap:7px;margin-top:18px;}
+.menu-item{border:1px solid var(--ink);padding:4px 9px;font-size:12px;}
+.menu-item.sel{background:var(--ink);color:var(--paper);}
+
+/* ---------- recipe stepper ---------- */
+.step-head{display:flex;align-items:baseline;gap:9px;}
+.step-num{font-size:28px;font-weight:700;line-height:1;}
+.step-text{font-family:"Spectral",serif;font-size:22px;line-height:1.18;margin:9px 0 12px;}
+.step-items{display:flex;flex-direction:column;gap:5px;}
+.item{display:flex;align-items:center;gap:8px;font-size:15px;}
+.item .nm{font-family:"Spectral",serif;}
+.timer{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ink);padding:2px 9px;font-size:12px;margin-top:10px;}
+
+/* ---------- pantry ---------- */
+.summary{display:flex;gap:12px;font-size:11px;margin-bottom:10px;}
+.summary span{display:inline-flex;align-items:center;gap:5px;}
+.plist{display:flex;flex-direction:column;gap:5px;}
+.prow{display:flex;align-items:center;gap:8px;font-size:15px;}
+.prow .nm{font-family:"Spectral",serif;flex:1 1 auto;}
+.prow .st{font-size:10px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;}
+
+/* ---------- shopping ---------- */
+.shop-group + .shop-group{margin-top:10px;}
+.shop-label{font-size:10px;letter-spacing:.16em;text-transform:uppercase;border-bottom:1px solid var(--ink);padding-bottom:2px;margin-bottom:5px;}
+.srow{display:flex;align-items:center;gap:8px;font-size:15px;}
+.srow .nm{font-family:"Spectral",serif;}
+.srow.bought .nm{text-decoration:line-through;opacity:.55;}
+.box{font-size:14px;}
+
+/* ---------- legend (not part of the device) ---------- */
+.legend{max-width:300px;font-size:13px;line-height:1.5;color:#3a352c;}
+.legend h1{font-family:"Spectral",serif;font-size:22px;margin:0 0 8px;color:var(--ink);}
+.legend code{background:rgba(0,0,0,.06);padding:1px 4px;border-radius:3px;font-size:12px;}
+.legend dl{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;margin:14px 0;}
+.legend dt{font-weight:500;color:var(--ink);}
+.legend dd{margin:0;}
+.legend .fineprint{font-size:11px;opacity:.85;}

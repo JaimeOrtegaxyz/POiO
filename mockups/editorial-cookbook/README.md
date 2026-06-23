@@ -251,6 +251,6 @@ what I deliberately left on the floor.
 
 - **Inkplate portability concerns** *(eink-glance).* Acknowledged but
   out of scope for this mockup. The whole point of having three mockups
-  is that `eink-glance` is the Stage-3 candidate; this one is the
+  is that `eink-glance` is the e-ink-surface design; this one is the
   Stage-2 web app candidate. Trying to make a single design that serves
   both would water down both.

@@ -85,7 +85,7 @@ Click is supported everywhere (tabs, rows, chips, checkboxes), but the prototype
 
 ## Where this design would fit
 
-This treatment is a strong fit for **Stage 2** (local web app) when the target user is the same person who already lives in Claude Code — opinionated, keyboard-driven, fast. For Stage 3 (e-ink kitchen device) the density and color use need to thin out dramatically, but the typographic grid and dot/glyph status vocabulary translate well to a 1200×825 monochrome panel.
+This treatment is a strong fit for **Stage 2** (local web app) when the target user is the same person who already lives in Claude Code — opinionated, keyboard-driven, fast. For Stage 3 (e-ink kitchen device) the density and color use need to thin out dramatically, but the typographic grid and dot/glyph status vocabulary translate well to the companion's 4.2" mono e-paper panel.
 
 ## v2 changelog
 
@@ -119,7 +119,7 @@ Three peer critiques came in (from `eink-glance`, `editorial-cookbook`, `chat-co
 
 - **"Add a chat / command input as the primary verb."** (chat-conversational) — Rejected. A `>` prompt at the bottom that accepts natural language is the entire thesis of the `chat-conversational` mockup. If terminal-dense adopts it, the two designs collapse into one. The keyboard-first TUI is the differentiating bet here; the narrowing-question flow (now in place) honors the spirit of "let the user steer the conversation" without trading away the genre. SKILL.md's three modes can be reached via direct keyboard verbs (`1-5` for views, `s` to swap, `space` to update pantry, `/` to search) and via the narrowing chips on suggestions.
 
-- **"Sketch a no-keyboard fallback for the Today view."** (eink-glance) — Rejected for this prototype. Eink is right that Stage 3 is wall-mounted and has no keyboard, but Stage 3 is *what the eink-glance mockup itself is for*. Terminal-dense is explicitly the Stage 2 client for the laptop-in-the-kitchen / power-user case. Putting tap targets here would water down both designs. The README's "Where this design would fit" section already says this; v2 keeps the line.
+- **"Sketch a no-keyboard fallback for the Today view."** (eink-glance) — Rejected for this prototype. Eink is right that the Stage-3 device has no keyboard, but that e-ink surface is *what the eink-glance mockup itself is for*. Terminal-dense is explicitly the Stage 2 client for the laptop-in-the-kitchen / power-user case. Putting tap targets here would water down both designs. The README's "Where this design would fit" section already says this; v2 keeps the line.
 
 - **"Give the recipe a serif body."** (editorial-cookbook) — Rejected, partially accepted. A proportional serif inside the TUI shell would feel like a CSS reset bug. Instead, v2 widens the line-height, raises the font-size from 12.5px to 13px on recipe body, sets a 70ch max-width on method steps, and lifts the vibe to a hero. The prose breathes inside the monospace; the genre stays intact. If the cook wants a magazine layout, `editorial-cookbook` is one repo over.
 

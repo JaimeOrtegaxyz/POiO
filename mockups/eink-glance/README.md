@@ -1,6 +1,6 @@
 # E-ink Glance — POiO UI Prototype
 
-A Stage-2 web prototype designed as if it were already running on the Stage-3 target hardware: a 9.7" Inkplate 10 e-ink display by the kitchen wall.
+A Stage-2 web prototype that treats the screen as if it were already e-ink. It was originally drawn for the earlier Stage-3 plan — a 9.7" Inkplate 10 on the kitchen wall — which has since been retired in favor of a chicken-shaped countertop companion. **The e-ink direction itself wasn't retired:** the companion's confirmed screen is a 4.2" mono e-paper panel, so the ink-on-paper visual language below is the live reference for it — only this broadsheet *layout* was sized for the bigger wall device. See [`../README.md`](../README.md).
 
 Open `index.html` in a browser. No build step, no dependencies beyond two Google Fonts.
 

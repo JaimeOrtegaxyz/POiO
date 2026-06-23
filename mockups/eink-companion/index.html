@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>POiO — e-paper companion · 400×300</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="stage">
+    <div class="rig">
+      <div class="device">
+        <div class="bezel">
+          <div class="eye" id="ctl-eye" title="Eye — wake / home (h)"></div>
+          <div class="screen" id="screen">
+            <header class="masthead">
+              <span class="brand">POiO</span>
+              <span class="context" id="context">Tonight</span>
+              <span class="meta" id="meta">18:42 · upd 6m</span>
+            </header>
+            <section class="body" id="body"></section>
+            <footer class="affordances" id="affordances"></footer>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="ctl" id="ctl-back" title="Back (Esc)">◂ back</button>
+          <button class="ctl" id="ctl-turnl" title="Encoder turn (↑)">‹ turn</button>
+          <button class="ctl ctl-press" id="ctl-press" title="Encoder press (Enter)">● press</button>
+          <button class="ctl" id="ctl-turnr" title="Encoder turn (↓)">turn ›</button>
+          <button class="ctl ctl-tap" id="ctl-tap" title="Tap-to-advance (Space)">tap ▸</button>
+        </div>
+      </div>
+
+      <aside class="legend">
+        <h1>e-paper companion</h1>
+        <p>A 400×300 mono e-paper screen, shown at 1.7×. Reference build for <code>hardware/UI-LANGUAGE.md</code> — the visual language from <code>eink-glance</code>, rebuilt for the real Stage-3 screen.</p>
+        <dl>
+          <dt>↑ / ↓ · scroll</dt><dd>encoder turn</dd>
+          <dt>Enter</dt><dd>encoder press</dd>
+          <dt>Space</dt><dd>tap-to-advance — next step</dd>
+          <dt>Esc / Backspace</dt><dd>back to Today</dd>
+          <dt>h</dt><dd>eye — wake / home</dd>
+          <dt>f</dt><dd>toggle e-paper refresh flash</dd>
+        </dl>
+        <p class="fineprint">View changes do a full refresh (brief invert flash); advancing a step is a partial refresh, no flash. 1-bit only — no color, no animation, dither/hatch for status.</p>
+      </aside>
+    </div>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
