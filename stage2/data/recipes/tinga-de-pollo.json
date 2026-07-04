@@ -1,0 +1,36 @@
+{
+  "id": "tinga-de-pollo",
+  "name": "Tinga de Pollo",
+  "vibe": "smoky chipotle-braised chicken piled on crisp tostadas — weeknight, one pot, gone in minutes.",
+  "serves": 2,
+  "time": { "activeMin": 15, "totalMin": 25 },
+  "flavor": "latin",
+  "tags": ["weeknight", "one-pot", "stovetop", "under-30"],
+  "season": [],
+  "cut": "cooked-shredded",
+  "ingredients": [
+    { "item": "chicken-thighs-boneless", "display": "boneless thighs, cooked & shredded", "qty": "2 cups", "group": "Protein", "required": true, "depletes": "heavy" },
+    { "item": "white-onion", "display": "cebolla", "qty": "½, sliced thin", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "vegetable-oil", "display": "aceite", "qty": "1 tbsp", "group": "Pantry & Spices", "required": true, "depletes": "light" },
+    { "item": "chipotle-in-adobo-canned", "display": "chipotles en adobo", "qty": "2–3, chopped + a spoon of the adobo", "group": "Pantry & Spices", "star": true, "required": true, "depletes": "heavy" },
+    { "item": "chicken-broth-stock", "display": "caldo", "qty": "a splash", "group": "Pantry & Spices", "required": true, "depletes": "some" },
+    { "item": "salt-kosher-table", "display": "sal", "qty": "to taste", "group": "Pantry & Spices", "required": true, "depletes": "none" },
+    { "item": "tostadas", "display": "tostadas", "qty": "6", "group": "Starch", "required": true, "depletes": "finishes" },
+    { "item": "crema-mexican-sour-cream", "display": "crema", "qty": "to drizzle", "group": "Dairy & Finish", "required": false, "depletes": "finishes" },
+    { "item": "queso-fresco", "display": "queso fresco", "qty": "crumbled, to finish", "group": "Dairy & Finish", "required": false, "depletes": "some" }
+  ],
+  "steps": [
+    { "n": 1, "text": "Slice ½ cebolla thin. Warm 1 tbsp aceite in the comal, medium.", "glyph": "pan", "timerSec": 0, "uses": ["white-onion", "vegetable-oil"] },
+    { "n": 2, "text": "Cook the cebolla until soft and just golden — don't rush it.", "glyph": "pan", "timerSec": 300, "uses": [] },
+    { "n": 3, "text": "Stir in the chipotles en adobo, chopped, plus a spoon of the adobo.", "glyph": "pot", "timerSec": 0, "uses": ["chipotle-in-adobo-canned"] },
+    { "n": 4, "text": "Add the shredded pollo and a splash of caldo. Simmer until it drinks it in.", "glyph": "pot", "timerSec": 480, "uses": ["chicken-thighs-boneless", "chicken-broth-stock"] },
+    { "n": 5, "text": "Season with sal. Warm the tostadas on a dry comal until they catch.", "glyph": "griddle", "timerSec": 0, "uses": ["tostadas", "salt-kosher-table"] },
+    { "n": 6, "text": "Pile the tinga on tostadas; finish with crema and crumbled queso fresco.", "glyph": "bowl", "timerSec": 0, "uses": ["crema-mexican-sour-cream", "queso-fresco"] }
+  ],
+  "finish": "Eat right away, standing up if you have to — tostadas go soft fast. A squeeze of lime and a few slices of avocado if you've got them.",
+  "notes": [
+    "Out of tostadas? Warm corn tortillas and fold it into tacos instead.",
+    "The tinga base keeps 3 days in the fridge and gets better — shred more pollo into it for tomorrow's tortas.",
+    "This finishes your crema and your tostadas; the checklist after will offer to mark them down."
+  ]
+}

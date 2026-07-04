@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://poio.dev/schema/recipe.schema.json",
+  "title": "POiO stepper recipe",
+  "description": "Structured recipe the e-paper companion renders and steps through. The human-readable format lives in SKILL.md; this is its machine form. The load-bearing addition over SKILL.md is per-ingredient `depletes`, which lets the server predict the post-cook pantry diff (the encoder control's 'used tonight?' checklist) with no LLM round-trip.",
+  "type": "object",
+  "required": ["id", "name", "vibe", "serves", "time", "ingredients", "steps"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "description": "stable slug, matches the filename" },
+    "name": { "type": "string" },
+    "vibe": { "type": "string", "description": "one sensory sentence, SKILL.md voice" },
+    "serves": { "type": "integer", "minimum": 1 },
+    "time": {
+      "type": "object",
+      "required": ["activeMin", "totalMin"],
+      "additionalProperties": false,
+      "properties": {
+        "activeMin": { "type": "integer", "minimum": 0 },
+        "totalMin": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "flavor": {
+      "type": "string",
+      "description": "flavor-profile family from references/style-guide.md",
+      "enum": ["latin", "indian", "asian", "middle-eastern", "mediterranean", "north-african", "fusion"]
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "free tags e.g. weeknight, one-pot, slow-cooker, adventurous, under-20"
+    },
+    "season": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"] },
+      "description": "months this dish leans into (optional; empty = year-round)"
+    },
+    "cut": {
+      "type": "string",
+      "description": "chicken cut, per SKILL.md cut guidance",
+      "enum": ["breast-boneless", "breast-bonein", "thigh-bonein", "thigh-boneless", "drumstick", "whole", "cooked-shredded", "none"]
+    },
+    "ingredients": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["item", "qty", "group"],
+        "additionalProperties": false,
+        "properties": {
+          "item": {
+            "type": "string",
+            "description": "pantry key — normalized lowercase, must match a pantry.json item so status + write-back line up"
+          },
+          "display": { "type": "string", "description": "how it reads on screen if different from `item`" },
+          "qty": { "type": "string", "description": "human quantity, e.g. '2 cups, shredded'" },
+          "group": {
+            "type": "string",
+            "description": "'What You Need' grouping from SKILL.md",
+            "enum": ["Protein", "Veg & Aromatics", "Pantry & Spices", "Sauce", "Dairy & Finish", "Starch"]
+          },
+          "star": { "type": "boolean", "default": false, "description": "bold star ingredient" },
+          "required": { "type": "boolean", "default": true, "description": "false = optional/garnish; an `out` required item blocks feasibility" },
+          "depletes": {
+            "type": "string",
+            "default": "none",
+            "description": "how much cooking this dish draws the item down — drives the predicted post-cook diff. Transition (current -> predicted, only surfaced when it changes): none/light => no change; some => low->out; heavy => plenty->low, low->out; finishes => ->out.",
+            "enum": ["none", "light", "some", "heavy", "finishes"]
+          }
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["n", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "n": { "type": "integer", "minimum": 1, "description": "1-based step index" },
+          "text": { "type": "string", "description": "one instruction, imperative, sensory — the 22px line on the panel" },
+          "glyph": {
+            "type": "string",
+            "description": "which dithered line-art glyph to show for this step",
+            "enum": ["pan", "pot", "griddle", "bowl", "oven", "knife", "none"]
+          },
+          "timerSec": { "type": "integer", "minimum": 0, "default": 0, "description": "0 = no timer; else countdown seconds" },
+          "uses": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "ingredient keys relevant to THIS step, shown with live pantry status dots"
+          }
+        }
+      }
+    },
+    "finish": { "type": "string", "description": "assembly / garnish / acid finish (SKILL.md 'The Finish')" },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "swaps for low items, storage, leftovers (SKILL.md 'Pantry Notes')"
+    }
+  }
+}

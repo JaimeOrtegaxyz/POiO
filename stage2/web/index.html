@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POiO — Stage-2 server</title>
+<style>
+  body{font-family:ui-monospace,Menlo,monospace;background:#e6dcc6;color:#1a1816;
+    display:flex;min-height:100vh;margin:0;align-items:center;justify-content:center;padding:32px}
+  .card{max-width:560px;background:#f4efe4;border:1px solid #1a1816;padding:28px 32px}
+  h1{font-family:Georgia,serif;margin:.2em 0}
+  code{background:rgba(0,0,0,.06);padding:1px 5px}
+  li{margin:3px 0;line-height:1.5}
+  .tag{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a6f57}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="tag">poio · stage-2</div>
+    <h1>The brain is up.</h1>
+    <p>This server wraps the poio skill (pantry + recipes) behind a JSON API. The
+      <strong>encoder companion app</strong> lands here next milestone; for now, the
+      endpoints it will drive:</p>
+    <ul>
+      <li><code>GET /api/health</code></li>
+      <li><code>GET /api/pantry</code> · <code>?filter=attention</code></li>
+      <li><code>GET /api/recipes</code></li>
+      <li><code>GET /api/recipes/{id}</code></li>
+      <li><code>GET /api/recipes/{id}/consumed</code> — the "used tonight?" prediction</li>
+      <li><code>GET /api/today</code></li>
+      <li><code>POST /api/pantry/apply</code> — write the pantry update back</li>
+      <li><code>POST /api/suggest</code></li>
+    </ul>
+    <p class="tag">see stage2/README.md</p>
+  </div>
+</body>
+</html>

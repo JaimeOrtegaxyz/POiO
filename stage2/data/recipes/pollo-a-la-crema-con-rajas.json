@@ -1,0 +1,36 @@
+{
+  "id": "pollo-a-la-crema-con-rajas",
+  "name": "Pollo a la Crema con Rajas",
+  "vibe": "silky media crema, charred poblano rajas, sweet elote — comfort that still tastes like somewhere.",
+  "serves": 2,
+  "time": { "activeMin": 20, "totalMin": 30 },
+  "flavor": "latin",
+  "tags": ["weeknight", "one-pan", "creamy", "under-30"],
+  "season": ["jul", "aug", "sep"],
+  "cut": "breast-boneless",
+  "ingredients": [
+    { "item": "chicken-breast-boneless", "display": "chicken breast", "qty": "2, sliced into strips", "group": "Protein", "required": true, "depletes": "heavy" },
+    { "item": "poblano-peppers", "display": "poblanos", "qty": "2, charred & cut into rajas", "group": "Veg & Aromatics", "star": true, "required": true, "depletes": "heavy" },
+    { "item": "white-onion", "display": "cebolla", "qty": "½, sliced", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "garlic", "display": "ajo", "qty": "2 cloves, minced", "group": "Veg & Aromatics", "required": true, "depletes": "light" },
+    { "item": "corn-on-the-cob-elote", "display": "elote", "qty": "1 ear, kernels cut off", "group": "Veg & Aromatics", "required": false, "depletes": "some" },
+    { "item": "media-crema", "display": "media crema", "qty": "¾ cup", "group": "Dairy & Finish", "star": true, "required": true, "depletes": "heavy" },
+    { "item": "salt-kosher-table", "display": "sal", "qty": "to taste", "group": "Pantry & Spices", "required": true, "depletes": "none" },
+    { "item": "limes", "display": "limón", "qty": "½, to finish", "group": "Pantry & Spices", "required": false, "depletes": "light" },
+    { "item": "cilantro", "display": "cilantro", "qty": "a small handful", "group": "Dairy & Finish", "required": false, "depletes": "some" }
+  ],
+  "steps": [
+    { "n": 1, "text": "Char the poblanos over the flame until blackened, sweat them, peel and cut into rajas.", "glyph": "pan", "timerSec": 0, "uses": ["poblano-peppers"] },
+    { "n": 2, "text": "Salt the chicken strips. Sear in a hot pan until golden, then set aside.", "glyph": "pan", "timerSec": 360, "uses": ["chicken-breast-boneless", "salt-kosher-table"] },
+    { "n": 3, "text": "Soften the cebolla and ajo in the same pan; add the elote kernels to catch some color.", "glyph": "pan", "timerSec": 0, "uses": ["white-onion", "garlic", "corn-on-the-cob-elote"] },
+    { "n": 4, "text": "Add the rajas, then pour in the media crema. Loosen with a splash of water.", "glyph": "pot", "timerSec": 0, "uses": ["poblano-peppers", "media-crema"] },
+    { "n": 5, "text": "Return the chicken; simmer gently until the sauce coats a spoon.", "glyph": "pot", "timerSec": 300, "uses": ["chicken-breast-boneless"] },
+    { "n": 6, "text": "Finish with a squeeze of limón and torn cilantro.", "glyph": "bowl", "timerSec": 0, "uses": ["limes", "cilantro"] }
+  ],
+  "finish": "Spoon over white rice or scoop with warm tortillas. The crema wants a little acid — don't skip the lime.",
+  "notes": [
+    "No media crema? Regular crema thinned with a splash of milk gets close; crème fraîche also works.",
+    "Rajas keep a week in the fridge — char extra poblanos while the flame's going.",
+    "Uses most of your media crema and poblanos — the checklist will offer to mark them down."
+  ]
+}
