@@ -12,7 +12,7 @@ stage2/
   schema/recipe.schema.json   # the stepper-recipe schema
   data/pantry.json     # runtime pantry store (server reads + writes this)
   data/recipes/*.json  # stepper recipes (validated against the schema)
-  web/                 # the encoder companion app (wired in the next milestone)
+  web/                 # the encoder companion app, wired live to this API
   PANTRY-MODEL.md      # design note: where the pantry lives, why the device needs no keyboard
 ```
 
@@ -21,8 +21,14 @@ stage2/
 ```bash
 python3 stage2/bootstrap_pantry.py      # first time: seed data/pantry.json
 python3 stage2/server.py --port 8781    # start the brain
-# open http://127.0.0.1:8781/
+# open http://127.0.0.1:8781/  → the companion app, live
 ```
+
+Put the laptop on the counter and cook. The **scroll wheel is the encoder**
+(arrows work too), `Enter` selects/confirms, `Space` is tap-to-advance. The whole
+loop: **Cook → tap through the steps → finish → rate → confirm the predicted
+pantry changes**. That confirm is a real `POST /api/pantry/apply` — reload and the
+change is there. Pantry edits (cycle a status) also write straight to the server.
 
 ## API
 
