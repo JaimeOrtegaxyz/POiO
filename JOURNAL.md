@@ -1,5 +1,13 @@
 # Journal
 
+## 2026-07-04, 01:01
+
+Worked today on mockups for the interface. We had some older web demos but tbh that doesn't make sense anymore. I'd rather prototype something that looks/works closer to what the final device will be. Idea is to clone that demo to the laptop and use it as if it were a POiO. We'll see how it goes.
+
+I don't have it perfectly planned still how I would approach pantry inventory, feels like that will be heavy friction. Might have to do image/audio feedback to solve that? I can imagine I just press a button and say "hey we out of parsley but I got some chives" which should be ok, but want to test the more minimal version for now and see how it works. Mics not planned yet anyway. So it goes.
+
+![Mockup of the POiO e-paper companion showing a Tinga de Pollo recipe with a hold-to-talk voice input, annotated as a friction probe](assets/journal/2026-07-03-voice-companion-mockup.png)
+
 ## 2026-06-08
 
 Decided to put down some raw ideas here, if anything just to keep track of my thoughts around this.
