@@ -77,9 +77,14 @@ mouse gesture so it *feels* like the device.
 `tap-to-advance` is the dirty-hands verb (a knuckle, no targeting); `back` and
 `select` are deliberate presses. This mapping is why the device needs no keyboard.
 
-> **Next build:** make the on-screen control panel a real **interactive encoder
-> widget** — a rotary knob you can drag/click that *also* visibly turns when you
-> use the wheel or arrow keys — so the mapping is unmistakable. Tracked separately.
+> **Built.** The on-screen control panel is now an **interactive encoder widget**:
+> a rotary knob you can **drag to turn** (or **click to press**), a **tap pad** for
+> tap-to-advance, and a **back** button — each labeled with its role. Crucially it
+> reflects *every* input source: turning with the wheel or arrow keys visibly spins
+> the knob, Space flashes the tap pad, Esc flashes back, `h` flashes the eye. The
+> mapping is unmistakable because the physical control moves no matter how you drive
+> it. (The panel is device chrome, so its motion is fine — the e-paper screen above
+> stays animation-free.)
 
 ## Onboarding — where it shows up
 

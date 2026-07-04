@@ -31,12 +31,18 @@
             <footer class="affordances" id="affordances"></footer>
           </div>
         </div>
-        <div class="controls">
-          <button class="ctl" id="ctl-back" title="Back (Esc)">◂ back</button>
-          <button class="ctl" id="ctl-turnl" title="Encoder turn (↑ / wheel)">‹ turn</button>
-          <button class="ctl ctl-press" id="ctl-press" title="Encoder press (Enter)">● press</button>
-          <button class="ctl" id="ctl-turnr" title="Encoder turn (↓ / wheel)">turn ›</button>
-          <button class="ctl ctl-tap" id="ctl-tap" title="Tap-to-advance (Space)">tap ▸</button>
+        <!-- physical control panel — maps 1:1 to the device (see VISUALS.md).
+             The knob is the rotary encoder: drag it to turn, click it to press;
+             it also visibly turns when you use the wheel or arrow keys. -->
+        <div class="panel">
+          <button class="pbtn" id="ctl-back" title="Back — left tactile button (Esc)">◂<span class="lbl">back</span></button>
+          <div class="knobwrap">
+            <div class="knob" id="ctl-knob" title="Rotary encoder — drag to turn, click to press (↑ ↓ · wheel · Enter)">
+              <div class="knob-dial"><span class="knob-ind"></span></div>
+            </div>
+            <span class="lbl">turn · press</span>
+          </div>
+          <button class="pad" id="ctl-tap" title="Tap-to-advance — knuckle-tap the head (Space)">tap ▸<span class="lbl">next step</span></button>
         </div>
       </div>
 

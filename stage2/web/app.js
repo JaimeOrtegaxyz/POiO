@@ -36,7 +36,7 @@
 
   /* ---------------- state ---------------- */
   const state = {
-    view: 'boot', menu: 0, step: 0, dHl: 0, fbHl: 1, pHl: 0, sHl: 0, recHl: 0, setupHl: 0, listHl: 0,
+    view: 'boot', menu: 0, step: 0, dHl: 0, fbHl: 1, pHl: 0, sHl: 0, recHl: 0, setupHl: 0, listHl: 0, knobAngle: 0,
     flash: true, dish: '', recipe: null, ingByKey: {}, diff: [], appliedN: 0,
     today: null, pantry: { counts: { plenty: 0, low: 0, out: 0 }, items: [] },
     recipes: [], shop: [], list: [], timerId: null, timeLeft: 0, errMsg: '',
@@ -65,6 +65,56 @@
   const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   function flash() { if (!state.flash) return; screen.classList.add('flash'); setTimeout(() => screen.classList.remove('flash'), 90); }
   function clearTimer() { if (state.timerId) { clearInterval(state.timerId); state.timerId = null; } }
+
+  /* ---------- physical control widget — reflects EVERY input source ----------
+     The knob/tap/back/eye react whether you drag them, click them, or drive the
+     app with the keyboard or scroll wheel, so the physical mapping is obvious.
+     This is device chrome (not the e-paper screen), so motion here is fine. */
+  function pulse(sel, cls) {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    el.classList.remove(cls);   // restart if mid-pulse
+    void el.offsetWidth;
+    el.classList.add(cls);
+    setTimeout(() => el.classList.remove(cls), 150);
+  }
+  function reflect(kind, dir) {
+    if (kind === 'turn') {
+      state.knobAngle += dir > 0 ? 30 : -30;   // one detent per step
+      const d = document.querySelector('.knob-dial');
+      if (d) d.style.transform = `rotate(${state.knobAngle}deg)`;
+      pulse('.knob', 'bump');
+    } else if (kind === 'press') pulse('.knob', 'press');
+    else if (kind === 'tap') pulse('#ctl-tap', 'tapped');
+    else if (kind === 'back') pulse('#ctl-back', 'flash');
+    else if (kind === 'home') pulse('#ctl-eye', 'flash');
+  }
+  function bindKnob() {
+    const knob = document.getElementById('ctl-knob');
+    if (!knob) return;
+    let dragging = false, lastY = 0, moved = 0, accum = 0;
+    const STEP = 15; // px of vertical drag per detent
+    knob.addEventListener('pointerdown', (e) => {
+      dragging = true; lastY = e.clientY; moved = 0; accum = 0;
+      try { knob.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+    });
+    knob.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const dy = e.clientY - lastY; lastY = e.clientY;
+      moved += Math.abs(dy); accum += dy;
+      while (Math.abs(accum) >= STEP) { const d = accum > 0 ? 1 : -1; accum -= d * STEP; encoderTurn(d); }
+    });
+    const end = (e) => {
+      if (!dragging) return;
+      dragging = false;
+      try { knob.releasePointerCapture(e.pointerId); } catch (_) {}
+      if (moved < 5) encoderPress();   // a click with no real drag = a press
+    };
+    knob.addEventListener('pointerup', end);
+    knob.addEventListener('pointercancel', end);
+    knob.addEventListener('wheel', (e) => { encoderTurn(e.deltaY > 0 ? 1 : -1); e.preventDefault(); }, { passive: false });
+  }
 
   /* ---------------- views ---------------- */
   const CONTEXT = {
@@ -373,6 +423,7 @@
 
   /* ---------------- input ---------------- */
   function encoderTurn(dir) {
+    reflect('turn', dir);
     switch (state.view) {
       case 'setup': state.setupHl = (state.setupHl + dir + SETUP.length) % SETUP.length; break;
       case 'list': if (state.list.length) state.listHl = (state.listHl + dir + state.list.length) % state.list.length; break;
@@ -388,6 +439,7 @@
   }
 
   function encoderPress() {
+    reflect('press');
     switch (state.view) {
       case 'setup': SETUP[state.setupHl].go(); break;
       case 'list': {
@@ -415,6 +467,7 @@
   }
 
   function tapAdvance() {
+    reflect('tap');
     if (state.view !== 'recipe') return;
     if (state.step < state.recipe.steps.length - 1) {
       state.step++;
@@ -425,6 +478,7 @@
   }
 
   function back() {
+    reflect('back');
     if (state.view === 'loading' || state.view === 'boot') return;
     if (state.view === 'setupinfo') { state.view = 'setup'; render(true); return; }
     if (state.view === 'setup') return;
@@ -433,7 +487,7 @@
     if (state.view === 'recipe') { clearTimer(); }
     if (state.view !== 'list') home();
   }
-  function home() { clearTimer(); loadHome(); }
+  function home() { reflect('home'); clearTimer(); loadHome(); }
 
   document.addEventListener('keydown', (e) => {
     switch (e.key) {
@@ -451,10 +505,8 @@
 
   $('#ctl-eye').addEventListener('click', home);
   $('#ctl-back').addEventListener('click', back);
-  $('#ctl-turnl').addEventListener('click', () => encoderTurn(-1));
-  $('#ctl-turnr').addEventListener('click', () => encoderTurn(1));
-  $('#ctl-press').addEventListener('click', encoderPress);
   $('#ctl-tap').addEventListener('click', tapAdvance);
+  bindKnob();
 
   boot();
 })();
