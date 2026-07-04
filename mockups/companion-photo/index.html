@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>POiO — companion · PHOTO probe · 400×300</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* photo-capture states (viewfinder + read-back), kept 1-bit and animation-free */
+    .pcap{height:100%;display:flex;align-items:center;justify-content:center;}
+    .viewf{position:relative;width:88%;height:86%;border:1px dashed var(--ink);
+      background-image:radial-gradient(var(--ink) .8px,transparent 1px);background-size:5px 5px;
+      display:flex;align-items:center;justify-content:center;}
+    .viewf.captured{border-style:solid;background-size:3px 3px;}
+    .viewf .vf{position:absolute;width:14px;height:14px;border:2px solid var(--ink);}
+    .viewf .c-tl{top:-1px;left:-1px;border-right:0;border-bottom:0;}
+    .viewf .c-tr{top:-1px;right:-1px;border-left:0;border-bottom:0;}
+    .viewf .c-bl{bottom:-1px;left:-1px;border-right:0;border-top:0;}
+    .viewf .c-br{bottom:-1px;right:-1px;border-left:0;border-top:0;}
+    .cap-label{font-size:11px;letter-spacing:.06em;background:var(--paper);padding:2px 8px;border:1px solid var(--ink);}
+    .pthumb{width:120px;height:62px;margin:0 auto;border:1px solid var(--ink);
+      background-image:radial-gradient(var(--ink) .8px,transparent 1px);background-size:4px 4px;
+      display:flex;align-items:center;justify-content:center;}
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <div class="rig">
+      <div class="device">
+        <div class="bezel">
+          <div class="eye" id="ctl-eye" title="Eye — wake / home (h)"></div>
+          <div class="screen" id="screen">
+            <header class="masthead">
+              <span class="brand">
+                <svg viewBox="0 0 1056 306" xmlns="http://www.w3.org/2000/svg" aria-label="POiO">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M436.271 10.9258C517.735 10.9259 583.775 76.9669 583.775 158.432C583.775 239.896 517.735 305.936 436.271 305.937C354.806 305.937 288.766 239.896 288.766 158.432C288.766 76.9668 354.806 10.9258 436.271 10.9258ZM436.271 120.189C420.323 120.189 407.394 133.117 407.394 149.065C407.394 165.014 420.322 177.942 436.271 177.942C452.218 177.942 465.146 165.013 465.146 149.065C465.146 133.118 452.218 120.19 436.271 120.189Z" fill="#1a1816"/>
+                  <path d="M720.888 177.942C735.247 177.942 746.888 189.583 746.888 203.942V279.937C746.888 294.296 735.247 305.937 720.888 305.937H623.042C608.683 305.937 597.042 294.296 597.042 279.937V203.942C597.042 189.583 608.683 177.942 623.042 177.942H720.888Z" fill="#1a1816"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M907.662 10.9258C989.127 10.9259 1055.17 76.9669 1055.17 158.432C1055.17 239.896 989.126 305.936 907.662 305.937C826.198 305.937 760.157 239.896 760.157 158.432C760.157 76.9668 826.198 10.9258 907.662 10.9258ZM907.661 120.189C891.713 120.189 878.784 133.117 878.784 149.065C878.784 165.014 891.713 177.942 907.661 177.942C923.609 177.942 936.537 165.013 936.537 149.065C936.537 133.118 923.609 120.19 907.661 120.189Z" fill="#1a1816"/>
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M154.528 12.4873C221.338 12.4873 275.498 66.6473 275.498 133.457C275.498 200.267 221.338 254.427 154.528 254.427H137.749C134.204 254.427 130.69 254.292 127.213 254.029V277.595C127.213 291.954 115.572 303.595 101.213 303.595H26C11.6407 303.595 0.000173185 291.954 0 277.595V38.4873C6.18527e-06 24.1279 11.6406 12.4873 26 12.4873H154.528ZM139.7 111.604C125.045 111.605 113.165 123.485 113.165 138.14C113.165 152.795 125.045 164.675 139.7 164.675C154.355 164.675 166.235 152.795 166.235 138.14C166.235 123.485 154.355 111.604 139.7 111.604Z" fill="#1a1816"/>
+                  <path d="M671.966 0C717.439 0 754.304 36.8633 754.304 82.3369C754.304 127.811 717.439 164.675 671.966 164.675C626.492 164.675 589.629 127.811 589.629 82.3369C589.629 36.8635 626.492 0.00020619 671.966 0Z" fill="#1a1816"/>
+                </svg>
+                <span class="ctx" id="context">Tonight</span>
+              </span>
+              <span class="meta" id="meta">18:42 · upd 6m</span>
+            </header>
+            <section class="body" id="body"></section>
+            <footer class="affordances" id="affordances"></footer>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="ctl" id="ctl-back" title="Back (Esc)">◂ back</button>
+          <button class="ctl" id="ctl-turnl" title="Encoder turn (↑)">‹ turn</button>
+          <button class="ctl ctl-press" id="ctl-press" title="Encoder press (Enter)">● press</button>
+          <button class="ctl" id="ctl-turnr" title="Encoder turn (↓)">turn ›</button>
+          <button class="ctl ctl-tap" id="ctl-tap" title="Tap-to-advance (Space)">tap ▸</button>
+          <button class="ctl ctl-talk" id="ctl-scan" title="Scan / photo (S)">◉ scan</button>
+        </div>
+      </div>
+
+      <aside class="legend">
+        <h1>companion · photo</h1>
+        <div class="tag">friction probe — input bet: the camera sees it</div>
+        <p>The lighter sketch. A third bet: don't describe the pantry, <b>photograph</b> it. After cooking, scan the shelf / the empty jars and a vision model proposes the diff. It also probes the open question — the "seeing" can live on your <b>phone</b>, leaving the device to just confirm. Press <b>scan</b> to feel the capture → read → confirm states (faked).</p>
+        <dl>
+          <dt>S · scan</dt><dd>capture the shelf (the bet)</dd>
+          <dt>Space</dt><dd>tap-to-advance — next step</dd>
+          <dt>↑ / ↓ · scroll</dt><dd>encoder turn</dd>
+          <dt>Enter</dt><dd>encoder press — select / apply</dd>
+          <dt>Esc</dt><dd>back / discard</dd>
+          <dt>h</dt><dd>eye — wake / home</dd>
+          <dt>f</dt><dd>toggle refresh flash</dd>
+        </dl>
+        <div class="hw">
+          <b>Hardware this bet implies:</b> on-device camera (OV2640 ~$3–5) + lens + a real framing problem — a countertop chicken can't see your fridge shelf. Or <b>$0 on-device</b> if the phone does the seeing, but then you need a companion app + BLE/Wi-Fi handoff. <b>Highest complexity or a cross-device dependency</b> vs <code>PROTOTYPE.md</code>.<br>
+          <b>Wet hands:</b> worst of the three mid-mess — you need a clean hand on a phone/device to frame a shot. Fine post-cook, once you've washed up.
+        </div>
+        <p class="fineprint">View changes full-refresh (invert flash); the shutter freeze and the cursor partial-refresh. 1-bit screen — the viewfinder and read-back are dithered stand-ins; a real panel shows a coarse 1-bit preview, never a smooth camera feed.</p>
+      </aside>
+    </div>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

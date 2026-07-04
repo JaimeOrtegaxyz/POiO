@@ -1,48 +1,138 @@
-# POiO — UI Mockups
+# POiO — mockups
 
-> **WIP, side exploration.** These are early Stage-2 web-app prototypes committed as work-in-progress. They predate the current Stage-3 direction (a chicken-shaped countertop companion — see [`hardware/PLAN.md`](../hardware/PLAN.md)). What was retired from the earlier plan is the **9.7" wall-mounted ambient form factor** — *not* e-ink. The companion's confirmed screen is a 4.2" mono e-paper panel, so the `eink-glance/` mockup's broadsheet *layout* was sized for hardware that's gone, but its **visual language** — pure ink-on-paper, dither/hatch instead of gray, zero animation — is exactly what the chosen e-paper screen needs and carries straight into the product. The other three (editorial / terminal / chat) remain conceptually independent of the screen choice.
+> **Direction, as of 2026-07-03.** The e-paper **companion is the product**. These
+> browser mockups are no longer candidate web apps to ship — they're **friction
+> probes**: laptop abstractions of how the device will behave, so the frictions
+> can be felt on a screen before committing to hardware. Everything here is meant
+> to migrate to the poio firmware later, not to become a website. The four Stage-2
+> web-app mockups that used to live here (chat / editorial / terminal / broadsheet)
+> were retired on the pivot; git history keeps them.
 
-Four working prototypes for POiO's Stage 2 web app. Each was built by a separate design agent, then revised after a cross-critique round. They are deliberately divergent — different theses, not different skins.
+## What's here
 
-Each is a static, no-build, no-framework HTML/CSS/JS prototype. Open `index.html` directly in a browser.
+| folder | role | input bet |
+|---|---|---|
+| [`eink-companion/`](eink-companion/) | **canonical** device screen — reference build of [`../hardware/UI-LANGUAGE.md`](../hardware/UI-LANGUAGE.md) | encoder + tap |
+| [`companion-voice/`](companion-voice/) | probe · **hero** | push-to-talk (speech) |
+| [`companion-encoder/`](companion-encoder/) | probe · **control** | encoder only (prediction) |
+| [`companion-photo/`](companion-photo/) | probe · **sketch** | camera (an image) |
+| [`eink-glance/`](eink-glance/) | history — the retired 9.7" broadsheet; kept for its visual grammar | keyboard |
+| [`_gallery.html`](_gallery.html) | browse them side by side | — |
 
-## The four directions
+All are static, no-build HTML/CSS/JS. Serve the folder and open, or open a file
+directly. The logo is inlined as 1-bit SVG in each (the committed source is
+[`../assets/logo-bw.svg`](../assets/logo-bw.svg)).
 
-### 1. [`eink-glance/`](eink-glance/) — the e-paper visual language
-Monochrome ink-on-paper, no animation, dither/hatch language instead of color. Built as a broadsheet for the retired 9.7" wall display, but its visual grammar is the reference for the companion's chosen 4.2" mono e-paper screen. Keyboard nav (`1`–`5`, `j/k`, `/`, `?`), Ask-POiO input on Today, Mode-1 narrowing question on suggestion pick.
+---
 
-### 2. [`editorial-cookbook/`](editorial-cookbook/) — Print food zine
-Serif display type (DM Serif Display / Fraunces), warm paper palette, saffron/chipotle/charred/lime/crema accents, Unsplash photography with gradient fallbacks if the CDN fails. Numbered chapter marks, sticky scroll-spy nav. Editorial voice that still answers to the keyboard (`1`–`5`, `j/k`, `/`, `?`). Click any pantry row to cycle status.
+## The friction map
 
-### 3. [`terminal-dense/`](terminal-dense/) — TUI in the browser
-Monospaced (JetBrains Mono), light parchment by default with a dark theme on `t`. Real vim-style keyboard model (`1`–`5`, `j/k/g/G`, `enter`, `space`, `/`, `?`). Five panes mapped to the five views. Live `/`-to-find pantry overlay, `space` to cycle status, ingredient diff against pantry on the recipe view.
+The probes exist to answer one question honestly: **where does using this device
+actually cost the user input, and which of those moments justify new hardware?**
+So first, every input moment across one night's lifecycle:
 
-### 4. [`chat-conversational/`](chat-conversational/) — Conversation as front door
-Six destinations in a left nav rail (Today / Suggestions / Recipe / Pantry / Shopping / Chat). Today is the boot view; Chat is one of the destinations, not the whole app. Quick-reply chips numbered with keyboard hints. Pantry mutations from chat propagate visibly. Four wired recipes; honest stubs for unwired picks.
+| # | moment | what the user must do | input load | could an LLM take it raw? |
+|---|---|---|---|---|
+| 1 | wake / greet | approach, or one tap | ~none (PIR / tap) | — |
+| 2 | pick tonight's dish | accept the default, or scroll + select | low | yes — "what should I cook?" |
+| 3 | servings / a swap | scale 2→4, sub a missing item | low but fiddly | yes — "make it for four" |
+| 4 | pre-flight check | glance: do I have everything? | read-only | partly |
+| 5 | **cook / step through** | advance N steps, re-read, go back — **hands dirty** | medium, repeated | mostly no (tap) |
+| 6 | timers | start (auto), dismiss | low, interrupts | no |
+| 7 | **pantry update (post-cook)** | mark what you consumed | **HIGH — N items, one-by-one** | yes — "out of X, low on Y" |
+| 8 | recipe feedback | rate / note for next time | low, easily skipped | yes — "great, bit dry" |
 
-## What's in each folder
+Two things fall out of the map:
+
+- **Moment 5 is shared and physical.** Every probe carries the same cooking flow —
+  one big instruction, a dithered line-art glyph per step for a bit of soul (mood:
+  [`../hardware/poio-eink-mockscreen.png`](../hardware/poio-eink-mockscreen.png)), a
+  stopwatch timer, tap-to-advance. Hands are dirty here; **tap stays the primary
+  verb mid-cook in all three** — it's the one moment none of the input bets improve.
+- **Moment 7 is the motivating friction** (the one that surfaced clicking the
+  canonical companion). Crossing off consumed items one-by-one on a 4-input device
+  is the future blocker. That's what each probe attacks differently — and it's the
+  **only** moment where the three genuinely diverge.
+
+### The convergence
+
+All three probes funnel into the **same "proposed pantry diff → confirm / undo"
+screen**. The bet being tested is *only how the diff gets proposed*:
 
 ```
-<direction>/
-├── index.html          # single-page prototype
-├── styles.css          # (terminal-dense uses style.css)
-├── app.js              # vanilla JS
-├── data.js             # (chat-conversational only)
-├── README.md           # design rationale + v2 changelog
-├── CRITIQUE_from_eink-glance.md
-├── CRITIQUE_from_editorial-cookbook.md
-├── CRITIQUE_from_terminal-dense.md
-└── CRITIQUE_from_chat-conversational.md
+   voice    →  say it     ──┐
+   encoder  →  predict it ──┼──►  [ proposed diff ]  ──►  confirm ● / discard ◂
+   photo    →  show it     ──┘        (shared)
 ```
 
-The three `CRITIQUE_from_*.md` files in each folder are the peer reviews received in round 2 — the design's `README.md` ends with a `## v2 changelog` listing which were accepted and which were rejected (with reasoning).
+That's what makes them comparable: same outcome, same last screen, three paths to it.
 
-## How they were built
+---
 
-1. **Round 1 — parallel design.** Four agents, four briefs, four folders. Each built a v1 prototype demonstrating Today / Suggestions / Recipe / Pantry / Shopping with realistic mock data drawn from `pantry.example.md` and `references/style-guide.md`.
-2. **Round 2 — cross-critique.** Each agent reviewed the other three through the lens of its own design values, dropping a uniquely-named critique file into each target folder (no write conflicts).
-3. **Round 3 — revision.** Each agent read its three incoming critiques and produced v2 in place. Recurring complaints (no Mode-1 narrowing question, no keyboard nav, voice flattened, Spanish food terms translated, unrealistic pantry data) got fixed across the board; thesis-violating suggestions got documented rejections.
+## The three probes
 
-All four prototypes survived round 3 with their original theses intact and the recurring weaknesses addressed.
+### companion-voice — the hero (bet: speech)
+Hold **talk**, say *"we're out of tostadas, chipotle's low, I finished the crema."*
+Feel the states e-paper makes awkward: **recording** (a coarse block meter that steps,
+never a smooth waveform) → **thinking** (the LLM round-trip — a static dithered
+placeholder and a `~2s` latency note, never a spinner) → **proposed diff** → confirm.
+- **Hardware:** + I²S MEMS mic (~$1); push-to-talk reuses the eye button ($0). **~+$1–2**
+  over `PROTOTYPE.md` — the one part it doesn't list. Real cost is firmware (audio +
+  streaming STT) and latency.
+- **Wet hands:** best — one big forgiving button, no targeting. Risk: kitchen noise vs. STT, and the wait.
 
-**Note (post-pivot).** These per-mockup READMEs were written before Stage 3 became the countertop companion. Where they call `eink-glance` "the Stage-3 candidate" or describe Stage 3 as a wall-mounted Inkplate, read it as "the e-ink-surface design" — the e-ink direction is alive (mono e-paper is the chosen screen); only the 9.7" wall form factor was retired.
+### companion-encoder — the control (bet: prediction, +$0)
+The opposite bet: the device knows the recipe, so it knows what you probably used.
+At plate-up it shows a **pre-ticked checklist**, computed while you cooked — one press
+confirms the lot; scroll to un-tick a wrong one. N edits collapse to 1 confirm.
+**If this feels fine, the mic earns nothing** — that's the point of a control. (Try the
+one-at-a-time path in Pantry to feel the baseline it dodges.)
+- **Hardware:** nothing new. **+$0** — exactly `PROTOTYPE.md`. No audio, no round-trip.
+- **Wet hands:** one confirming press is forgiving; only a wrong prediction costs you a scroll.
+
+### companion-photo — the sketch (bet: an image)
+Scan the shelf / the empty jars; a vision model reads back the diff. Also probes
+whether the *seeing* should live on your **phone**, leaving the device to only confirm.
+Capture → read (`~3s`) → propose → confirm.
+- **Hardware:** on-device camera (OV2640 ~$3–5) + a real framing problem (a countertop
+  chicken can't see your fridge), **or $0 on-device** but a phone app + BLE/Wi-Fi handoff.
+  Highest complexity, or a cross-device dependency.
+- **Wet hands:** worst mid-mess — you need a clean hand to frame a shot. Fine once you've washed up.
+
+---
+
+## The question under all of it
+
+**Does pantry editing even belong on the device?** It could stay *read-mostly* on the
+companion, with the actual editing happening on a phone (or not at all — infer silently
+from cooked recipes and only surface exceptions). The **encoder** probe leans "the device
+is enough, just predict"; the **photo** probe's phone flavor leans "let it live elsewhere";
+the **voice** probe leans "the device is the natural place to just say it." Living with
+the three should make the honest answer obvious — no fourth mockup until one earns it.
+
+## e-paper honesty (all probes)
+
+- View change = **full refresh** (the brief invert flash; toggle with `f`). Stepping, the
+  cursor, the record meter = **partial refresh**, no flash.
+- **No smooth animation.** Every change is a discrete repaint. The "thinking" and "recording"
+  states are deliberately static — that's the real affordance, and feeling the latency is part
+  of the point.
+- **1-bit only** — no color, dither/hatch for status. The single non-1-bit element is the
+  voice probe's red record LED, and it's on the *shell*, never on the screen.
+- The per-second cooking timer is a mockup convenience; a shipping panel would coarse-refresh
+  it (every ~10s, or minutes only) to spare the e-paper.
+
+## Run
+
+```bash
+python3 -m http.server 8770 --bind 127.0.0.1   # from this mockups/ dir
+# then open http://127.0.0.1:8770/_gallery.html
+```
+
+Each probe's keys are on its own page (right-hand legend). Shared: `↑`/`↓` encoder ·
+`Enter` press · `Space` tap-to-advance · `Esc` back · `h` home · `f` toggle refresh flash.
+Voice adds `V` (talk); photo adds `S` (scan).
+
+**To feel the whole loop in any probe:** Cook → tap through the steps → finish → pick a
+rating → do the pantry update. That walks moments 5 → 8 — the cooking experience and the
+motivating friction back to back.

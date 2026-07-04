@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POiO — e-paper friction probes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#1a1816; --paper:#f4efe4; --paper2:#ebe4d5; --rule:#cabfa9; --mut:#6b645a; --shell:#f2c84b; }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; background:var(--paper); color:var(--ink); font-family:"Spectral",Georgia,serif; }
+  body{ padding:40px clamp(16px,5vw,64px) 96px; }
+  .mono{ font-family:"JetBrains Mono",ui-monospace,Menlo,monospace; }
+  header{ max-width:1180px; margin:0 auto 6px; }
+  .brandrow{ display:flex; align-items:center; gap:12px; }
+  .brandrow svg{ height:26px; width:auto; }
+  .kicker{ font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--mut); }
+  h1{ font-size:clamp(32px,5.5vw,52px); margin:.14em 0 .15em; font-weight:600; letter-spacing:-.01em; }
+  .lede{ font-size:18px; max-width:66ch; line-height:1.5; color:#332f29; margin:0 0 6px; }
+  .lede em{ font-style:italic; }
+  .rule{ max-width:1180px; margin:22px auto; border:0; border-top:1px solid var(--rule); }
+  .note{ max-width:1180px; margin:0 auto 24px; font-family:"JetBrains Mono",monospace; font-size:12.5px; line-height:1.7; color:var(--mut); }
+  .note b{ color:var(--ink); }
+  .conv{ max-width:1180px; margin:0 auto 26px; border:1px solid var(--rule); background:#fbf7ee; padding:14px 18px; font-family:"JetBrains Mono",monospace; font-size:12.5px; line-height:1.9; white-space:pre; overflow-x:auto; }
+  .grid{ max-width:1180px; margin:0 auto; display:grid; gap:26px; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); }
+  .card{ border:1px solid var(--rule); background:#fbf7ee; display:flex; flex-direction:column; overflow:hidden; }
+  .card.hero{ border-color:var(--ink); }
+  .shot{ position:relative; height:212px; overflow:hidden; border-bottom:1px solid var(--rule); background:var(--paper2); }
+  .shot iframe{ position:absolute; top:0; left:0; width:1180px; height:760px; border:0; transform:scale(.36); transform-origin:top left; pointer-events:none; background:var(--paper2); }
+  .shot .veil{ position:absolute; inset:0; }
+  .body{ padding:15px 18px 18px; display:flex; flex-direction:column; gap:9px; flex:1; }
+  .row{ display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; }
+  h2{ font-size:22px; margin:0; font-weight:600; letter-spacing:-.01em; }
+  .badge{ font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border:1px solid var(--ink); white-space:nowrap; }
+  .badge.b-ink{ background:var(--ink); color:var(--paper); }
+  .badge.warn{ border-style:dashed; color:var(--mut); border-color:var(--mut); }
+  .thesis{ font-size:15px; line-height:1.5; margin:0; }
+  .diff{ font-family:"JetBrains Mono",monospace; font-size:11.5px; line-height:1.6; color:#403a32; margin:1px 0 0; }
+  .diff b{ color:var(--ink); }
+  .keys{ font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--mut); margin-top:auto; padding-top:8px; }
+  kbd{ font-family:"JetBrains Mono",monospace; font-size:10.5px; border:1px solid var(--rule); border-bottom-width:2px; padding:0 4px; border-radius:3px; background:var(--paper); }
+  .open{ display:inline-block; margin-top:11px; font-family:"JetBrains Mono",monospace; font-size:13px; letter-spacing:.04em; text-decoration:none; color:var(--paper); background:var(--ink); padding:9px 14px; text-align:center; }
+  .open:hover{ background:#000; }
+  .tblwrap{ max-width:1180px; margin:38px auto 0; overflow-x:auto; }
+  table{ border-collapse:collapse; width:100%; font-family:"JetBrains Mono",monospace; font-size:12.5px; min-width:640px; }
+  caption{ text-align:left; font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--mut); margin-bottom:10px; }
+  th,td{ text-align:left; padding:8px 12px; border-bottom:1px solid var(--rule); vertical-align:top; }
+  th{ font-weight:700; }
+  td b{ font-weight:700; }
+  .take{ max-width:1180px; margin:38px auto 0; border:1px solid var(--ink); background:#fbf7ee; padding:22px 24px; }
+  .take h3{ font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.16em; text-transform:uppercase; margin:0 0 12px; }
+  .take p{ font-size:15.5px; line-height:1.6; margin:0 0 10px; max-width:78ch; }
+  .take strong{ font-weight:600; }
+  footer{ max-width:1180px; margin:30px auto 0; font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--mut); }
+</style>
+</head>
+<body>
+<header>
+  <div class="brandrow">
+    <svg viewBox="0 0 1056 306" xmlns="http://www.w3.org/2000/svg" aria-label="POiO">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M436.271 10.9258C517.735 10.9259 583.775 76.9669 583.775 158.432C583.775 239.896 517.735 305.936 436.271 305.937C354.806 305.937 288.766 239.896 288.766 158.432C288.766 76.9668 354.806 10.9258 436.271 10.9258ZM436.271 120.189C420.323 120.189 407.394 133.117 407.394 149.065C407.394 165.014 420.322 177.942 436.271 177.942C452.218 177.942 465.146 165.013 465.146 149.065C465.146 133.118 452.218 120.19 436.271 120.189Z" fill="#1a1816"/>
+      <path d="M720.888 177.942C735.247 177.942 746.888 189.583 746.888 203.942V279.937C746.888 294.296 735.247 305.937 720.888 305.937H623.042C608.683 305.937 597.042 294.296 597.042 279.937V203.942C597.042 189.583 608.683 177.942 623.042 177.942H720.888Z" fill="#1a1816"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M907.662 10.9258C989.127 10.9259 1055.17 76.9669 1055.17 158.432C1055.17 239.896 989.126 305.936 907.662 305.937C826.198 305.937 760.157 239.896 760.157 158.432C760.157 76.9668 826.198 10.9258 907.662 10.9258ZM907.661 120.189C891.713 120.189 878.784 133.117 878.784 149.065C878.784 165.014 891.713 177.942 907.661 177.942C923.609 177.942 936.537 165.013 936.537 149.065C936.537 133.118 923.609 120.19 907.661 120.189Z" fill="#1a1816"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M154.528 12.4873C221.338 12.4873 275.498 66.6473 275.498 133.457C275.498 200.267 221.338 254.427 154.528 254.427H137.749C134.204 254.427 130.69 254.292 127.213 254.029V277.595C127.213 291.954 115.572 303.595 101.213 303.595H26C11.6407 303.595 0.000173185 291.954 0 277.595V38.4873C6.18527e-06 24.1279 11.6406 12.4873 26 12.4873H154.528ZM139.7 111.604C125.045 111.605 113.165 123.485 113.165 138.14C113.165 152.795 125.045 164.675 139.7 164.675C154.355 164.675 166.235 152.795 166.235 138.14C166.235 123.485 154.355 111.604 139.7 111.604Z" fill="#1a1816"/>
+      <path d="M671.966 0C717.439 0 754.304 36.8633 754.304 82.3369C754.304 127.811 717.439 164.675 671.966 164.675C626.492 164.675 589.629 127.811 589.629 82.3369C589.629 36.8635 626.492 0.00020619 671.966 0Z" fill="#1a1816"/>
+    </svg>
+    <span class="kicker">e-paper companion · friction probes</span>
+  </div>
+  <h1>Three input bets, one device</h1>
+  <p class="lede">The e-paper companion is the product; these are <em>friction probes</em> — laptop stand-ins for how the device will behave, built to feel the frictions before committing to hardware. The one that matters: after cooking, how do you tell it what you used? Each probe answers differently. Full write-up in <span class="mono">mockups/README.md</span>.</p>
+</header>
+<hr class="rule">
+<p class="note"><b>How to read this:</b> <b>eink-companion</b> is the canonical device (the baseline). The three <b>companion-*</b> probes each carry the same cooking flow but attack the post-cook <b>pantry update</b> differently — voice, prediction, photo. <b>eink-glance</b> is the retired broadsheet, kept for its visual grammar. Thumbnails are live but frozen; click <b>Open</b> for the real thing (keyboard-driven — each page lists its keys). To feel the whole loop in a probe: <b>Cook → tap through → finish → rate → update the pantry.</b></p>
+
+<div class="conv">   voice    →  say it     ──┐
+   encoder  →  predict it ──┼──►  [ proposed pantry diff ]  ──►  confirm ● / discard ◂
+   photo    →  show it     ──┘         (the shared last screen — only the path to it differs)</div>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="shot"><iframe src="./eink-companion/index.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><a class="veil" href="./eink-companion/index.html" target="_blank" rel="noopener"></a></div>
+    <div class="body">
+      <div class="row"><h2>eink-companion</h2><span class="badge b-ink">canonical</span></div>
+      <p class="thesis">The device itself: 400×300 mono e-paper, encoder + tap, the recipe stepper as its one job. Reference build of <span class="mono">UI-LANGUAGE.md</span>. This is the baseline the probes extend.</p>
+      <p class="diff"><b>Clicking this</b> is where the pantry-update friction surfaced — the reason the probes exist.</p>
+      <div class="keys"><kbd>↑</kbd>/<kbd>↓</kbd> encoder · <kbd>space</kbd> next · <kbd>enter</kbd> select · <kbd>f</kbd> flash</div>
+      <a class="open" href="./eink-companion/index.html" target="_blank" rel="noopener">Open ↗</a>
+    </div>
+  </div>
+
+  <div class="card hero">
+    <div class="shot"><iframe src="./companion-voice/index.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><a class="veil" href="./companion-voice/index.html" target="_blank" rel="noopener"></a></div>
+    <div class="body">
+      <div class="row"><h2>companion-voice</h2><span class="badge">probe · hero</span></div>
+      <p class="thesis">Bet: <b>speech</b>. Hold talk, say "out of tostadas, chipotle's low, finished the crema." Feel the states e-paper makes hard: record (coarse meter) → thinking (LLM round-trip, no spinner) → diff → confirm.</p>
+      <p class="diff"><b>+ mic (~$1)</b>, PTT reuses the eye. Best for wet hands; risk is noise + latency.</p>
+      <div class="keys"><kbd>V</kbd> talk · <kbd>space</kbd> next · <kbd>↑</kbd>/<kbd>↓</kbd> · <kbd>enter</kbd> apply · <kbd>f</kbd> flash</div>
+      <a class="open" href="./companion-voice/index.html" target="_blank" rel="noopener">Open ↗</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="shot"><iframe src="./companion-encoder/index.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><a class="veil" href="./companion-encoder/index.html" target="_blank" rel="noopener"></a></div>
+    <div class="body">
+      <div class="row"><h2>companion-encoder</h2><span class="badge">probe · control</span></div>
+      <p class="thesis">Bet: <b>prediction</b>, +$0. The device knows the recipe, so it pre-computes a "used tonight?" checklist — already ticked. One press confirms the lot. If this feels fine, the mic earns nothing.</p>
+      <p class="diff"><b>Nothing added</b> — exactly PROTOTYPE.md. The honest control.</p>
+      <div class="keys"><kbd>space</kbd> next · <kbd>↑</kbd>/<kbd>↓</kbd> move · <kbd>enter</kbd> un-tick/confirm · <kbd>f</kbd> flash</div>
+      <a class="open" href="./companion-encoder/index.html" target="_blank" rel="noopener">Open ↗</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="shot"><iframe src="./companion-photo/index.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><a class="veil" href="./companion-photo/index.html" target="_blank" rel="noopener"></a></div>
+    <div class="body">
+      <div class="row"><h2>companion-photo</h2><span class="badge">probe · sketch</span></div>
+      <p class="thesis">Bet: <b>an image</b>. Scan the shelf; a vision model reads back the diff. Also probes whether the "seeing" belongs on your phone, leaving the device to just confirm. Capture → read → propose → confirm.</p>
+      <p class="diff"><b>+ camera ($3–5)</b> & a framing problem, or $0 via phone + handoff. Highest complexity.</p>
+      <div class="keys"><kbd>S</kbd> scan · <kbd>space</kbd> next · <kbd>↑</kbd>/<kbd>↓</kbd> · <kbd>enter</kbd> apply · <kbd>f</kbd> flash</div>
+      <a class="open" href="./companion-photo/index.html" target="_blank" rel="noopener">Open ↗</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="shot"><iframe src="./eink-glance/index.html" loading="lazy" tabindex="-1" scrolling="no"></iframe><a class="veil" href="./eink-glance/index.html" target="_blank" rel="noopener"></a></div>
+    <div class="body">
+      <div class="row"><h2>eink-glance</h2><span class="badge warn">history</span></div>
+      <p class="thesis">The retired 9.7" wall broadsheet: pure ink-on-paper, dither/hatch, zero animation, five views on a page. The form factor's gone; its visual grammar became the device language.</p>
+      <p class="diff"><b>Not in the contest</b> — kept for reference, superseded by the companion.</p>
+      <div class="keys"><kbd>1</kbd>–<kbd>5</kbd> views · <kbd>j</kbd>/<kbd>k</kbd> · <kbd>/</kbd> ask · <kbd>?</kbd> help</div>
+      <a class="open" href="./eink-glance/index.html" target="_blank" rel="noopener">Open ↗</a>
+    </div>
+  </div>
+
+</div>
+
+<div class="tblwrap">
+  <table>
+    <caption>The decision these probes feed — hardware bill for the pantry-update bet</caption>
+    <thead><tr><th>probe</th><th>added part</th><th>Δ BOM vs PROTOTYPE.md</th><th>real cost</th><th>wet hands mid-mess</th></tr></thead>
+    <tbody>
+      <tr><td><b>voice</b></td><td>I²S MEMS mic (PTT reuses eye)</td><td><b>~+$1–2</b></td><td>firmware: audio + streaming STT; latency</td><td><b>best</b> — one forgiving button</td></tr>
+      <tr><td><b>encoder</b></td><td>none</td><td><b>+$0</b></td><td>none new — predict while cooking</td><td>good — 1 press; a wrong guess costs a scroll</td></tr>
+      <tr><td><b>photo</b></td><td>camera, or phone + handoff</td><td><b>+$3–5</b>, or $0 + app</td><td>framing problem, or cross-device app</td><td><b>worst</b> — need a clean hand on a phone</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="take">
+  <h3>My take — before living with them</h3>
+  <p>These are meant to be <strong>lived with</strong>, not judged from a gallery — but a prior: <strong>run the encoder control first, honestly.</strong> If a pre-ticked "used tonight?" checklist that's right most of the time feels fine, you've saved a mic, an audio pipeline, and a latency problem — and the answer to "do we need to hear you" is no. That's the cheapest possible win and it should be disproven before it's dismissed.</p>
+  <p><strong>Voice is the one to want</strong> — saying "I'm out of X" is the most human version and the best for dirty hands — but it carries the most firmware risk and the only round-trip the user has to wait on. Worth it only if the encoder control actually feels worse in the kitchen.</p>
+  <p><strong>Photo is the long shot.</strong> Its real value here is forcing the question the other two dodge: maybe the pantry isn't edited on the device at all — the phone sees, the chicken confirms. Keep it as a sketch until that question gets pressure.</p>
+  <p style="margin-bottom:0"><strong>The unlock:</strong> all three end on the same confirm screen. Build that once, well, and the input bet becomes a swappable front-end — which is exactly the kind of decision you want to defer until the kitchen tells you.</p>
+</div>
+
+<footer>Review aid · mockups/_gallery.html · thumbnails are live iframes, Open launches the real probe · logo inlined from assets/logo-bw.svg</footer>
+</body>
+</html>
