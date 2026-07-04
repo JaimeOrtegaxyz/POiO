@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 *.tmp
 data/pantry.json.tmp
+# runtime pantry store — a fresh clone starts unprovisioned (first-run bootstrap).
+# regenerate with: python3 stage2/bootstrap_pantry.py [--demo]
+data/pantry.json

@@ -7,7 +7,9 @@ pantry.json (the runtime store the server reads/writes), then apply a small demo
 overlay so the prototype is actually cookable — because the real pantry.md ships
 all `out`. In production this overlay is replaced by conversational onboarding.
 
-Run:  python3 stage2/bootstrap_pantry.py
+Run:
+  python3 stage2/bootstrap_pantry.py           # faithful: mirror pantry.md as-is (real bootstrap)
+  python3 stage2/bootstrap_pantry.py --demo     # + demo overlay so a fresh clone is cookable
 """
 import json
 import re
@@ -75,38 +77,41 @@ DEMO_ADD = [
 
 
 def main():
+    demo = "--demo" in sys.argv
     if not PANTRY_MD.exists():
         sys.exit(f"pantry.md not found at {PANTRY_MD}")
     items = parse_pantry_md(PANTRY_MD.read_text())
     by_key = {it["key"]: it for it in items}
 
-    for it in DEMO_ADD:
-        if it["key"] not in by_key:
-            items.append(it)
-            by_key[it["key"]] = it
-
     applied = 0
-    for k in DEMO_PLENTY:
-        if k in by_key:
-            by_key[k]["status"] = "plenty"; applied += 1
-    for k in DEMO_LOW:
-        if k in by_key:
-            by_key[k]["status"] = "low"; applied += 1
+    if demo:
+        for it in DEMO_ADD:
+            if it["key"] not in by_key:
+                items.append(it)
+                by_key[it["key"]] = it
+        for k in DEMO_PLENTY:
+            if k in by_key:
+                by_key[k]["status"] = "plenty"; applied += 1
+        for k in DEMO_LOW:
+            if k in by_key:
+                by_key[k]["status"] = "low"; applied += 1
 
     counts = {s: sum(1 for it in items if it["status"] == s) for s in ("plenty", "low", "out")}
     doc = {
         "updated": date.today().isoformat(),
-        "source": "bootstrapped from pantry.md + demo overlay (see PANTRY-MODEL.md)",
+        "source": ("pantry.md + demo overlay (see PANTRY-MODEL.md)" if demo
+                   else "faithful mirror of pantry.md"),
         "counts": counts,
         "items": items,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n")
-    missing = [k for k in DEMO_PLENTY + DEMO_LOW if k not in by_key]
-    print(f"wrote {OUT} — {len(items)} items, overlay applied to {applied}, "
-          f"counts={counts}")
-    if missing:
-        print("WARNING: overlay keys not found in pantry.md:", missing)
+    print(f"wrote {OUT} ({'demo overlay' if demo else 'faithful'}) — "
+          f"{len(items)} items, counts={counts}")
+    if demo:
+        missing = [k for k in DEMO_PLENTY + DEMO_LOW if k not in by_key]
+        if missing:
+            print("WARNING: overlay keys not found in pantry.md:", missing)
 
 
 if __name__ == "__main__":

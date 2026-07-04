@@ -41,6 +41,11 @@ def predict(status: str, depletes: str) -> str:
     return status  # none / light -> no change
 
 
+def provisioned() -> bool:
+    """A fresh clone has no pantry.json — that's the first-run signal."""
+    return PANTRY_JSON.exists()
+
+
 def load_pantry() -> dict:
     return json.loads(PANTRY_JSON.read_text())
 
@@ -114,11 +119,12 @@ def pick_today(pidx):
 
 
 # --- LLM seam: headless `claude` CLI (uses existing Claude Code auth) --------
-CLAUDE_BIN = shutil.which("claude") or "/Users/jaimeortega/.local/bin/claude"
+# resolved from PATH so it's portable across machines (no hardcoded home dir).
+CLAUDE_BIN = shutil.which("claude")
 
 
 def llm_available() -> bool:
-    return bool(shutil.which("claude")) or Path(CLAUDE_BIN).exists()
+    return CLAUDE_BIN is not None
 
 
 def ask_llm(prompt: str, timeout: int = 60) -> str:
@@ -163,13 +169,16 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if path == "/api/health":
                 return self._send(200, {"ok": True, "recipes": len(RECIPES),
-                                        "llm": llm_available(), "pantry": PANTRY_JSON.exists()})
+                                        "llm": llm_available(), "provisioned": provisioned()})
             if path == "/api/pantry":
+                if not provisioned():
+                    return self._send(200, {"provisioned": False,
+                                            "counts": {"plenty": 0, "low": 0, "out": 0}, "items": []})
                 doc = load_pantry()
                 items = doc["items"]
                 if qs.get("filter", [""])[0] == "attention":
                     items = [it for it in items if it["status"] in ("low", "out")]
-                return self._send(200, {"updated": doc.get("updated"),
+                return self._send(200, {"provisioned": True, "updated": doc.get("updated"),
                                         "counts": doc["counts"], "items": items})
             if path == "/api/recipes":
                 pidx = pantry_index()
@@ -185,7 +194,9 @@ class Handler(BaseHTTPRequestHandler):
                     return self._send(200, {"id": rid, "changes": consumed_diff(r, pidx)})
                 return self._send(200, recipe_full(r, pidx))
             if path == "/api/today":
-                return self._send(200, {"tonight": pick_today(pantry_index())})
+                if not provisioned():
+                    return self._send(200, {"provisioned": False, "tonight": None})
+                return self._send(200, {"provisioned": True, "tonight": pick_today(pantry_index())})
             # static: serve the app from web/
             return self._serve_static(path)
         except Exception as e:  # noqa
@@ -198,6 +209,8 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length) or "{}") if length else {}
             if u.path == "/api/pantry/apply":
                 return self._apply(body)
+            if u.path == "/api/pantry/bootstrap":
+                return self._bootstrap(body)
             if u.path == "/api/suggest":
                 return self._suggest(body)
             return self._send(404, {"error": "unknown endpoint"})
@@ -217,6 +230,20 @@ class Handler(BaseHTTPRequestHandler):
                 applied.append({"item": it["key"], "to": to})
         save_pantry(doc)
         return self._send(200, {"applied": applied, "counts": doc["counts"]})
+
+    def _bootstrap(self, body):
+        """First-run provisioning. mode='demo' seeds a plausible pantry so a fresh
+        clone is cookable in one press; the real path is the conversational
+        bootstrap (talk to the poio skill → pantry.md → bootstrap_pantry.py)."""
+        mode = body.get("mode", "demo")
+        args = [sys.executable, str(HERE / "bootstrap_pantry.py")]
+        if mode == "demo":
+            args.append("--demo")
+        proc = subprocess.run(args, capture_output=True, text=True, timeout=30)
+        if proc.returncode != 0:
+            return self._send(500, {"error": "bootstrap failed", "detail": proc.stderr[:300]})
+        doc = load_pantry()
+        return self._send(200, {"provisioned": True, "mode": mode, "counts": doc["counts"]})
 
     def _suggest(self, body):
         """Mode-1 'what should I cook'. Tries the LLM; falls back to the
