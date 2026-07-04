@@ -41,9 +41,13 @@ def predict(status: str, depletes: str) -> str:
     return status  # none / light -> no change
 
 
+FORCE_FIRSTRUN = False
+
+
 def provisioned() -> bool:
-    """A fresh clone has no pantry.json — that's the first-run signal."""
-    return PANTRY_JSON.exists()
+    """A fresh clone has no pantry.json — that's the first-run signal.
+    --first-run forces this off so onboarding can be previewed non-destructively."""
+    return PANTRY_JSON.exists() and not FORCE_FIRSTRUN
 
 
 def load_pantry() -> dict:
@@ -260,18 +264,23 @@ class Handler(BaseHTTPRequestHandler):
         if WEB in f.parents or f == WEB / rel:
             if f.is_file() and str(f).startswith(str(WEB)):
                 ctype = {"html": "text/html", "css": "text/css", "js": "application/javascript",
-                         "json": "application/json", "svg": "image/svg+xml"}.get(f.suffix.lstrip("."), "text/plain")
+                         "json": "application/json", "svg": "image/svg+xml", "woff2": "font/woff2",
+                         "woff": "font/woff", "ttf": "font/ttf"}.get(f.suffix.lstrip("."), "text/plain")
                 return self._send(200, raw=f.read_bytes(), ctype=ctype + "; charset=utf-8")
         return self._send(404, {"error": "not found", "path": path})
 
 
 def main():
+    global FORCE_FIRSTRUN
     port = 8781
     if "--port" in sys.argv:
         port = int(sys.argv[sys.argv.index("--port") + 1])
+    if "--first-run" in sys.argv:
+        FORCE_FIRSTRUN = True  # preview the onboarding screen without touching pantry.json
     httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     print(f"poio stage-2 on http://127.0.0.1:{port}  "
-          f"(recipes={len(RECIPES)}, llm={'yes' if llm_available() else 'no'})")
+          f"(recipes={len(RECIPES)}, llm={'yes' if llm_available() else 'no'}"
+          f"{', FIRST-RUN preview' if FORCE_FIRSTRUN else ''})")
     httpd.serve_forever()
 
 

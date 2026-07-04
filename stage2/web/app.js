@@ -36,10 +36,10 @@
 
   /* ---------------- state ---------------- */
   const state = {
-    view: 'boot', menu: 0, step: 0, dHl: 0, fbHl: 1, pHl: 0, sHl: 0, recHl: 0, setupHl: 0,
+    view: 'boot', menu: 0, step: 0, dHl: 0, fbHl: 1, pHl: 0, sHl: 0, recHl: 0, setupHl: 0, listHl: 0,
     flash: true, dish: '', recipe: null, ingByKey: {}, diff: [], appliedN: 0,
     today: null, pantry: { counts: { plenty: 0, low: 0, out: 0 }, items: [] },
-    recipes: [], shop: [], timerId: null, timeLeft: 0, errMsg: '',
+    recipes: [], shop: [], list: [], timerId: null, timeLeft: 0, errMsg: '',
   };
   const MENU = [
     { label: 'Cook', go: () => cookToday() },
@@ -69,7 +69,7 @@
   /* ---------------- views ---------------- */
   const CONTEXT = {
     boot: () => 'POiO', setup: () => 'Welcome', setupinfo: () => 'Setup',
-    today: () => 'Tonight', recipes: () => 'Recipes',
+    list: () => 'Kitchen', today: () => 'Tonight', recipes: () => 'Recipes',
     recipe: () => `${state.dish} · ${state.step + 1}/${(state.recipe ? state.recipe.steps.length : 0)}`,
     cookdone: () => 'Just cooked', review: () => 'Used tonight?', saved: () => 'Pantry',
     pantry: () => 'Pantry', shopping: () => 'Shopping', loading: () => state._loadCtx || 'One sec', error: () => 'Offline',
@@ -89,6 +89,22 @@
         <div class="diff-h">Set up your kitchen</div>
         <div class="setup-copy">Tell <b>poio</b> (the skill) what you have — "set up my pantry" — and it fills the pantry as a conversation. Then run <code>python3 stage2/bootstrap_pantry.py</code> and reload here.</div>
         <div class="setup-copy" style="opacity:.75">Files are a one-time seed; after that the conversation and this device keep it current. No hand-editing.</div>`;
+    },
+    list() {
+      let html = '', navStarted = false;
+      state.list.forEach((it, i) => {
+        const hl = i === state.listHl ? ' row-hl' : '';
+        const car = `<span class="caret">${i === state.listHl ? '▸' : ''}</span>`;
+        if (it.type === 'nav' && !navStarted) { html += `<hr class="list-div">`; navStarted = true; }
+        if (it.type === 'recipe') {
+          html += `<div class="rrow${it.tonight ? ' tonight' : ''}${it.feasible ? '' : ' blocked'}${hl}">
+            ${car}${sw(it.feasible ? 'plenty' : 'out')}<span class="nm">${esc(it.name)}</span>
+            <span class="mt">${it.totalMin}m${it.feasible ? '' : ' · missing'}</span></div>`;
+        } else {
+          html += `<div class="rrow nav${hl}">${car}<span class="nm">${esc(it.label)} ›</span></div>`;
+        }
+      });
+      return `<div class="list-kick">What are we cooking?</div><div class="rlist">${html}</div>`;
     },
     loading() { return `<div class="center"><div class="dots">···</div><div class="sub">${esc(state._loadMsg || '')}</div></div>`; },
     error() {
@@ -207,6 +223,7 @@
     boot: () => ['', ''],
     setup: () => ['<b>turn</b> ▸ choose', '<b>press</b> ● go'],
     setupinfo: () => ['', '<b>◂</b> back'],
+    list: () => ['<b>turn</b> ▸ choose', '<b>press</b> ● open'],
     today: () => ['<b>turn</b> ▸ choose', '<b>press</b> ● open'],
     recipes: () => ['<b>turn</b> ▸ move', '<b>press</b> ● cook · <b>◂</b> back'],
     recipe: () => { const last = state.step === state.recipe.steps.length - 1; return [`<b>tap</b> ▸ ${last ? 'finish' : 'next'}`, '<b>◂</b> back']; },
@@ -251,15 +268,27 @@
   }
 
   /* ---------------- data loads ---------------- */
-  async function boot() {
-    state.view = 'boot'; render(true);
+  async function boot() { state.view = 'boot'; render(true); await loadHome(); }
+
+  // Home is the recipe LIST (tonight starred), not a single pick. Pantry / Shopping
+  // ride at the bottom as nav rows. Re-fetches so feasibility reflects the pantry.
+  async function loadHome() {
     try {
-      const today = await getJSON('/api/today');
+      const [today, recs, pantry] = await Promise.all([
+        getJSON('/api/today'), getJSON('/api/recipes'), getJSON('/api/pantry?filter=attention')]);
       if (today.provisioned === false) { state.setupHl = 0; state.view = 'setup'; render(true); return; }
-      const pantry = await getJSON('/api/pantry?filter=attention');
       state.today = today.tonight;
       state.pantry = { counts: pantry.counts, items: pantry.items };
-      state.menu = 0; state.view = 'today'; render(true);
+      const tid = today.tonight ? today.tonight.id : null;
+      const rows = recs.recipes.map((r) => ({
+        type: 'recipe', id: r.id, name: r.name, totalMin: r.time.totalMin,
+        feasible: r.feasible, tonight: r.id === tid,
+      }));
+      rows.sort((a, b) => (b.tonight ? 1 : 0) - (a.tonight ? 1 : 0)); // tonight first
+      state.list = [...rows,
+        { type: 'nav', key: 'pantry', label: 'Pantry' },
+        { type: 'nav', key: 'shopping', label: 'Shopping' }];
+      state.listHl = 0; state.view = 'list'; render(true);
     } catch (e) { showError(e); }
   }
 
@@ -346,6 +375,7 @@
   function encoderTurn(dir) {
     switch (state.view) {
       case 'setup': state.setupHl = (state.setupHl + dir + SETUP.length) % SETUP.length; break;
+      case 'list': if (state.list.length) state.listHl = (state.listHl + dir + state.list.length) % state.list.length; break;
       case 'today': state.menu = (state.menu + dir + MENU.length) % MENU.length; break;
       case 'recipes': if (state.recipes.length) state.recHl = (state.recHl + dir + state.recipes.length) % state.recipes.length; break;
       case 'pantry': if (state.pantry.items.length) state.pHl = (state.pHl + dir + state.pantry.items.length) % state.pantry.items.length; break;
@@ -360,6 +390,14 @@
   function encoderPress() {
     switch (state.view) {
       case 'setup': SETUP[state.setupHl].go(); break;
+      case 'list': {
+        const it = state.list[state.listHl];
+        if (!it) break;
+        if (it.type === 'recipe') openRecipe(it.id);
+        else if (it.key === 'pantry') openPantry();
+        else if (it.key === 'shopping') openShopping();
+        break;
+      }
       case 'today': MENU[state.menu].go(); break;
       case 'recipes': { const r = state.recipes[state.recHl]; if (r) openRecipe(r.id); break; }
       case 'cookdone': openReview(); break;
@@ -390,11 +428,12 @@
     if (state.view === 'loading' || state.view === 'boot') return;
     if (state.view === 'setupinfo') { state.view = 'setup'; render(true); return; }
     if (state.view === 'setup') return;
+    if (state.view === 'list') return; // list is home
     if (state.view === 'review') { openPantry(); return; }
     if (state.view === 'recipe') { clearTimer(); }
-    if (state.view !== 'today') home();
+    if (state.view !== 'list') home();
   }
-  function home() { clearTimer(); state.menu = 0; state.view = 'today'; render(true); }
+  function home() { clearTimer(); loadHome(); }
 
   document.addEventListener('keydown', (e) => {
     switch (e.key) {
