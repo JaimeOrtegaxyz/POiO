@@ -1,8 +1,8 @@
 # POiO — orientation
 
 A personalized chicken-recipe assistant, headed toward a chicken-shaped countertop
-appliance with the AI on-device. The README tells the public story; this file tells
-you where the project actually stands and how not to step on anything.
+appliance with the AI on-device. This file is the working map: where things stand,
+what's canonical, and what not to touch.
 
 ## The stages, and where each one is
 

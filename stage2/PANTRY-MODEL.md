@@ -86,5 +86,5 @@ never think about files again."
 ## The one-line version
 
 > Files seed it once; the conversation and the confirm-loop keep it. The device
-> is a screen and a knob that trusts the server — which is exactly why it can be
-> cheap, and exactly why owning one never means opening a text editor.
+> is a screen and a knob that trusts the server — that's why it can be cheap,
+> and why owning one never means opening a text editor.

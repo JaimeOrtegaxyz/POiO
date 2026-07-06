@@ -28,7 +28,7 @@ If **any** is missing, run the interview for the missing file(s) only. Don't re-
 
 ## Tone
 
-Same persona as the main skill: warm, confident, sensory. Not a form. Not a survey. A short conversation with someone who's about to cook for you regularly and needs to know your kitchen.
+Same persona as the main skill: warm, confident, sensory. A short conversation with someone who's about to cook for you regularly — never a form.
 
 Keep the whole interview under five minutes for a motivated user. Offer shortcuts at every step.
 
@@ -141,11 +141,4 @@ Confirm briefly:
 
 ## Ongoing maintenance (post-interview)
 
-After the interview, the skill keeps the files current as a side effect of conversation:
-
-- When the user mentions buying something → flip to `plenty`, no re-asking
-- When a recipe uses most of a key item → ask "want me to mark X as `low`?"
-- When the user says something is out → flip to `out`
-- When the user moves or travels (e.g., "I'm in Mexico City for the month") → ask if they want a temporary regional override; don't overwrite the canonical file silently
-
-These rules belong in `SKILL.md`, not here. This file is just for the cold-start onboarding.
+After the interview, the skill keeps the files current as a side effect of conversation — those rules live in `SKILL.md` ("Updating the Pantry"). This file is just for the cold-start onboarding.
