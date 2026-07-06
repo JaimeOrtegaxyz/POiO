@@ -38,7 +38,7 @@
   const state = {
     view: 'boot', menu: 0, step: 0, dHl: 0, fbHl: 1, pHl: 0, sHl: 0, recHl: 0, setupHl: 0, listHl: 0, knobAngle: 0,
     flash: true, dish: '', recipe: null, ingByKey: {}, diff: [], appliedN: 0,
-    today: null, pantry: { counts: { plenty: 0, low: 0, out: 0 }, items: [] },
+    today: null, pantry: { counts: { plenty: 0, low: 0, out: 0 }, items: [] }, pAll: false,
     recipes: [], shop: [], list: [], timerId: null, timeLeft: 0, errMsg: '',
   };
   const MENU = [
@@ -229,14 +229,21 @@
     pantry() {
       const its = state.pantry.items;
       const c = state.pantry.counts;
+      const total = c.plenty + c.low + c.out;
       const rows = its.length ? its.map((r, i) => `
         <div class="prow${i === state.pHl ? ' row-hl' : ''}">
           <span class="caret">${i === state.pHl ? '▸' : ''}</span>
           ${sw(r.status)}<span class="nm">${esc(r.label)}</span><span class="st">${WORD[r.status]}</span>
         </div>`).join('') : `<div class="diff-empty">nothing low or out — nice.</div>`;
+      const tglHl = state.pHl === its.length;
+      const tgl = `
+        <div class="prow${tglHl ? ' row-hl' : ''}" style="margin-top:4px;border-top:1px solid var(--ink);padding-top:6px">
+          <span class="caret">${tglHl ? '▸' : ''}</span>
+          <span class="nm">${state.pAll ? 'show low & out only ›' : `show all ${total} items ›`}</span>
+        </div>`;
       return `
         <div class="summary"><span>${sw('plenty')} ${c.plenty} stocked</span><span>${sw('low')} ${c.low} low</span><span>${sw('out')} ${c.out} out</span></div>
-        <div class="plist">${rows}</div>
+        <div class="plist">${rows}${tgl}</div>
         <div class="talk-hint" style="margin-top:10px"><span class="pip"></span><b>press</b> ● cycle status — writes to the server</div>`;
     },
     shopping() {
@@ -247,7 +254,7 @@
         html += `<div class="srow${r.bought ? ' bought' : ''}${i === state.sHl ? ' row-hl' : ''}"><span class="caret">${i === state.sHl ? '▸' : ''}</span><span class="box">${r.bought ? '▣' : '▢'}</span><span class="nm">${esc(r.label)}</span></div>`;
       });
       if (last !== null) html += '</div>';
-      return html;
+      return html + `<div class="talk-hint" style="margin-top:10px"><span class="pip"></span><b>press</b> ● mark bought — restocks it for real</div>`;
     },
   };
 
@@ -349,7 +356,7 @@
   }
 
   async function refreshPantry() {
-    const p = await getJSON('/api/pantry?filter=attention');
+    const p = await getJSON('/api/pantry' + (state.pAll ? '' : '?filter=attention'));
     state.pantry = { counts: p.counts, items: p.items };
   }
 
@@ -381,10 +388,23 @@
   }
 
   function openShopping() {
-    // derived from the attention pantry: out -> restock, low -> top up
-    const out = state.pantry.items.filter((i) => i.status === 'out').map((i) => ({ key: i.key, label: i.label, group: 'RESTOCK', bought: false }));
-    const low = state.pantry.items.filter((i) => i.status === 'low').map((i) => ({ key: i.key, label: i.label, group: 'TOP UP', bought: false }));
+    // derived from the attention pantry: out -> restock, low -> top up.
+    // `was` remembers the pre-shopping status so un-marking can restore it.
+    const out = state.pantry.items.filter((i) => i.status === 'out').map((i) => ({ key: i.key, label: i.label, group: 'RESTOCK', was: i.status, bought: false }));
+    const low = state.pantry.items.filter((i) => i.status === 'low').map((i) => ({ key: i.key, label: i.label, group: 'TOP UP', was: i.status, bought: false }));
     state.shop = [...out, ...low]; state.sHl = 0; state.view = 'shopping'; render(true);
+  }
+
+  // mark bought = a real restock: writes `plenty` back; un-mark restores.
+  async function toggleBought() {
+    const r = state.shop[state.sHl];
+    if (!r) return;
+    const to = r.bought ? r.was : 'plenty';
+    try {
+      await postJSON('/api/pantry/apply', { changes: [{ item: r.key, to }] });
+      r.bought = !r.bought;
+      render(false);
+    } catch (e) { showError(e); }
   }
 
   async function openReview() {
@@ -409,6 +429,13 @@
   }
 
   async function cyclePantry() {
+    if (state.pHl === state.pantry.items.length) {  // the filter-toggle row
+      state.pAll = !state.pAll;
+      showLoading('Pantry', state.pAll ? 'reading everything' : 'reading pantry');
+      try { await refreshPantry(); state.pHl = 0; state.view = 'pantry'; render(true); }
+      catch (e) { showError(e); }
+      return;
+    }
     const it = state.pantry.items[state.pHl];
     if (!it) return;
     const to = NEXT[it.status];
@@ -429,7 +456,7 @@
       case 'list': if (state.list.length) state.listHl = (state.listHl + dir + state.list.length) % state.list.length; break;
       case 'today': state.menu = (state.menu + dir + MENU.length) % MENU.length; break;
       case 'recipes': if (state.recipes.length) state.recHl = (state.recHl + dir + state.recipes.length) % state.recipes.length; break;
-      case 'pantry': if (state.pantry.items.length) state.pHl = (state.pHl + dir + state.pantry.items.length) % state.pantry.items.length; break;
+      case 'pantry': { const n = state.pantry.items.length + 1; state.pHl = (state.pHl + dir + n) % n; break; }  // +1 = the filter-toggle row
       case 'shopping': if (state.shop.length) state.sHl = (state.sHl + dir + state.shop.length) % state.shop.length; break;
       case 'cookdone': state.fbHl = (state.fbHl + dir + FB.length) % FB.length; break;
       case 'review': if (state.diff.length) state.dHl = (state.dHl + dir + (state.diff.length + 1)) % (state.diff.length + 1); break;
@@ -454,7 +481,7 @@
       case 'recipes': { const r = state.recipes[state.recHl]; if (r) openRecipe(r.id); break; }
       case 'cookdone': openReview(); break;
       case 'pantry': cyclePantry(); break;
-      case 'shopping': if (state.shop[state.sHl]) { state.shop[state.sHl].bought = !state.shop[state.sHl].bought; render(true); } break;
+      case 'shopping': toggleBought(); break;
       case 'review':
         if (!state.diff.length) { openPantry(); break; }
         if (state.dHl === state.diff.length) applyDiff();

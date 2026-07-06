@@ -120,11 +120,12 @@ is enough, just predict"; the **photo** probe's phone flavor leans "let it live 
 the **voice** probe leans "the device is the natural place to just say it."
 
 The current answer (see the direction note up top): predict-and-confirm is the bet
-being lived with — it's what the Stage-2 app builds. What it covers well is post-cook
-depletion; what's still honestly unsolved is the rest of inventory input — restocking
-after a shopping trip, corrections outside a recipe, and adding items the pantry has
-never seen. Those may end up on the phone/laptop conversation rather than the device.
-No fourth mockup until a real gap earns it.
+being lived with — it's what the Stage-2 app builds. Post-cook depletion is the
+solved case (predicted diff → one press). The Stage-2 app also gives the rest of
+the loop on-device paths now — marking a shopping item bought restocks it for real,
+and the pantry view can surface the full inventory for corrections — while adding
+never-seen items stays conversation-side by design. Whether those paths *feel*
+right is what living with it will tell. No fourth mockup until a real gap earns it.
 
 ## e-paper honesty (all probes)
 

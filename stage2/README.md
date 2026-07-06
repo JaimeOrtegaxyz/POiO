@@ -41,7 +41,10 @@ Then put the laptop on the counter and cook. **Scroll wheel = the encoder**
 (arrows too), `Enter` selects/confirms, `Space` is tap-to-advance. The loop:
 **pick → tap through the steps → finish → rate → confirm the predicted pantry
 changes** — that confirm is a real `POST /api/pantry/apply`, so reload and the
-change is there. Cycling a pantry status writes straight to the server too.
+change is there. Cycling a pantry status writes straight to the server too, and
+marking a shopping item bought restocks it for real (un-mark restores it). The
+pantry view shows what needs attention by default; its last row toggles to the
+full inventory so anything can be corrected.
 
 ## API
 
@@ -53,7 +56,7 @@ change is there. Cycling a pantry status writes straight to the server too.
 | `GET /api/recipes/{id}` | full stepper recipe, live pantry status stamped on each ingredient |
 | `GET /api/recipes/{id}/consumed` | **the "used tonight?" prediction** — post-cook diff |
 | `GET /api/today` | tonight's pick (deterministic feasible recipe for now; LLM later). `provisioned:false` before first-run |
-| `POST /api/pantry/apply` | `{changes:[{item,to}]}` — writes the pantry update back |
+| `POST /api/pantry/apply` | `{changes:[{item,to}]}` — writes the pantry update back. A change with a `label` (+ optional `category`) instead of a known `item` **adds** the item — the write path for never-seen ingredients (meant for the conversational assistant) |
 | `POST /api/pantry/bootstrap` | `{mode:"demo"}` — first-run provisioning (seeds the demo pantry) |
 | `POST /api/suggest` | Mode-1 "what should I cook" (deterministic now; LLM-wired seam) |
 

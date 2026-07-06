@@ -34,10 +34,14 @@ you where the project actually stands and how not to step on anything.
 
 Encoder is in (navigation). Camera is unlikely (cost + complexity). Voice is
 undecided — it must never be required for the device to work. The open design
-question is **inventory input**: post-cook depletion is solved (predicted diff →
-one-press confirm), but restocking after shopping, corrections outside a recipe,
-and adding never-seen items are not solved on-device yet. Details:
-`mockups/README.md` (friction map), `stage2/PANTRY-MODEL.md`.
+question is **inventory input**: how the pantry gets encoded, updated, and
+corrected with the least input. The Stage-2 app now has on-device paths for the
+whole loop — post-cook depletion (predicted diff → one-press confirm), restock
+(marking a shopping item bought writes `plenty` back), and corrections (the
+pantry view can show the full inventory, not just low/out). Adding never-seen
+items is deliberately conversation-side, through the API. Whether these paths
+*feel* right in real cooking is the open part. Details: `mockups/README.md`
+(friction map), `stage2/PANTRY-MODEL.md`.
 
 ## Run it
 
@@ -72,12 +76,11 @@ standing choice for this app. The mockups gallery is separate:
 
 ## Known gaps (honest list)
 
-- Shopping view's "mark bought" is local-only — it doesn't write `plenty` back to
-  the server yet, so the restock loop doesn't close.
-- The on-device Pantry view lists attention items (`low`/`out`) only; there's no
-  path to demote a `plenty` item outside the post-cook diff.
 - `POST /api/suggest` returns the deterministic feasible list; the LLM seam
   (`ask_llm()`, headless `claude` CLI) exists but isn't wired to it.
+- `POST /api/pantry/apply` can add never-seen items (send a `label` instead of a
+  known `item`), but no client calls that yet — the conversational assistant is
+  the intended writer.
 - Re-running `stage2/bootstrap_pantry.py` overwrites `data/pantry.json` — device
   edits since the last seed are lost. Fine for a prototype; don't rely on it.
 - The conversational pantry bootstrap (interview → real kitchen) has never been

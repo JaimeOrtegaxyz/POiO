@@ -41,6 +41,11 @@ def predict(status: str, depletes: str) -> str:
     return status  # none / light -> no change
 
 
+def slug(label: str) -> str:
+    """Same key rule as bootstrap_pantry.py, so adds land on consistent keys."""
+    return re.sub(r"[^a-z0-9]+", "-", label.lower()).strip("-")
+
+
 FORCE_FIRSTRUN = False
 
 
@@ -222,18 +227,34 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(500, {"error": str(e)})
 
     def _apply(self, body):
+        """Status writes, and — with a `label` — adds. A change whose key isn't in
+        the pantry but carries a label creates the item: the write path for
+        never-seen items, meant for the conversational assistant (PANTRY-MODEL),
+        so adds don't have to go through pantry.md + a destructive re-seed."""
         changes = body.get("changes", [])
         doc = load_pantry()
         idx = {it["key"]: it for it in doc["items"]}
-        applied = []
+        applied, added = [], []
         for ch in changes:
-            it = idx.get(ch.get("item"))
             to = ch.get("to")
-            if it and to in ("plenty", "low", "out"):
+            if to not in ("plenty", "low", "out"):
+                continue
+            key = ch.get("item") or slug(ch.get("label", ""))
+            if not key:
+                continue
+            it = idx.get(key)
+            if it:
                 it["status"] = to
                 applied.append({"item": it["key"], "to": to})
+            elif ch.get("label"):
+                it = {"key": key, "label": ch["label"],
+                      "category": ch.get("category", "Uncategorized"),
+                      "status": to, "notes": ch.get("notes", "")}
+                doc["items"].append(it)
+                idx[key] = it
+                added.append({"item": key, "to": to})
         save_pantry(doc)
-        return self._send(200, {"applied": applied, "counts": doc["counts"]})
+        return self._send(200, {"applied": applied, "added": added, "counts": doc["counts"]})
 
     def _bootstrap(self, body):
         """First-run provisioning. mode='demo' seeds a plausible pantry so a fresh
