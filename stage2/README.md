@@ -18,10 +18,11 @@ stage2/
 
 ## Quickstart (clone → cook)
 
-Needs `python3` and the `claude` CLI. No install, no build, no API key.
+Needs `python3`. No install, no build, no API key. (The `claude` CLI on `PATH`
+is optional — only suggestions/generation use it; the cooking loop runs without it.)
 
 ```bash
-git clone <this repo> && cd poio && git checkout epaper-pivot
+git clone https://github.com/JaimeOrtegaxyz/poio.git && cd poio
 python3 stage2/server.py --port 8781
 # open http://127.0.0.1:8781/
 ```
@@ -82,12 +83,14 @@ so it's portable across machines; `GET /api/health` reports whether it's reachab
 - **The pantry is not committed.** A fresh clone starts unprovisioned → the
   first-run screen. Use **Try a demo pantry** to cook immediately, or the
   conversational setup for your real kitchen.
-- **`pantry.md` in the repo is the all-`out` template** — hand-filling it is the
-  friction we're designing away (see `PANTRY-MODEL.md`). The faithful bootstrap
-  (`python3 stage2/bootstrap_pantry.py`, no flag) mirrors it; `--demo` overlays a
-  cookable seed.
+- **The committed template is `pantry.example.md`** (all-`out`; your personal
+  `pantry.md` is gitignored and starts as a copy of it). Hand-filling it is the
+  friction we're designing away (see `PANTRY-MODEL.md`). The bootstrap script
+  reads `pantry.md` if you have one, else falls back to the template; `--demo`
+  overlays a cookable seed on either.
 - **Recipes:** three are wired (Tinga de Pollo, Pollo a la Crema con Rajas,
   Gochujang-Glazed Thighs), all feasible against the demo pantry.
 - **Needs only** `python3` + the `claude` CLI on `PATH`. The cooking loop works
-  without the CLI; only suggestions/generation need it. Fonts load from Google
-  Fonts when online and fall back to system fonts offline.
+  without the CLI; only suggestions/generation need it. Fonts are bundled in
+  `web/fonts/` — the app is self-contained and works offline (the archival
+  `mockups/` still use the Google Fonts CDN; intentional, they're not "what we use").

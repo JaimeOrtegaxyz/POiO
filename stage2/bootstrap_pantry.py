@@ -18,7 +18,10 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent          # repo root
+# pantry.md is personal, gitignored state — a fresh clone only has the
+# committed template, so fall back to it (they start out identical anyway).
 PANTRY_MD = ROOT / "pantry.md"
+PANTRY_TEMPLATE = ROOT / "pantry.example.md"
 OUT = Path(__file__).resolve().parent / "data" / "pantry.json"
 
 VALID = {"plenty", "low", "out"}
@@ -78,9 +81,10 @@ DEMO_ADD = [
 
 def main():
     demo = "--demo" in sys.argv
-    if not PANTRY_MD.exists():
-        sys.exit(f"pantry.md not found at {PANTRY_MD}")
-    items = parse_pantry_md(PANTRY_MD.read_text())
+    src = PANTRY_MD if PANTRY_MD.exists() else PANTRY_TEMPLATE
+    if not src.exists():
+        sys.exit(f"no pantry source: neither {PANTRY_MD} nor {PANTRY_TEMPLATE} exists")
+    items = parse_pantry_md(src.read_text())
     by_key = {it["key"]: it for it in items}
 
     applied = 0
@@ -99,8 +103,8 @@ def main():
     counts = {s: sum(1 for it in items if it["status"] == s) for s in ("plenty", "low", "out")}
     doc = {
         "updated": date.today().isoformat(),
-        "source": ("pantry.md + demo overlay (see PANTRY-MODEL.md)" if demo
-                   else "faithful mirror of pantry.md"),
+        "source": (f"{src.name} + demo overlay (see PANTRY-MODEL.md)" if demo
+                   else f"faithful mirror of {src.name}"),
         "counts": counts,
         "items": items,
     }

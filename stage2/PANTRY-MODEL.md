@@ -71,9 +71,12 @@ Three ways to get from empty to a stocked pantry, best-first:
 
 ## The honest gap today
 
-`pantry.md` in this repo is the **all-`out` template**, last touched 2026-04-12 —
-i.e. nobody has ever actually filled it in. That's the whole point: hand-filling
-it is precisely the friction we're designing away. For the prototype the server's
+The committed pantry template (`pantry.example.md`) ships **all-`out`**, and the
+personal `pantry.md` it seeds (gitignored, per-machine) has never been filled in
+by hand — i.e. nobody has ever actually done the manual pass. That's the whole
+point: hand-filling it is precisely the friction we're designing away.
+(`bootstrap_pantry.py` reads `pantry.md` when it exists and falls back to the
+template on a fresh clone.) For the prototype the server's
 `pantry.json` is seeded with a plausible Guadalajara mid-week pantry (via
 `bootstrap_pantry.py`) so you can cook *tonight* and correct as you go. Before the
 device is real, the **conversational bootstrap has to exist** — it's the piece

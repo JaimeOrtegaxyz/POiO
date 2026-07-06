@@ -48,17 +48,17 @@ Lives in `~/.claude/skills/poio` as a symlink to this repo. Type `/poio` in a Cl
 
 Stage 1 is where the pantry model, the suggestion logic, and the recipe format get stress-tested before any of it gets wrapped in an app or burned to a microcontroller.
 
-### Stage 2: Local web app
+### Stage 2: Local web app *(first cut built — see [`stage2/`](stage2/))*
 
-POiO out of Claude Code. A small Python server you run on your own machine, exposing the same suggestion / recipe / shopping-list endpoints, plus a thin browser UI on `localhost`. Same markdown files as the source of truth. Bring your own Anthropic key.
+POiO out of Claude Code. A small Python server you run on your own machine (stdlib only, no install), exposing pantry / recipe / suggestion endpoints as JSON, plus a browser UI on `localhost` that behaves like the eventual device — encoder, tap-to-advance, e-paper constraints and all. No API key: the server rides your existing Claude Code auth through the headless `claude` CLI, and the cooking loop itself never touches the LLM. The markdown files seed the pantry once; after that the runtime store is `stage2/data/pantry.json` (see [`stage2/PANTRY-MODEL.md`](stage2/PANTRY-MODEL.md)).
 
-Two reasons for Stage 2: get POiO in front of cooks who don't live in a terminal, and lock down the HTTP API the eventual hardware will call.
+Two reasons for Stage 2: feel the device's frictions on a laptop before committing to hardware, and lock down the HTTP API the eventual firmware will call. Quickstart in [`stage2/README.md`](stage2/README.md).
 
 ### Stage 3: Kitchen companion device
 
-A small chicken-shaped countertop device, palm-sized, battery-powered, with a 4" screen, a rotary encoder, two buttons, and a soft "eye" you press to wake it. Walks you through a recipe step by step, taps-to-advance when your hands are covered in raw chicken, clucks at you when the timer's up. Talks to the same self-hosted server the web app uses. Open hardware, no vendor cloud, no subscription. Targeting a ~$50 electronics BOM — honest retail range is $79–99 lean DTC or $129–199 properly shipped.
+A small chicken-shaped countertop device, palm-sized, battery-powered, with a 4.2" mono e-paper screen, a rotary encoder, two buttons, and a soft "eye" you press to wake it. Walks you through a recipe step by step, taps-to-advance when your hands are covered in raw chicken, clucks at you when the timer's up. Talks to the same self-hosted server the web app uses. Open hardware, no vendor cloud, no subscription. Targeting a ~$55 electronics BOM — honest retail range is $79–99 lean DTC or $129–199 properly shipped.
 
-See [`hardware/PLAN.md`](hardware/PLAN.md) for the product direction and [`hardware/PROTOTYPE.md`](hardware/PROTOTYPE.md) for the bench parts list.
+See [`hardware/PLAN.md`](hardware/PLAN.md) for the product direction, [`hardware/UI-LANGUAGE.md`](hardware/UI-LANGUAGE.md) for the screen's design language, and [`hardware/PROTOTYPE.md`](hardware/PROTOTYPE.md) for the bench parts list.
 
 ### Stage 4: The brain moves in *(the endgame)*
 
@@ -82,7 +82,7 @@ The same shape across all three stages, with thinner or thicker clients:
 ┌─────────────────────────────────────────────┐
 │  ENGINE  (Python, the "brain")              │
 │  • Reads pantry + references                │
-│  • Calls the Anthropic API                  │
+│  • Calls Claude (headless CLI today)        │
 │  • Returns suggestions / recipes / lists    │
 │  • Stateless per request                    │
 └──────────────────┬──────────────────────────┘
@@ -96,7 +96,7 @@ The same shape across all three stages, with thinner or thicker clients:
 └─────────────────────────────────────────────┘
 ```
 
-In Stage 1 the skill plays both client and engine, reading markdown directly and calling Claude through Claude Code. From Stage 2 onward, the engine runs as its own process; clients only talk to it over HTTP. Markdown stays the source of truth at every stage.
+In Stage 1 the skill plays both client and engine, reading markdown directly and calling Claude through Claude Code. From Stage 2 onward, the engine runs as its own process; clients only talk to it over HTTP. The markdown files stay the human-readable seed at every stage; Stage 2's runtime pantry is `stage2/data/pantry.json`, bootstrapped from them once and kept current by the confirm loop (the full argument is [`stage2/PANTRY-MODEL.md`](stage2/PANTRY-MODEL.md)). Today the engine calls Claude through the headless `claude` CLI, riding your existing Claude Code auth — swapping to a direct API key is a one-function change.
 
 Keeping the engine behind a clean HTTP boundary is also what makes Stage 4 a swap rather than a rewrite: the brain is whatever answers at that boundary. Today it's a Python process calling a cloud model; the endgame moves that same role onto a chip inside the device. The clients and the data don't care which.
 
@@ -115,7 +115,7 @@ ln -s ~/Documents/GitHub/poio ~/.claude/skills/poio
 /poio
 ```
 
-First invocation runs a short setup interview (location, then a pantry walkthrough) and writes your personal `pantry.md` and `references/regional-context.md`. Both files are gitignored. They're yours, they stay local.
+First invocation runs a short setup interview (location, a pantry walkthrough, then your equipment) and writes your personal `pantry.md`, `references/regional-context.md`, and `references/equipment.md`. All three are gitignored. They're yours, they stay local.
 
 After that, just talk to it:
 
@@ -129,22 +129,31 @@ After that, just talk to it:
 ```
 poio/
 ├── SKILL.md                              # Persona, modes, output format (Stage 1 entrypoint)
+├── JOURNAL.md                            # Build log — the reasoning behind decisions
 ├── pantry.example.md                     # Pantry template
 ├── references/
 │   ├── regional-context.example.md       # Worked example (Guadalajara / Western Mexico)
 │   └── style-guide.md                    # Flavor families, sauces, assembly patterns
 ├── setup/
 │   └── interview.md                      # Onboarding script (reused across all stages)
+├── stage2/                               # Stage-2 server + laptop-as-device app
+│   ├── server.py                         # JSON API + static host (stdlib only)
+│   ├── web/                              # The encoder companion app, wired to the API
+│   ├── schema/ · data/                   # Stepper-recipe schema, recipes, runtime pantry
+│   ├── README.md                         # Quickstart + API reference
+│   └── PANTRY-MODEL.md                   # Where the pantry lives (and why no keyboard)
 ├── hardware/
 │   ├── PLAN.md                           # Stage 3 product direction
-│   └── PROTOTYPE.md                      # Bench parts list / bake-off rig
-├── mockups/                              # WIP Stage-2 web UI explorations
-├── assets/                               # Logo, animation
+│   ├── UI-LANGUAGE.md                    # The e-paper screen's design language
+│   ├── PROTOTYPE.md                      # Bench parts list / input bake-off rig
+│   └── POiO.3dm                          # Rhino shell model (WIP)
+├── mockups/                              # Device-screen mockups + input friction probes
+├── assets/                               # Logo, animation, journal images
 ├── LICENSES/                             # Full license texts (Apache-2.0, CERN-OHL-S, CC-BY-SA)
 └── LICENSE                               # Which license covers what
 ```
 
-Personal files (`pantry.md`, `references/regional-context.md`) are generated by the setup interview on first use and never committed.
+Personal files (`pantry.md`, `references/regional-context.md`, `references/equipment.md`) are generated by the setup interview on first use and never committed.
 
 ## License
 

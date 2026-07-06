@@ -12,3 +12,4 @@ __pycache__/
 # Templates live in *.example.md and are committed.
 pantry.md
 references/regional-context.md
+references/equipment.md

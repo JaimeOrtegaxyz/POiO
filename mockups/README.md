@@ -7,6 +7,16 @@
 > to migrate to the poio firmware later, not to become a website. The four Stage-2
 > web-app mockups that used to live here (chat / editorial / terminal / broadsheet)
 > were retired on the pivot; git history keeps them.
+>
+> **Where the bets stand, as of 2026-07-06.** The **encoder is in** — it's the
+> navigation input regardless of what else lands, and the encoder probe grew into
+> the live Stage-2 app ([`../stage2/`](../stage2/)). **Camera is unlikely** for
+> the shipped device (hard to implement, adds cost). **Voice is undecided** — it
+> wouldn't compete with the encoder, but the device has to work well with no
+> voice at all, so it stays a possible layer, not a dependency. The genuinely
+> open question is **inventory input** (moment 7 below): how the pantry gets
+> encoded, updated, and corrected with the least input. Prediction + confirm is
+> the current bet; the probes stay here as the record of the alternatives.
 
 ## What's here
 
@@ -107,8 +117,14 @@ Capture → read (`~3s`) → propose → confirm.
 companion, with the actual editing happening on a phone (or not at all — infer silently
 from cooked recipes and only surface exceptions). The **encoder** probe leans "the device
 is enough, just predict"; the **photo** probe's phone flavor leans "let it live elsewhere";
-the **voice** probe leans "the device is the natural place to just say it." Living with
-the three should make the honest answer obvious — no fourth mockup until one earns it.
+the **voice** probe leans "the device is the natural place to just say it."
+
+The current answer (see the direction note up top): predict-and-confirm is the bet
+being lived with — it's what the Stage-2 app builds. What it covers well is post-cook
+depletion; what's still honestly unsolved is the rest of inventory input — restocking
+after a shopping trip, corrections outside a recipe, and adding items the pantry has
+never seen. Those may end up on the phone/laptop conversation rather than the device.
+No fourth mockup until a real gap earns it.
 
 ## e-paper honesty (all probes)
 

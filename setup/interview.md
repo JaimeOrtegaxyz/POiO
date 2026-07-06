@@ -1,11 +1,12 @@
 # Bootstrap Interview
 
-This is the onboarding script POiO runs the first time it's used. It collects just enough information to generate the two personal files the assistant relies on:
+This is the onboarding script POiO runs the first time it's used. It collects just enough information to generate the three personal files the assistant relies on:
 
 - `pantry.md` — what the user has in their kitchen
 - `references/regional-context.md` — what's in season where they live
+- `references/equipment.md` — what they cook on
 
-Both files are gitignored (personal state). Templates of each live alongside as `*.example.md` and serve as the structural reference.
+All three files are gitignored (personal state). Templates of each live alongside as `*.example.md` and serve as the structural reference.
 
 This file is the single source of truth for onboarding. Stage 1 (the Claude skill) follows it as a conversational script. Stage 2 (the local web app) will reuse it as the setup-wizard content. Stage 3 (the hardware device) will reuse it as the pairing flow over Bluetooth or a captive-portal page.
 
@@ -17,10 +18,11 @@ Before doing anything else in a POiO session, check:
 
 1. Does `pantry.md` exist in the skill's directory?
 2. Does `references/regional-context.md` exist?
+3. Does `references/equipment.md` exist?
 
-If **both** exist, skip the interview and proceed normally.
+If **all three** exist, skip the interview and proceed normally.
 
-If **either** is missing, run the interview for the missing file(s) only. Don't re-ask about something the user already configured.
+If **any** is missing, run the interview for the missing file(s) only. Don't re-ask about something the user already configured.
 
 ---
 
@@ -40,7 +42,7 @@ Skip this part if `references/regional-context.md` already exists.
 
 > "Quick setup before we start cooking. I need to know where you are (so I can suggest what's actually in season) and what's in your kitchen. Takes a few minutes — we can do it now or you can hand-edit the files later if you'd rather. Want to walk through it?"
 
-If user declines: copy `references/regional-context.example.md` to `references/regional-context.md` unmodified, copy `pantry.example.md` to `pantry.md`, tell the user where the files live, and stop the interview. They can fill them in by hand.
+If user declines: copy `references/regional-context.example.md` to `references/regional-context.md` unmodified, copy `pantry.example.md` to `pantry.md`, copy `references/equipment.example.md` to `references/equipment.md`, tell the user where the files live, and stop the interview. They can fill them in by hand.
 
 ### Step 1.2 — Ask for location
 
@@ -113,7 +115,27 @@ Write `pantry.md` based on the answers, preserving the category structure from `
 
 Confirm briefly and move on:
 
-> "Pantry's in. Ready to cook?"
+> "Pantry's in. One last thing — the gear."
+
+---
+
+## Part 3 — Equipment
+
+Skip this part if `references/equipment.md` already exists.
+
+### Step 3.1 — One batched question
+
+> "What do you cook on? Stovetop and oven I'll assume unless you say otherwise — anything else worth knowing about? Slow cooker, air fryer, grill, pressure cooker… and any quirks (tiny oven, no extractor fan, that kind of thing)."
+
+Don't itemize one at a time — take the answer as it comes and follow up only on what changes recipe-writing (oven size if they roast whole birds, whether the grill is a weeknight tool or a weekend ritual, whether they actually *like* the air fryer).
+
+### Step 3.2 — Write the file
+
+Write `references/equipment.md` following the structure of `references/equipment.example.md`: what exists, and — more useful — how POiO should treat it (default to it, offer it, or never push it).
+
+Confirm briefly:
+
+> "Got your kitchen. Ready to cook?"
 
 ---
 
