@@ -79,6 +79,10 @@ RECIPES = load_recipes()
 
 
 def pantry_index():
+    """Empty index before first-run: recipe routes must not 500 on a fresh clone
+    (the client fetches /api/recipes in the same batch that detects first-run)."""
+    if not provisioned():
+        return {}
     return {it["key"]: it for it in load_pantry()["items"]}
 
 
