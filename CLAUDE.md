@@ -30,18 +30,24 @@ what's canonical, and what not to touch.
 - **Design/decision log:** `stage2/VISUALS.md` (taste calls + kitchen-test feedback),
   `JOURNAL.md` (Jaime's build log — read it for the *why*).
 
-## Where the input bets stand (2026-07-06)
+## Where the bets stand (2026-07-06)
 
-Encoder is in (navigation). Camera is unlikely (cost + complexity). Voice is
-undecided — it must never be required for the device to work. The open design
-question is **inventory input**: how the pantry gets encoded, updated, and
-corrected with the least input. The Stage-2 app now has on-device paths for the
-whole loop — post-cook depletion (predicted diff → one-press confirm), restock
-(marking a shopping item bought writes `plenty` back), and corrections (the
-pantry view can show the full inventory, not just low/out). Adding never-seen
-items is deliberately conversation-side, through the API. Whether these paths
-*feel* right in real cooking is the open part. Details: `mockups/README.md`
-(friction map), `stage2/PANTRY-MODEL.md`.
+Input layer: encoder is in (navigation), camera is unlikely (cost +
+complexity), voice is undecided — it must never be required for the device to
+work. Above that, **the whole UI is an open question**. The Stage-2 flow has
+been kitchen-tested exactly once; this is the moment to judge whether it
+actually works — screens, navigation, the shape of the loop — and rethinking
+the flow entirely is on the table. Don't treat the current screens as settled
+when weighing changes.
+
+The sharpest instance is **inventory input**: how the pantry gets encoded,
+updated, and corrected with the least input. The Stage-2 app has on-device
+paths for the whole loop — post-cook depletion (predicted diff → one-press
+confirm), restock (marking a shopping item bought writes `plenty` back), and
+corrections (the pantry view can show the full inventory, not just low/out).
+Adding never-seen items is deliberately conversation-side, through the API.
+Whether any of this *feels* right in real cooking is the open part. Details:
+`mockups/README.md` (friction map), `stage2/PANTRY-MODEL.md`.
 
 ## Run it
 

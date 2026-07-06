@@ -13,8 +13,10 @@
 > the live Stage-2 app ([`../stage2/`](../stage2/)). **Camera is unlikely** for
 > the shipped device (hard to implement, adds cost). **Voice is undecided** — it
 > wouldn't compete with the encoder, but the device has to work well with no
-> voice at all, so it stays a possible layer, not a dependency. The genuinely
-> open question is **inventory input** (moment 7 below): how the pantry gets
+> voice at all, so it stays a possible layer, not a dependency. Above the input
+> layer, **the whole UI is still open** — the Stage-2 flow has one kitchen test
+> behind it, and rethinking it entirely is on the table. The sharpest open
+> question is **inventory input** (moment 7 below): how the pantry gets
 > encoded, updated, and corrected with the least input. Prediction + confirm is
 > the current bet; the probes stay here as the record of the alternatives.
 
