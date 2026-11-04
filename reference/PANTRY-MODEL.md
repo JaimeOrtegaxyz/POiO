@@ -1,3 +1,5 @@
+> Reference material carried over from Stage 2. The ideas hold (bootstrap / upkeep / correction, predict-and-confirm, files only seed). Two lines are superseded and marked inline.
+
 # Where the pantry lives — and why the device never needs a keyboard
 
 > A design note prompted by a real question: to use the prototype you first have
@@ -60,11 +62,15 @@ Three ways to get from empty to a stocked pantry, best-first:
 - **The device needs:** a network path to the Stage-2 server, the read + confirm
   UI, and the encoder/tap it already has. That's it.
 - **The device does NOT need:** a keyboard, a user-facing file system, or a text
-  editor — ever. A mic or camera are *enhancements* to upkeep and bootstrap, not
+  editor — ever. ~~A mic or camera are *enhancements* to upkeep and bootstrap, not
   requirements, because conversational input can happen on the phone and the
-  daily loop is encoder-confirm.
-- **The server must be always-on and reachable** — a Pi / Mac mini in the kitchen,
-  per `hardware/PLAN.md`. It holds the pantry, runs the skill, calls the model.
+  daily loop is encoder-confirm.~~ *Superseded 2026-11-04: voice is required
+  (push-to-talk on the red button); there's no device camera, and photos come
+  through the app.*
+- ~~**The server must be always-on and reachable** — a Pi / Mac mini in the kitchen,
+  per `hardware/PLAN.md`. It holds the pantry, runs the skill, calls the model.~~
+  *Superseded 2026-11-04: the brain is hosted (V1 device is a thin client to it);
+  on-device is the endgame.*
 - **Onboarding is a first-class product surface, not an afterthought.** Budget
   firmware/app time for: Wi-Fi setup + the one-time pantry bootstrap (chat, and/or
   photo). Ship without it and the device is dead on arrival for a new owner.
