@@ -1,120 +1,149 @@
-# POiO e-paper UI — design language
+# POiO screen — design language
 
-The visual contract for POiO's screen. It governs two things: the firmware UI on the device, and the [`mockups/eink-companion/`](../mockups/eink-companion/) prototype that serves as its reference implementation.
+The visual contract for POiO's screen. It governs two things: the device UI, and the online mockup's emulation of the device screen. Voice and copy rules live in [`VOICE.md`](../VOICE.md); what's in V1 lives in [`SCOPE.md`](../SCOPE.md).
 
-The *grammar* here is lifted wholesale from the [`eink-glance/`](../mockups/eink-glance/) mockup — pure ink-on-paper, dither/hatch instead of gray, zero animation. What's thrown away is everything that assumed a 9.7" broadsheet you read from across the room. The companion's screen is small and close, and its main job is walking you through one recipe, not laying five panels on a page. So this doc keeps eink-glance's *look* and rebuilds its *layout and interaction* for the real hardware.
+Lineage: the grammar started in the archived [`eink-glance/`](../archive/mockups/eink-glance/) broadsheet (ink on paper, patterns instead of gray, no motion) and was rebuilt for a small, close screen in the archived mono [`eink-companion/`](../archive/mockups/eink-companion/). This version keeps the restraint and moves it to color e-paper.
 
 ## The screen we're designing for
 
-- **4.2" 400×300 plain mono e-paper**, 4:3, **1-bit (pure black/white)**, ~120 dpi.
-- Read at **arm's length** on a kitchen counter — not across the room. Type is bigger, density is lower than a broadsheet would allow.
-- **Partial refresh ~0.4 s** per region, no flash. Occasional **full refresh** to clear ghosting.
-- No keyboard, no pointer, no hover. Inputs are physical: **encoder** (rotate to move, press to select), **tap-to-advance** (knuckle on the head → next step), **eye button** (wake / menu), and **two tactile buttons** (back / context).
+- **Color e-paper, panel TBD** (picked by the [bench test](PROTOTYPE.md)). Size, resolution, color depth and repaint times get filled in once the panel is chosen.
+- Read at **arm's length** on a kitchen counter, often mid-task. Type is big, density is low.
+- **Always on.** When nothing is cooking, it shows the open cookbook screen.
+- No keyboard, no pointer, no hover. Inputs: **voice** (push-to-talk on the **red button**) and the **encoder** (rotate to browse, press to select or step).
 
 ## First principles
 
-1. **Two tones, no gray.** On the panel it's literally 1-bit black on white. The brand tones — ink `#1a1816`, paper `#f4efe4` — are the *mockup's* fidelity targets and the enclosure palette; the panel renders them as pure black/white.
-2. **Type does the work color usually does.** Two typefaces, set against each other, carry the hierarchy.
-3. **Dither and hatch instead of gray** for any "in-between" state.
-4. **Hairlines, not fills.** Rules and dotted dividers organize the screen. Solid black is reserved for emphasis.
-5. **Zero animation.** Every change is a discrete repaint. No transitions, no spinners, no movement.
-6. **One job per screen.** The single biggest departure from eink-glance. At 400×300 you cannot stack five views — each screen does one thing, and you move between them with the encoder/buttons.
+1. **Design within the panel's real limits.** Color e-paper is not an LCD: fewer, softer colors, slower repaints. Nothing may depend on a color or speed the panel can't deliver.
+2. **Food gets the color; chrome stays quiet.** Images use the panel's full color. UI chrome uses a small brand palette.
+3. **Type does most of the hierarchy.** Two typefaces, set against each other.
+4. **Status is color plus pattern**, never color alone.
+5. **Discrete repaints by default.** No spinners, ever.
+6. **One job per screen.** Each screen does one thing; you move between them with the encoder or by voice.
 7. **Sparse by default.** Show the essentials and nothing more. Add an element only when something genuinely feels missing in use — never to fill space. It's easier to add later than to claw density back. When in doubt, leave it out.
 
 ## Color
 
-Black on white. That's it. No accent colors, ever.
-
-Emphasis comes from **weight, size, inversion** (a white-on-black badge), or **rule thickness** — never hue. If a thing needs to shout, it gets a solid-black bar or an inverted pill, the way eink-glance marks "today's pick."
+- **Food images:** the panel's full color.
+- **UI chrome:** four brand tones: **ink**, **paper**, **yellow** and **red**. Exact values are set on the panel, since e-paper renders color differently from a monitor. The old mockup targets (ink `#1a1816`, paper `#f4efe4`) are the starting point for the first two.
+- Emphasis comes first from **weight, size and inversion** (an inverted pill, a solid bar). Red is for the few things that must catch the eye; yellow is the brand accent.
+- Final palette after the bench test.
 
 ## Typography
 
-Two faces, same split as eink-glance:
+- **Quicksand**: reading and display. Dish titles, the current step's instruction, the cookbook suggestion.
+- **JetBrains Mono**: chrome. Kickers, quantities, status labels, step numbers, footer meta. Tabular figures so numbers align.
 
-- **Spectral (serif)** — reading and display: dish titles, the current step's instruction, big numerals.
-- **JetBrains Mono** — all chrome: kickers, quantities, status pills, timers, footer meta. Tabular figures so numbers align.
+Both are rechecked on the panel during the bench test. *Fix: this doc previously named Spectral as the reading face; Quicksand is what the app actually used and is now canonical.*
 
-**Type scale.** Each size has to be baked as a bitmap font in firmware (GxEPD2 + Adafruit GFX), so keep the set small — six sizes, no ad-hoc values:
+**Type roles.** Keep the set small, no ad-hoc sizes. Pixel sizes get re-scaled after the bench test, once the panel's resolution and viewing distance are known.
 
-| Role | px @ ~120 dpi | Face |
-|---|---|---|
-| Hero / dish title | 36 | Spectral |
-| Step number `3 / 7` | 28 | JetBrains Mono |
-| **Step body (most-read)** | **22** | Spectral |
-| Ingredient + quantity rows | 18 | Spectral name / Mono qty |
-| Kicker / label / status | 14 | JetBrains Mono, tracked caps |
-| Footer meta | 12 | JetBrains Mono |
+| Role | Face |
+|---|---|
+| Hero / dish title | Quicksand |
+| Step number `3 / 7` | JetBrains Mono |
+| **Step body (most-read)** | **Quicksand** |
+| Ingredient + quantity rows | Quicksand name / Mono qty |
+| Kicker / label / status | JetBrains Mono, tracked caps |
+| Footer meta | JetBrains Mono |
 
-Floor for anything you must read while cooking: **~18 px**. Quantities right-align in a mono gutter (carried straight from the eink-glance recipe layout).
+Anything you must read while cooking has a size floor, set on the panel. Quantities right-align in a mono gutter.
 
 ## Status grammar
 
-The dither/hatch vocabulary, unchanged — it's the part of eink-glance that's most worth keeping, and it's free on 1-bit:
+`plenty` / `low` / `out` are shown as **color plus pattern**, the same everywhere they appear (pantry pills, the pantry diff, shopping markers), so the eye learns the encoding once and it still reads in poor light or for color-blind users.
+
+Starting proposal, final after the bench test:
 
 - `plenty` → **solid ink**
-- `low` → **45° diagonal hatch**
-- `out` → **sparse dot dither**
+- `low` → **yellow with a 45° diagonal hatch**
+- `out` → **red with a sparse dot pattern**
 
-Same three patterns everywhere they appear (pantry pills, the snapshot bar, shopping markers) so the eye learns the encoding once. Define them as fixed-pitch 1-bit patterns (hatch line every 4 px; dither dot on a 4 px grid) so they snap to the panel grid and don't shimmer. See `mockups/eink-glance/styles.css` for the CSS expression of the same patterns.
+Patterns are fixed-pitch and snap to the panel's pixel grid so they don't shimmer.
 
 ## Layout
 
-A 400×300 frame, three bands:
+Three bands:
 
 ```
-┌────────────────────────────────────┐  ← 16 px margin all around
-│ MASTHEAD   POiO · context · refresh │  ~36 px: mark + where-you-are + meta
+┌────────────────────────────────────┐
+│ MASTHEAD   POiO · context · meta    │  one line: mark + where-you-are + meta
 ├────────────────────────────────────┤  hairline
 │                                     │
 │            BODY                     │  the one job: a step, a list, a screen
 │                                     │
 ├────────────────────────────────────┤  hairline
-│ AFFORDANCES  ▸ tap · ● select · ◂ back │  ~28 px: what the controls do, as static glyphs
+│ AFFORDANCES  ● hablar · ◎ elegir    │  what the controls do here, as static glyphs
 └────────────────────────────────────┘
 ```
 
-- **Masthead-lite.** The eink-glance broadsheet nameplate, shrunk to one line: small POiO mark, the current context (dish name / "Pantry" / "Shopping"), and refresh/clock meta in mono on the right.
-- **Body is the screen.** One job. The five eink-glance "views" become a small set you navigate one at a time.
-- **Affordances band** replaces eink-glance's keyboard hints. Static glyphs label what the physical controls do *here* — never hover tooltips.
+- **Masthead-lite.** Small POiO mark, the current context (dish name / "Despensa" / "Lista"), meta in mono on the right. No clock: time isn't shown.
+- **Body is the screen.** One job.
+- **Affordances band.** Static glyphs label what the red button and the encoder do *here*.
 
-### The recipe stepper is the primary screen
+### The open cookbook screen
 
-It's what the device is *for*. One step per screen:
+The resting screen, always on. It looks like a cookbook left open on the counter:
+
+- Suggests a dish **1-2× a day**, seasonal, with its image.
+- Ignore it, or tweak it by voice ("algo más rápido"). No prompts, no badges.
+- Proactive check-ins ("¿qué tal la tinga?") appear here later that day or the next, never at turn-on.
+- It changes rarely, so it can afford slower repaints than the stepper.
+
+### The recipe stepper
+
+The primary cooking screen. One step per screen:
 
 - Step `X / N` (mono, top of body).
-- The instruction in **22 px Spectral**, the largest comfortable reading size.
-- Only the ingredients/quantities relevant to *this* step, with status dots if stock matters.
-- A timer cue if the step has one.
-- Tap-to-advance is the implied verb; the affordance band says so.
+- The instruction in the step-body size, the largest comfortable reading size.
+- Only the ingredients/quantities relevant to *this* step, with status markers if stock matters.
+- **Checkpoints instead of a timer cue.** No time on screen and no countdown. When a checkpoint arrives, the step shows its message ("Voltea el pollo.") and the checkpoint sound plays.
+- The advance verb is **encoder press** or saying **"siguiente"**; the affordance band says so.
+
+## Voice-state feedback
+
+Text plus sound, never motion:
+
+| State | Screen | Sound |
+|---|---|---|
+| Idle | Whatever screen you're on | — |
+| Listening (red button held) | A static listening state; LED by the button on | Press tick |
+| Thinking (button released) | A static "thinking" state | Release tick |
+| Didn't understand | "No te entendí. Mantén el botón y dilo otra vez." | "Didn't understand" sound |
+| Answered | The resulting screen, repainted once | — |
 
 ## Motion & refresh
 
-- **No transitions.** A state change is a repaint, full stop.
-- **Partial-refresh the region that changed** — the step number and step body — so advancing a step doesn't flash the whole panel.
-- **Schedule a full refresh** every several steps or on idle wake, to clear accumulated ghosting.
-- No loading spinners. If something is genuinely pending, show a static `…` or a deliberate dithered placeholder block — not motion.
+- **Discrete repaints by default.** A state change is a repaint.
+- Short animations get a place only if the online mockup's A/B shows they earn it, and only within what the panel can do.
+- **No spinners.** Pending states are static (see voice-state feedback).
+
+### Refresh hygiene
+
+Generic rules; panel-specific numbers TBD after the bench test.
+
+- **Partial-refresh the region that changed** (the step number and step body) where the panel supports it, so advancing doesn't repaint the whole screen.
+- **Schedule a full refresh** every several steps, and at least daily on the cookbook screen, to clear accumulated ghosting.
+- Avoid leaving the same high-contrast element in the same spot for days; the cookbook screen's daily change helps.
 
 ## Affordances (no keyboard, no hover)
 
-Map eink-glance's keyboard model onto the physical controls:
-
-| eink-glance (keyboard) | companion (physical) |
+| Control | Does |
 |---|---|
-| `j` / `k`, arrows | encoder rotate |
-| `enter` / click | encoder press |
-| (next step) | **tap-to-advance** (accelerometer) |
-| `esc` / back | back button |
-| `?` / menu, wake | eye button |
+| **Voice** (while the red button is held) | Free input: ask, tweak, "siguiente", "se acabó el X", "¿qué sabes de mí?" |
+| **Red button** | Push-to-talk: hold while speaking, release when done |
+| **Encoder rotate** | Browse: options, steps, lists |
+| **Encoder press** | Select / advance a step / confirm |
 
-State lives in the screen, not in a cursor. Selection is shown by **inversion or a solid caret**, not a hover color.
+State lives in the screen, not in a cursor. Selection is shown by **inversion or a solid caret**, not a hover color. A back control is added only if the bench test shows a need.
 
-## What does *not* carry from eink-glance
+## Adaptive UI
 
-- The **broadsheet density** — five panels on one page. Too much for 400×300.
-- The **1200 px masthead and 54 px hero** scale — re-scaled to the six-size type scale above.
-- **Desktop hover and keyboard hints** — replaced by the physical-control affordance band.
-- **Smooth grays / photography** — the panel is 1-bit; lean on dither/hatch and type, never halftone food photos (they ghost and look noisy).
+V1 ships **1-2 designer-set layout variants** (for example, image-led vs text-led). POiO may suggest switching ("¿Prefieres las recetas sin foto?"); the user decides. Variants stay inside this language; nothing is generated on the fly.
+
+## Images
+
+Realistic-ish food within color e-paper limits: dithered to the panel's palette, simple compositions, food large in frame. The online mockup mirrors this look rather than showing screen-quality photos.
 
 ## Reference implementation
 
-[`mockups/eink-companion/`](../mockups/eink-companion/) is the canonical visual reference for this language at the true 400×300 spec. The firmware UI should match its layout intent within bitmap-font limits — the mockup is allowed nicer font rendering than the panel will manage, but nothing in it may rely on color, animation, or sub-pixel grays.
+The online mockup (coming, `mockup/`) will be the visual reference for this language. The old mono reference is archived at [`../archive/mockups/eink-companion/`](../archive/mockups/eink-companion/).
