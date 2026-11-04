@@ -1,3 +1,5 @@
+> **Archived Nov 2026.** Record of a finished copy pass. Its product model (chicken-only, local app, mono companion) is outdated.
+
 # Copy Review — POiO
 
 **Product model:** POiO is Jaime's open personal project: a chicken-only recipe

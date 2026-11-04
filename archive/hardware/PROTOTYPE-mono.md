@@ -1,3 +1,5 @@
+> **Archived Nov 2026.** Bench rig for the 4.2" mono e-paper + four-input bake-off. Superseded by the color e-paper bench test in [hardware/PROTOTYPE.md](../../hardware/PROTOTYPE.md).
+
 # Prototype parts list
 
 A deliberate **kitchen bake-off rig** for the Stage-3 companion. The point isn't a minimal viable prototype — it's to put every realistic *input* option on the counter, live with them for a couple of weeks while actually cooking, and let the winner reveal itself by feel. The screen is settled (a 4.2" mono e-paper); the final product picks one (maybe two) input model from the menu.

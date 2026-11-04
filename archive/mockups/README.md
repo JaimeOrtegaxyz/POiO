@@ -1,3 +1,5 @@
+> **Archived Nov 2026.** Friction probes built for the mono e-paper / encoder direction. Superseded by the color e-paper + voice direction (SCOPE.md). Internal links may point to pre-archive paths.
+
 # POiO — mockups
 
 > **Direction, as of 2026-07-03.** The e-paper **companion is the product**. These
