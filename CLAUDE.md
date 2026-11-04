@@ -1,93 +1,88 @@
 # POiO — orientation
 
-A personalized chicken-recipe assistant, headed toward a chicken-shaped countertop
-appliance with the AI on-device. This file is the working map: where things stand,
+A chicken-first kitchen companion, headed toward a chicken-shaped countertop
+device with the AI on-device. This file is the working map: where things stand,
 what's canonical, and what not to touch.
 
-## The stages, and where each one is
+Scope: [`SCOPE.md`](SCOPE.md). Decisions: [`DECISIONS.md`](DECISIONS.md).
+Voice/copy/sounds: [`VOICE.md`](VOICE.md).
 
-1. **Claude Code skill** — *works.* `SKILL.md` at the repo root is the skill;
-   install is a symlink (`ln -s <repo> ~/.claude/skills/poio`). First use runs
-   `setup/interview.md` to generate the personal files.
-2. **Local web app** — *first cut built, kitchen-tested once.* `stage2/server.py`
-   (stdlib-only JSON API) + `stage2/web/` (a browser app that behaves like the
-   device: encoder, tap-to-advance, e-paper constraints). This is the
-   "laptop-as-device" prototype. Quickstart + API: `stage2/README.md`.
-3. **Hardware companion** — *parts list ready, nothing ordered; shell model WIP.*
-   4.2" mono e-paper (decided — see `hardware/PLAN.md`), ESP32-S3, encoder + tap.
-   Screen design language: `hardware/UI-LANGUAGE.md`.
-4. **On-device LLM** — *the endgame, not buildable yet.* Everything before it keeps
-   the brain behind a clean HTTP boundary so it becomes a board swap. The thesis:
-   README "The bet".
+## The phases, and where each one is
+
+1. **Skill** — *works.* `SKILL.md` at the repo root is the skill and the base
+   brain; install is a symlink (`ln -s <repo> ~/.claude/skills/poio`). First use
+   runs the short first-run part of `setup/interview.md`.
+2. **Online mockup** — *next, not started.* Hosted, Google login, Anthropic API,
+   text-first, voice input, emulates the device screen. Code will live in
+   `mockup/` (Apache-2.0, secrets in env).
+3. **Device** — *direction set, nothing ordered.* Color e-paper (panel TBD; the
+   bench test in `hardware/PROTOTYPE.md` is next), voice via push-to-talk on the
+   red button + encoder, always-on, thin client to the hosted brain. Shell model
+   in `hardware/POiO.3dm`. Direction: `hardware/PLAN.md`; screen language:
+   `hardware/UI-LANGUAGE.md`.
+4. **On-device brain** — *the endgame, not buildable yet.* Everything before it
+   keeps the brain behind a clean HTTP boundary so it becomes a board swap. The
+   thesis: README "The bet".
+
+The local Python app (the old Stage 2) is archived in `archive/stage2/`.
 
 ## What's canonical vs. archival
 
-- **Canonical:** `stage2/` (the live app), `hardware/PLAN.md` + `UI-LANGUAGE.md` +
-  `PROTOTYPE.md`, `SKILL.md`, `stage2/PANTRY-MODEL.md` (where the pantry lives).
-- **Archival, kept on purpose:** everything under `mockups/` — friction probes and
-  the retired 9.7" wall-device design (`eink-glance/`). They still use the Google
-  Fonts CDN; that's intentional, only `stage2/web/` bundles its fonts.
-- **Design/decision log:** `stage2/VISUALS.md` (taste calls + kitchen-test feedback),
-  `JOURNAL.md` (Jaime's build log — read it for the *why*).
+- **Canonical:** `SKILL.md`, `SCOPE.md`, `DECISIONS.md`, `VOICE.md`,
+  `hardware/*.md`, `reference/` (recipe schema, pantry model, sample recipes),
+  and `mockup/` once it lands.
+- **Archival, frozen:** everything under `archive/` (the Stage 2 app, the
+  mockups, the copy review, the mono prototype rig). Archived files only get a
+  banner; don't rewrite them or chase their old internal links. Index:
+  `archive/README.md`.
+- **Fonts:** Quicksand + JetBrains Mono are canonical. The archived mockups still
+  use the Google Fonts CDN; that's intentional.
+- **Build log:** `JOURNAL.md` (Jaime's personal log — read it for the *why*,
+  don't edit it).
 
-## Where the bets stand (2026-07-06)
+## Current status (Nov 2026)
 
-Input layer: encoder is in (navigation), camera is unlikely (cost +
-complexity), voice is undecided — it must never be required for the device to
-work. Above that, **the whole UI is an open question**. The Stage-2 flow has
-been kitchen-tested exactly once; this is the moment to judge whether it
-actually works — screens, navigation, the shape of the loop — and rethinking
-the flow entirely is on the table. Don't treat the current screens as settled
-when weighing changes.
-
-The sharpest instance is **inventory input**: how the pantry gets encoded,
-updated, and corrected with the least input. The Stage-2 app has on-device
-paths for the whole loop — post-cook depletion (predicted diff → one-press
-confirm), restock (marking a shopping item bought writes `plenty` back), and
-corrections (the pantry view can show the full inventory, not just low/out).
-Adding never-seen items is deliberately conversation-side, through the API.
-Whether any of this *feels* right in real cooking is the open part. Details:
-`mockups/README.md` (friction map), `stage2/PANTRY-MODEL.md`.
+- The product direction was reset on 2026-11-04: voice required, color e-paper,
+  always-on, hosted brain for V1. The reasons are dated in `DECISIONS.md`.
+- Next builds: the online mockup (`mockup/`) and the color e-paper bench test
+  (`hardware/PROTOTYPE.md`).
+- Still open: panel, mic hardware, Wi-Fi setup method, on-device LLM
+  feasibility, push-to-talk details, batch cooking, how proactive is too
+  proactive. The full list: `SCOPE.md` → Open questions.
+- When something is undecided, write it as open in `SCOPE.md` rather than
+  guessing.
 
 ## Run it
 
+The skill is the only live phase:
+
 ```bash
-python3 stage2/server.py --port 8781    # → http://127.0.0.1:8781/
+ln -s ~/Documents/GitHub/poio ~/.claude/skills/poio   # then /poio in Claude Code
 ```
 
-No dependencies, no API key. A fresh clone starts unprovisioned → first-run screen
-→ "Try a demo pantry" seeds a cookable pantry in one press. The `claude` CLI on
-PATH is optional (only suggestions use it; cooking never touches the LLM).
-Preview onboarding without wiping state: `--first-run`. Port 8781 is Jaime's
-standing choice for this app. The mockups gallery is separate:
-`python3 -m http.server 8770` from `mockups/`, open `_gallery.html`.
+The archived local app still runs from the repo root; see
+`archive/stage2/README.md`. Mockup run notes land with `mockup/`.
 
 ## Rules that aren't obvious from the code
 
-- **Never stage, commit, or revert `hardware/POiO.3dm`.** It's Jaime's live Rhino
-  work and is often modified in the working tree.
+- **Never stage, commit, or revert `hardware/POiO.3dm`** unless Jaime asks. It's
+  Jaime's live Rhino work and is often modified in the working tree.
 - **Personal files are gitignored and stay that way:** `pantry.md`,
-  `references/regional-context.md`, `references/equipment.md`. The committed
-  `*.example.md` files are the templates. `stage2/data/pantry.json` is per-machine
-  runtime state (also gitignored) — the server owns it; markdown only seeds it.
-- **E-paper honesty is a hard constraint in all device UI:** 1-bit black on white,
-  no animation, no spinners, dither/hatch instead of gray, discrete repaints. See
-  `hardware/UI-LANGUAGE.md` before touching `stage2/web/` or any mockup.
+  `references/regional-context.md`, `references/equipment.md`, `poionotas.md`.
+  The committed `*.example.md` files are the templates.
+  `archive/stage2/data/pantry.json` is per-machine runtime state for the archived
+  app (also gitignored).
+- **Secrets go in env.** `.env` is gitignored; never commit keys.
+- **Color e-paper honesty is a hard constraint in all device UI** (and in the
+  mockup's screen emulation): design within the panel's real limits, discrete
+  repaints, no spinners, color plus pattern for status. See
+  `hardware/UI-LANGUAGE.md` before touching any screen.
 - **Sparse by default.** Screens show the essentials; add an element only when its
   absence is felt in real use. When in doubt, leave it out.
-- **UI copy stays plain for now.** The "voice of the chicken" (personality in copy)
-  is a deliberately deferred layer — don't scatter quips (see `stage2/VISUALS.md`).
+- **B-C voice everywhere; see `VOICE.md`.**
+- **Docs in English; product copy in Mexican Spanish.**
+- **`SCOPE.md` wins over Figma.**
+- **Meeting notes never go in the repo**; only decisions, with no personal details
+  about anyone.
 - Licensing is split three ways (code / hardware / content) — see `LICENSE` before
   adding new kinds of files.
-
-## Known gaps (honest list)
-
-- `POST /api/suggest` returns the deterministic feasible list; the LLM seam
-  (`ask_llm()`, headless `claude` CLI) exists but isn't wired to it.
-- `POST /api/pantry/apply` can add never-seen items (send a `label` instead of a
-  known `item`), but no client calls that yet — the conversational assistant is
-  the intended writer.
-- Re-running `stage2/bootstrap_pantry.py` overwrites `data/pantry.json` — device
-  edits since the last seed are lost. Fine for a prototype; don't rely on it.
-- The conversational pantry bootstrap (interview → real kitchen) has never been
-  run end-to-end; the demo seed is what everyone has cooked against.

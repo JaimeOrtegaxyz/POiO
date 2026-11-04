@@ -5,7 +5,7 @@
 <h1 align="center">POiO</h1>
 
 <p align="center">
-  A personalized chicken recipe assistant. Pantry-aware, season-aware, with a global flavor vocabulary.
+  A chicken-first kitchen companion. Pantry-aware, season-aware.
 </p>
 
 <p align="center">
@@ -22,91 +22,90 @@
 
 I fucking love chicken.
 
-So I made POiO. Three little markdown files (the stuff in your kitchen, what's growing where you live, a flavor cheat sheet) and an assistant that reads them and has opinions. It looks at what you have and suggests what to cook. The protein is always chicken because that's the whole point.
+So I made POiO. Three little markdown files (the stuff in your kitchen, what's growing where you live, a flavor cheat sheet) and an assistant that reads them and has opinions. It looks at what you have and suggests what to cook. Chicken by default; other dishes when you ask for them, when there's no chicken in the house, or when your habits call for it.
 
-Today it lives as a Claude Code skill. Down the road it'll be a small chicken-shaped countertop companion that walks you through tonight's recipe step by step, clucking at you along the way. Roadmap below.
+Today it lives as a Claude Code skill. Next is an online mockup, then a chicken-shaped countertop device. Roadmap below; what's in each version is in [`SCOPE.md`](SCOPE.md).
 
 ## The bet
 
 POiO is partly a kitchen toy and partly a bet on where things are going.
 
-The bet: AI becomes a part you buy once, baked into an object the way a motor is baked into a blender. You don't rent it, it doesn't phone home, and it doesn't die when a company sunsets its servers.
+The bet: AI becomes a part you buy once, baked into an object the way a motor is baked into a blender. You don't rent it, it doesn't depend on someone else's servers, and it doesn't die when a company sunsets them.
 
 That future isn't quite here. Build POiO with fully on-device intelligence *today* and it'd be too slow, too expensive, not smart enough — maybe all three. But the hardware that makes it cheap, fast, and smart enough is coming. It has to: the whole industry needs those parts to exist, so the market will drag them into being. The only real question is when, and nobody knows.
 
-So POiO is a stab at imagining a product that the future will fully enable — and pointing at it now. It doesn't need the endgame hardware to be useful (the stages below are each real and buildable with what exists). The cuteness is bait. The argument is that small, single-purpose AI appliances should belong to the people who buy them.
+So POiO is a stab at imagining a product that the future will fully enable — and pointing at it now. It doesn't need the endgame hardware to be useful (each phase below is real and buildable with what exists). V1 and the online mockup use a hosted brain as a stepping stone; the endgame is the brain on the device. The cuteness is bait. The argument is that small, single-purpose AI appliances should belong to the people who buy them.
 
-Being narrow helps: POiO doesn't need a general model, just a chicken-recipe companion. A tiny model that's *only* good at "suggest a dish from these six things and walk me through it" gets good enough years before the everything-machine does.
+Being narrow helps: POiO doesn't need a general model, just a chicken-first kitchen companion. A tiny model that's *only* good at "suggest a dish from these six things and walk me through it" gets good enough years before the everything-machine does.
 
 ## Roadmap
 
-Three buildable stages, each a real and usable thing on its own — plus a fourth that's the horizon they're aimed at.
+Four named phases. Phases say *where* POiO runs; [`SCOPE.md`](SCOPE.md) says *what* it does in V1, V2 and later.
 
-### Stage 1: Claude Code skill *(this repo, today)*
+### 1. Skill *(works today)*
 
-Lives in `~/.claude/skills/poio` as a symlink to this repo. Type `/poio` in a Claude Code session, or just start talking about food. It reads your pantry, your regional context, and a flavor reference, then suggests dishes, walks you through a recipe, or builds you a shopping list.
+Lives in `~/.claude/skills/poio` as a symlink to this repo. Type `/poio` in a Claude Code session, or just start talking about food. It reads your pantry, your regional context and a flavor reference, then gives you three options, walks you through a recipe with checkpoints, or builds you a shopping list.
 
-Stage 1 is where the pantry model, the suggestion logic, and the recipe format get stress-tested before any of it gets wrapped in an app or burned to a microcontroller.
+[`SKILL.md`](SKILL.md) is the base brain: the mockup, the app and the device all start from its logic.
 
-### Stage 2: Local web app *(first cut built — see [`stage2/`](stage2/))*
+### 2. Online mockup *(next)*
 
-POiO out of Claude Code. A small Python server you run on your own machine (stdlib only, no install), exposing pantry / recipe / suggestion endpoints as JSON, plus a browser UI on `localhost` that behaves like the eventual device — encoder, tap-to-advance, e-paper constraints and all. No API key: the server rides your existing Claude Code auth through the headless `claude` CLI, and the cooking loop itself never touches the LLM. The markdown files seed the pantry once; after that the runtime store is `stage2/data/pantry.json` (see [`stage2/PANTRY-MODEL.md`](stage2/PANTRY-MODEL.md)).
+A hosted web app: Google login, the Anthropic API behind it, text-first, with voice input. It emulates the device's color e-paper screen and A/B-tests images + animation against text. Code will live in this repo under `mockup/`.
 
-Two reasons for Stage 2: feel the device's frictions on a laptop before committing to hardware, and lock down the HTTP API the eventual firmware will call. Quickstart in [`stage2/README.md`](stage2/README.md).
+### 3. Device
 
-### Stage 3: Kitchen companion device
+Chicken-shaped (size and proportions per [`hardware/POiO.3dm`](hardware/POiO.3dm)), always-on, on the counter. A color e-paper screen (the leading option; panel TBD after a bench test), a red push-to-talk button and an encoder. It answers with text and a few sounds, never speech. V1 is a thin client to the hosted brain.
 
-A small chicken-shaped countertop device, palm-sized, battery-powered, with a 4.2" mono e-paper screen, a rotary encoder, two buttons, and a soft "eye" you press to wake it. Walks you through a recipe step by step, taps-to-advance when your hands are covered in raw chicken, clucks at you when the timer's up. Talks to the same self-hosted server the web app uses. Open hardware, no vendor cloud, no subscription. Targeting a ~$55 electronics BOM — honest retail range is $79–99 lean DTC or $129–199 properly shipped.
+See [`hardware/PLAN.md`](hardware/PLAN.md) for the product direction, [`hardware/UI-LANGUAGE.md`](hardware/UI-LANGUAGE.md) for the screen's design language, and [`hardware/PROTOTYPE.md`](hardware/PROTOTYPE.md) for the bench-test plan.
 
-See [`hardware/PLAN.md`](hardware/PLAN.md) for the product direction, [`hardware/UI-LANGUAGE.md`](hardware/UI-LANGUAGE.md) for the screen's design language, and [`hardware/PROTOTYPE.md`](hardware/PROTOTYPE.md) for the bench parts list.
+### 4. On-device brain *(the endgame)*
 
-### Stage 4: The brain moves in *(the endgame)*
+Same chicken, same personality, but the intelligence lives *inside* it. No server, no key, no network round-trip — a small model running on a chip inside the shell. Ask it what to make and it just answers.
 
-Same chicken, same personality, but the intelligence lives *inside* it. No self-hosted server, no Anthropic key, no network round-trip — a tiny model running on-device, on a chip cheap and frugal enough to sit in a battery-powered appliance. Ask it what to make and it just answers.
+This is the phase that explains the whole project. It's also the one that doesn't fully exist yet: the hardware to do it well and cheaply is still on its way. POiO doesn't wait for it. The earlier phases keep the brain *swappable*, so the day the right part lands it's a board swap, not a redesign.
 
-This is the stage that explains the whole project. It's also the one that doesn't fully exist yet: the hardware to do it well, cheaply, at appliance power budgets is still on its way. POiO doesn't wait for it. The earlier stages keep the brain *swappable*, so the day the right part lands it's a board swap, not a redesign.
+The earlier local Python prototype is archived in [`archive/stage2/`](archive/stage2/).
 
 ## Architecture
 
-The same shape across all three stages, with thinner or thicker clients:
+The same shape in every phase:
 
 ```
 ┌─────────────────────────────────────────────┐
 │  CLIENTS  (thin, swappable)                 │
-│  • Stage 1: Claude Code skill (SKILL.md)    │
-│  • Stage 2: local web app                   │
-│  • Stage 3: countertop device firmware      │
+│  • Claude Code skill (SKILL.md)             │
+│  • Online mockup                            │
+│  • Countertop device                        │
 └──────────────────┬──────────────────────────┘
-                   │ HTTP / JSON  (Stage 2+)
+                   │ HTTP / JSON
                    ▼
 ┌─────────────────────────────────────────────┐
-│  ENGINE  (Python, the "brain")              │
-│  • Reads pantry + references                │
-│  • Calls Claude (headless CLI today)        │
-│  • Returns suggestions / recipes / lists    │
-│  • Stateless per request                    │
+│  BRAIN                                      │
+│  • SKILL.md logic + the Anthropic API       │
+│  • Hosted for the mockup and V1             │
+│  • On the device later                      │
 └──────────────────┬──────────────────────────┘
-                   │ filesystem
+                   │
                    ▼
 ┌─────────────────────────────────────────────┐
-│  DATA  (markdown, canonical, git-friendly)  │
-│  • pantry.md                                │
-│  • references/regional-context.md           │
-│  • references/style-guide.md                │
+│  DATA                                       │
+│  • Pantry                                   │
+│  • Poionotas (what POiO knows about you)    │
+│  • Recipes (schema in reference/)           │
 └─────────────────────────────────────────────┘
 ```
 
-In Stage 1 the skill plays both client and engine, reading markdown directly and calling Claude through Claude Code. From Stage 2 onward, the engine runs as its own process; clients only talk to it over HTTP. The markdown files stay the human-readable seed at every stage; Stage 2's runtime pantry is `stage2/data/pantry.json`, bootstrapped from them once and kept current by the confirm loop (the full argument is [`stage2/PANTRY-MODEL.md`](stage2/PANTRY-MODEL.md)). Today the engine calls Claude through the headless `claude` CLI, riding your existing Claude Code auth — swapping to a direct API key is a one-function change.
+In the skill, Claude Code plays both client and brain, reading the markdown files directly. From the mockup on, clients only talk to the brain over HTTP. The recipe schema and pantry model the mockup starts from are in [`reference/`](reference/).
 
-Keeping the engine behind a clean HTTP boundary is also what makes Stage 4 a swap rather than a rewrite: the brain is whatever answers at that boundary. Today it's a Python process calling a cloud model; the endgame moves that same role onto a chip inside the device. The clients and the data don't care which.
+Keeping the brain behind a clean HTTP boundary is the engine-boundary idea that makes the endgame a swap rather than a rewrite: the brain is whatever answers at that boundary. For now it's hosted; the endgame moves that same role onto a chip inside the device. The clients and the data don't care which.
 
-## Quickstart (Stage 1)
+## Quickstart (skill)
 
 You need Claude Code installed.
 
 ```bash
 # 1. Clone somewhere you don't mind keeping it long-term
-git clone https://github.com/JaimeOrtegaxyz/poio.git ~/Documents/GitHub/poio
+git clone https://github.com/JaimeOrtegaxyz/POiO.git ~/Documents/GitHub/poio
 
 # 2. Symlink it into your Claude skills directory
 ln -s ~/Documents/GitHub/poio ~/.claude/skills/poio
@@ -115,45 +114,54 @@ ln -s ~/Documents/GitHub/poio ~/.claude/skills/poio
 /poio
 ```
 
-First invocation runs a short setup interview (location, a pantry walkthrough, then your equipment) and writes your personal `pantry.md`, `references/regional-context.md`, and `references/equipment.md`. All three are gitignored. They're yours, they stay local.
+First use asks four quick questions (your city, how many you cook for, what you don't eat, what you have today). Each one is skippable, and then you get three options right away. The rest comes up gradually after your first cook, or all at once if you say "pregúntame todo". Your answers go into `pantry.md`, `references/regional-context.md`, `references/equipment.md` and `poionotas.md`. All four are gitignored. They're yours, they stay local.
+
+Output defaults to Mexican Spanish and follows you into English if you write in English.
 
 After that, just talk to it:
 
-- *"What should I cook?"*
+- *"¿Qué hago de cenar con lo que tengo?"*
 - *"I'm going to the store."*
 - *"Make me a chipotle-lime chicken bowl."*
-- *"I bought a bunch of poblanos and some media crema."*
+- *"No hay pollo. ¿Qué hago con unos camarones?"*
+- *"Compré poblanos y media crema."*
 
 ## Repository layout
 
 ```
 poio/
-├── SKILL.md                              # Persona, modes, output format (Stage 1 entrypoint)
+├── SKILL.md                              # The base brain: persona, modes, output format
+├── SCOPE.md                              # What's in V1 / V2 / Future / Discarded (canonical)
+├── DECISIONS.md                          # Dated product decisions
+├── VOICE.md                              # Voice, Spanish copy conventions, sound set
 ├── JOURNAL.md                            # Build log — the reasoning behind decisions
 ├── pantry.example.md                     # Pantry template
 ├── references/
 │   ├── regional-context.example.md       # Worked example (Guadalajara / Western Mexico)
+│   ├── equipment.example.md              # Equipment template
 │   └── style-guide.md                    # Flavor families, sauces, assembly patterns
 ├── setup/
-│   └── interview.md                      # Onboarding script (reused across all stages)
-├── stage2/                               # Stage-2 server + laptop-as-device app
-│   ├── server.py                         # JSON API + static host (stdlib only)
-│   ├── web/                              # The encoder companion app, wired to the API
-│   ├── schema/ · data/                   # Stepper-recipe schema, recipes, runtime pantry
-│   ├── README.md                         # Quickstart + API reference
-│   └── PANTRY-MODEL.md                   # Where the pantry lives (and why no keyboard)
+│   └── interview.md                      # Onboarding script (reused by mockup and device)
+├── reference/                            # Recipe schema, pantry model, sample recipes
 ├── hardware/
-│   ├── PLAN.md                           # Stage 3 product direction
-│   ├── UI-LANGUAGE.md                    # The e-paper screen's design language
-│   ├── PROTOTYPE.md                      # Bench parts list / input bake-off rig
+│   ├── PLAN.md                           # Device product direction
+│   ├── UI-LANGUAGE.md                    # The screen's design language
+│   ├── PROTOTYPE.md                      # Color e-paper bench-test plan
 │   └── POiO.3dm                          # Rhino shell model (WIP)
-├── mockups/                              # Device-screen mockups + input friction probes
+├── mockup/                               # Online mockup (coming)
+├── archive/                              # Earlier work, frozen (Stage 2 app, mockups, mono rig)
 ├── assets/                               # Logo, animation, journal images
 ├── LICENSES/                             # Full license texts (Apache-2.0, CERN-OHL-S, CC-BY-SA)
 └── LICENSE                               # Which license covers what
 ```
 
-Personal files (`pantry.md`, `references/regional-context.md`, `references/equipment.md`) are generated by the setup interview on first use and never committed.
+Personal files (`pantry.md`, `references/regional-context.md`, `references/equipment.md`, `poionotas.md`) are generated on first use and never committed.
+
+## Credits
+
+Made by Jaime Ortega.
+
+Angie Arias — product & UX collaborator
 
 ## License
 
