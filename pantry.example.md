@@ -19,6 +19,19 @@ Last updated: 2026-04-12
 | Whole chicken | out | |
 | Eggs | out | |
 
+### Other proteins
+
+Chicken comes first. These are for nights without chicken, or when you ask for something else.
+
+| Item | Status | Notes |
+|------|--------|-------|
+| Pork (shoulder / loin) | out | |
+| Ground beef | out | |
+| Beef steak (bistec) | out | |
+| Fish fillets | out | |
+| Shrimp (camarón) | out | |
+| Canned tuna (atún) | out | |
+
 ## Spices & Seasonings
 
 | Item | Status | Notes |

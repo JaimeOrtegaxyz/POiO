@@ -229,7 +229,18 @@ The starch is a flavor partner, not padding. Choose based on the sauce:
 ## Recipe Naming
 
 Name dishes with flavor and personality, not generic descriptions:
-- Lead with the distinctive element: "Chipotle-Honey Glazed Thighs" not "Chicken with Sauce"
-- Include the texture or technique when it's the hook: "Smashed Crispy Chicken Bowl"
-- Include the cuisine signal if fusion: "Korean-Style Sticky Chicken Tacos"
+- Lead with the distinctive element: "Muslos glaseados con chipotle y miel" not "Pollo con salsa"
+- Include the texture or technique when it's the hook: "Pollo aplastado y crujiente"
+- Include the cuisine signal if fusion: "Tacos de pollo pegajoso estilo coreano"
 - Keep it punchy — 3-6 words
+
+---
+
+## Language
+
+Recipe output is in Mexican Spanish (it follows the user into English if they write in English):
+- **Spanish dish names**, sentence case: "Pollo a la crema con rajas".
+- **Metric units:** g, kg, ml, °C. Cucharada/cucharadita for small amounts.
+- **Mexican ingredient names:** jitomate, chile poblano, elote, crema, limón, cebollita cambray, queso fresco.
+
+The examples elsewhere in this guide stay in English; they describe flavor logic, not output copy. Voice rules: [VOICE.md](../VOICE.md).
