@@ -12,7 +12,7 @@ post-cook diff is computed deterministically from each ingredient's `depletes`.
 The LLM (headless `claude` CLI) is only for generating suggestions / new recipes
 — see ask_llm() — and is off the critical path so the kitchen stays instant.
 
-Run:  python3 stage2/server.py [--port 8781]
+Run:  python3 archive/stage2/server.py [--port 8781]
 """
 import json
 import re

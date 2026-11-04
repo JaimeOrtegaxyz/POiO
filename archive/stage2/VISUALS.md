@@ -1,3 +1,5 @@
+> **Archived Nov 2026.** Taste log for the Stage 2 web app. The Quicksand decision carries forward. The "voice of the chicken" section is superseded by [VOICE.md](../../VOICE.md).
+
 # POiO companion — visuals & interaction notes
 
 Design decisions for the live companion app (`stage2/web/`), and the running log

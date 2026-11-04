@@ -8,8 +8,8 @@ overlay so the prototype is actually cookable — because the real pantry.md shi
 all `out`. In production this overlay is replaced by conversational onboarding.
 
 Run:
-  python3 stage2/bootstrap_pantry.py           # faithful: mirror pantry.md as-is (real bootstrap)
-  python3 stage2/bootstrap_pantry.py --demo     # + demo overlay so a fresh clone is cookable
+  python3 archive/stage2/bootstrap_pantry.py           # faithful: mirror pantry.md as-is (real bootstrap)
+  python3 archive/stage2/bootstrap_pantry.py --demo     # + demo overlay so a fresh clone is cookable
 """
 import json
 import re
@@ -17,7 +17,7 @@ import sys
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent          # repo root
+ROOT = Path(__file__).resolve().parents[2]          # repo root
 # pantry.md is personal, gitignored state — a fresh clone only has the
 # committed template, so fall back to it (they start out identical anyway).
 PANTRY_MD = ROOT / "pantry.md"

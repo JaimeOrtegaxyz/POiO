@@ -1,3 +1,5 @@
+> **Archived Nov 2026.** Local Python prototype that tested the encoder cooking loop on a laptop. Superseded by the online mockup (see SCOPE.md). Reference material moved to [/reference](../../reference/). Run notes below still work from the repo root with `archive/stage2/` paths.
+
 # POiO — Stage-2 server
 
 The brain the e-paper companion talks to. It wraps the poio skill (pantry +
@@ -97,3 +99,28 @@ so it's portable across machines; `GET /api/health` reports whether it's reachab
   without the CLI; only suggestions/generation need it. Fonts are bundled in
   `web/fonts/` — the app is self-contained and works offline (the archival
   `mockups/` still use the Google Fonts CDN; intentional, they're not "what we use").
+
+## Run notes (as archived)
+
+```bash
+python3 archive/stage2/server.py --port 8781    # → http://127.0.0.1:8781/
+```
+
+No dependencies, no API key. A fresh clone starts unprovisioned → first-run screen
+→ "Try a demo pantry" seeds a cookable pantry in one press. The `claude` CLI on
+PATH is optional (only suggestions use it; cooking never touches the LLM).
+Preview onboarding without wiping state: `--first-run`. Port 8781 was the standing
+choice for this app. The archived mockups gallery is separate:
+`python3 -m http.server 8770` from `archive/mockups/`, open `_gallery.html`.
+
+## Known gaps (as archived)
+
+- `POST /api/suggest` returns the deterministic feasible list; the LLM seam
+  (`ask_llm()`, headless `claude` CLI) exists but isn't wired to it.
+- `POST /api/pantry/apply` can add never-seen items (send a `label` instead of a
+  known `item`), but no client calls that yet — the conversational assistant is
+  the intended writer.
+- Re-running `archive/stage2/bootstrap_pantry.py` overwrites `data/pantry.json` —
+  device edits since the last seed are lost. Fine for a prototype; don't rely on it.
+- The conversational pantry bootstrap (interview → real kitchen) has never been
+  run end-to-end; the demo seed is what everyone has cooked against.
