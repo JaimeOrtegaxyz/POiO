@@ -20,12 +20,12 @@
     { "item": "queso-fresco", "display": "queso fresco", "qty": "desmoronado, al final", "group": "Dairy & Finish", "required": false, "depletes": "some" }
   ],
   "steps": [
-    { "n": 1, "text": "Corta ½ cebolla en tiras finas. Calienta 1 cucharada de aceite en la sartén, a fuego medio.", "glyph": "pan", "timerSec": 0, "uses": ["white-onion", "vegetable-oil"] },
-    { "n": 2, "text": "Cocina la cebolla sin prisa. A los 5 min, checkpoint: debe estar suave y apenas dorada.", "glyph": "pan", "timerSec": 300, "uses": [] },
-    { "n": 3, "text": "Agrega los chipotles picados y 1 cucharada del adobo.", "glyph": "pot", "timerSec": 0, "uses": ["chipotle-in-adobo-canned"] },
-    { "n": 4, "text": "Agrega el pollo deshebrado y un chorrito de caldo, a fuego bajo. A los 8 min, checkpoint: el pollo se bebió el caldo.", "glyph": "pot", "timerSec": 480, "uses": ["chicken-thighs-boneless", "chicken-broth-stock"] },
-    { "n": 5, "text": "Sazona con sal. Calienta las tostadas en el comal seco hasta que truenen.", "glyph": "griddle", "timerSec": 0, "uses": ["tostadas", "salt-kosher-table"] },
-    { "n": 6, "text": "Sirve la tinga sobre las tostadas y termina con crema y queso fresco.", "glyph": "bowl", "timerSec": 0, "uses": ["crema-mexican-sour-cream", "queso-fresco"] }
+    { "n": 1, "text": "Corta ½ cebolla en tiras finas. Calienta 1 cucharada de aceite en la sartén, a fuego medio.", "glyph": "pan", "uses": ["white-onion", "vegetable-oil"] },
+    { "n": 2, "text": "Cocina la cebolla sin prisa. A los 5 min, checkpoint: debe estar suave y apenas dorada.", "glyph": "pan", "checkpoint": { "afterSec": 300, "message": "Debe estar suave y apenas dorada." }, "uses": [] },
+    { "n": 3, "text": "Agrega los chipotles picados y 1 cucharada del adobo.", "glyph": "pot", "uses": ["chipotle-in-adobo-canned"] },
+    { "n": 4, "text": "Agrega el pollo deshebrado y un chorrito de caldo, a fuego bajo. A los 8 min, checkpoint: el pollo se bebió el caldo.", "glyph": "pot", "checkpoint": { "afterSec": 480, "message": "El pollo se bebió el caldo." }, "uses": ["chicken-thighs-boneless", "chicken-broth-stock"] },
+    { "n": 5, "text": "Sazona con sal. Calienta las tostadas en el comal seco hasta que truenen.", "glyph": "griddle", "uses": ["tostadas", "salt-kosher-table"] },
+    { "n": 6, "text": "Sirve la tinga sobre las tostadas y termina con crema y queso fresco.", "glyph": "bowl", "uses": ["crema-mexican-sour-cream", "queso-fresco"] }
   ],
   "finish": "Cómelas en cuanto estén: las tostadas se aguadan rápido. Si tienes, un poco de limón y unas rebanadas de aguacate.",
   "notes": [

@@ -6,6 +6,9 @@ What's in scope today lives in [SCOPE.md](SCOPE.md); this file records when and 
 
 ## 2026-11-04
 
+**Recipe schema**
+- Recipe schema: steps carry an optional checkpoint {afterSec, message} instead of a countdown timerSec · supersedes timerSec · decided
+
 **Identity**
 - Name is **POiO**, with no pronunciation notes · — · decided
 - **Chicken-first kitchen companion**: chicken by default; other dishes when the user asks, when there's no chicken in the house, or when learned habits call for it · supersedes "the protein is always chicken" · decided

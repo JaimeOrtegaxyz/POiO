@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://poio.dev/schema/recipe.schema.json",
   "title": "POiO stepper recipe",
-  "description": "Structured recipe the e-paper companion renders and steps through. The human-readable format lives in SKILL.md; this is its machine form. The load-bearing addition over SKILL.md is per-ingredient `depletes`, which lets the server predict the post-cook pantry diff (the encoder control's 'used tonight?' checklist) with no LLM round-trip.",
+  "description": "Structured recipe the device screen (and the online mockup's emulation of it) renders and steps through. The human-readable format lives in SKILL.md; this is its machine form. The load-bearing addition over SKILL.md is per-ingredient `depletes`, which lets the client predict the post-cook pantry diff (the 'used tonight?' checklist) with no LLM round-trip.",
   "type": "object",
   "required": ["id", "name", "vibe", "serves", "time", "ingredients", "steps"],
   "additionalProperties": false,
@@ -79,13 +79,20 @@
         "additionalProperties": false,
         "properties": {
           "n": { "type": "integer", "minimum": 1, "description": "1-based step index" },
-          "text": { "type": "string", "description": "one instruction, imperative, sensory — the 22px line on the panel" },
+          "text": { "type": "string", "description": "one instruction, imperative, sensory — the step-body line on the screen" },
           "glyph": {
             "type": "string",
             "description": "which dithered line-art glyph to show for this step",
             "enum": ["pan", "pot", "griddle", "bowl", "oven", "knife", "none"]
           },
-          "timerSec": { "type": "integer", "minimum": 0, "default": 0, "description": "0 = no timer; else countdown seconds" },
+          "checkpoint": {
+            "type": "object", "required": ["afterSec", "message"], "additionalProperties": false,
+            "description": "When to look and what to check. Never shown as a countdown: afterSec only schedules the checkpoint message and sound.",
+            "properties": {
+              "afterSec": { "type": "integer", "minimum": 1 },
+              "message": { "type": "string", "description": "what to check or do, Mexican Spanish, e.g. 'Revisa que dore.'" }
+            }
+          },
           "uses": {
             "type": "array",
             "items": { "type": "string" },
