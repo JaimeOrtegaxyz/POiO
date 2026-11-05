@@ -1,4 +1,4 @@
-> Reference material carried over from Stage 2. The ideas hold (bootstrap / upkeep / correction, predict-and-confirm, files only seed). Two lines are superseded and marked inline.
+> Reference material carried over from Stage 2. The ideas hold (bootstrap / upkeep / correction, predict-and-confirm, files only seed). Two lines are superseded and marked inline. "Stage-2 server" now reads "hosted brain".
 
 # Where the pantry lives — and why the device never needs a keyboard
 
@@ -16,7 +16,7 @@ not a thing a device owner would ever do. The skill conversation — and the
 device's own confirm loop — *is* the pantry editor.
 
 This isn't a new burden; it falls straight out of the encoder decision. The
-device is a **thin client to the Stage-2 server** (the brain owns the pantry, the
+device is a **thin client to the hosted brain** (the brain owns the pantry, the
 recipes, the skill logic). Since the brain is server-side, the pantry is too — so
 the device needs no file system the user touches, and no keyboard to touch it
 with. That's exactly why the cheap encoder-only device is the right bet: the
@@ -59,7 +59,7 @@ Three ways to get from empty to a stocked pantry, best-first:
 
 ## What this commits the hardware/firmware to
 
-- **The device needs:** a network path to the Stage-2 server, the read + confirm
+- **The device needs:** a network path to the hosted brain, the read + confirm
   UI, and the encoder/tap it already has. That's it.
 - **The device does NOT need:** a keyboard, a user-facing file system, or a text
   editor — ever. ~~A mic or camera are *enhancements* to upkeep and bootstrap, not
