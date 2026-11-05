@@ -32,7 +32,10 @@ const sessionOf = (c: Context) => {
   return /^[a-z0-9-]{8,64}$/i.test(s) ? s : 'anon';
 };
 
-/** Keep event payloads small and scalar: numbers, booleans, short ids. */
+/** String fields an event may carry, each a short lowercase code. Everything else is numbers or flags. */
+const STRING_KEYS = new Set(['variant', 'source', 'kind']);
+
+/** Keep event payloads small and scalar: numbers, booleans, a couple of codes. No free text. */
 function cleanData(raw: unknown): Record<string, string | number | boolean> {
   const out: Record<string, string | number | boolean> = {};
   if (!raw || typeof raw !== 'object') return out;
@@ -40,7 +43,7 @@ function cleanData(raw: unknown): Record<string, string | number | boolean> {
     if (!/^[a-zA-Z_]{1,24}$/.test(k)) continue;
     if (typeof v === 'number' && Number.isFinite(v)) out[k] = v;
     else if (typeof v === 'boolean') out[k] = v;
-    else if (typeof v === 'string' && /^[a-z0-9_-]{1,64}$/i.test(v)) out[k] = v;
+    else if (typeof v === 'string' && STRING_KEYS.has(k) && /^[a-z]{1,12}$/.test(v)) out[k] = v;
   }
   return out;
 }

@@ -61,6 +61,9 @@ export const done: ScreenDef = {
     d.phase = 'line';
     d.enteredAt = app.now();
     d.animFrame = 0;
+    // The recipe is over: checkpoints still pending never fire.
+    app.rt.cook.pending = [];
+    app.rt.cook.fired = [];
     app.sounds.play('finish');
     const r = app.rt.recipe?.recipe;
     if (r) {

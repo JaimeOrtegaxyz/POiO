@@ -83,8 +83,9 @@ export const PROFILES: Record<ProfileId, Profile> = {
       desaturate: 0.4,
       grayLevels: 16,
       colorBits: 4,
-      ink: '#2b2a28',
-      paper: '#d6d3ca',
+      // Both exactly representable at 4 bits per channel, so flat areas stay neutral.
+      ink: '#222222',
+      paper: '#ddddcc',
     },
     // 1448 px wide is already large on screen: 1× by default, 2× optional.
     defaultScale: 1,

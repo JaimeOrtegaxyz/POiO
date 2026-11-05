@@ -64,6 +64,8 @@ function kaleidoPass(buf: PixelBuffer, p: Profile): PixelBuffer {
   const { data: d, width: w, height: h } = buf;
   const inkL = hexToRgb(k.ink).map((v) => SRGB_TO_LINEAR[v]);
   const paperL = hexToRgb(k.paper).map((v) => SRGB_TO_LINEAR[v]);
+  // White balance: the drawing paper is the panel's white, so it maps to on-panel paper exactly.
+  const wp = hexToRgb(p.colors.paper).map((v) => SRGB_TO_LINEAR[v]);
   const block = Math.max(1, Math.round(1 / k.colorScale));
   const levels = k.grayLevels - 1;
   const qmax = (1 << k.colorBits) - 1;
@@ -79,22 +81,23 @@ function kaleidoPass(buf: PixelBuffer, p: Profile): PixelBuffer {
       for (let y = by * block; y < Math.min(h, (by + 1) * block); y++) {
         for (let x = bx * block; x < Math.min(w, (bx + 1) * block); x++) {
           const i = (y * w + x) * 4;
-          r += SRGB_TO_LINEAR[d[i]]; g += SRGB_TO_LINEAR[d[i + 1]]; b += SRGB_TO_LINEAR[d[i + 2]]; n++;
+          r += SRGB_TO_LINEAR[d[i]] / wp[0]; g += SRGB_TO_LINEAR[d[i + 1]] / wp[1]; b += SRGB_TO_LINEAR[d[i + 2]] / wp[2]; n++;
         }
       }
       r /= n; g /= n; b /= n;
-      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b || 1e-4;
+      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
       const o = (by * bw + bx) * 3;
-      tint[o] = 1 + keep * (r / lum - 1);
-      tint[o + 1] = 1 + keep * (g / lum - 1);
-      tint[o + 2] = 1 + keep * (b / lum - 1);
+      if (lum < 0.02) { tint[o] = tint[o + 1] = tint[o + 2] = 1; continue; } // too dark to carry color
+      tint[o] = Math.max(0, 1 + keep * (r / lum - 1));
+      tint[o + 1] = Math.max(0, 1 + keep * (g / lum - 1));
+      tint[o + 2] = Math.max(0, 1 + keep * (b / lum - 1));
     }
   }
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
-      const lr = SRGB_TO_LINEAR[d[i]], lg = SRGB_TO_LINEAR[d[i + 1]], lb = SRGB_TO_LINEAR[d[i + 2]];
+      const lr = SRGB_TO_LINEAR[d[i]] / wp[0], lg = SRGB_TO_LINEAR[d[i + 1]] / wp[1], lb = SRGB_TO_LINEAR[d[i + 2]] / wp[2];
       const lum = 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
       // Gray layer: 16 levels, perceptually spaced, between on-panel ink and paper.
       const t = Math.round(Math.cbrt(Math.min(1, lum)) * levels) / levels;
