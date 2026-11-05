@@ -76,7 +76,12 @@ export class Encoder {
       if (this.isTyping()) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); this.turn(1); }
       else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); this.turn(-1); }
-      else if (e.key === 'Enter' && !e.repeat) { e.preventDefault(); this.press(); }
+      else if (e.key === 'Enter' && !e.repeat) {
+        // Let a focused button (Encender, debug controls) take its own Enter.
+        if (document.activeElement instanceof HTMLButtonElement) return;
+        e.preventDefault();
+        this.press();
+      }
     });
   }
 

@@ -31,7 +31,7 @@ The user message starts with `endpoint: <name>`. Follow that endpoint's contract
 
 - Return one recipe object valid against `reference/recipe.schema.json` (below), for the requested `title`, scaled to the servings given.
 - `id`: slug of the title. `vibe`: one sensory sentence. 4-8 steps, one instruction each, imperative, short enough to read at arm's length (aim for under 140 characters).
-- Steps with a wait carry a `checkpoint` `{afterSec, message}`: `afterSec` is when to look; `message` is what to check, e.g. "Revisa que dore." The step text may say "A los 5 min, checkpoint: ...".
+- Steps with a wait carry a `checkpoint` `{afterSec, message}`: `afterSec` is when to look; `message` is what to check, e.g. "Revisa que dore." Keep times out of the step text: the device never draws a time while cooking and hides any "A los 5 min, checkpoint: ..." clause, so the step text must read complete without it.
 - Every ingredient has `depletes` (none, light, some, heavy, finishes) so the device can predict the pantry diff without asking you. `uses` on each step lists only that step's ingredient keys.
 - `glyph` per step: pan, pot, griddle, bowl, oven or knife.
 - Mark garnish and optional items `required: false`.

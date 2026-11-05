@@ -4,6 +4,158 @@
  * Every string drawn on the emulated screen lives in this file.
  */
 
+import { agree, agreement, joinY, listAgreement, pronoun } from '../../shared/grammar';
+import type { PantryStatus } from '../../shared/pantry';
+
+// ---------------------------------------------------------------------------
+// The screen
+// ---------------------------------------------------------------------------
+
+export const MARK = 'POiO';
+
+/** Masthead contexts. */
+export const CONTEXT = {
+  onboarding: 'Primera vez',
+  choose: 'Para hoy',
+  cookbook: 'Recetario',
+  pantry: 'Despensa',
+  notes: 'Lo que sé de ti',
+};
+
+/** Affordance band: ● = red button, ◎ = encoder. Static glyphs, what the controls do here. */
+export const AFFORD = {
+  onboarding: '● mantén y responde · pulsa para saltar',
+  choose: '● mantén y habla · ◎ gira · pulsa para elegir',
+  intro: '● mantén y habla · pulsa para empezar',
+  check: '● mantén y habla · pulsa si todo está listo',
+  missing: '● mantén y habla · ◎ gira · pulsa para elegir',
+  cook: '● mantén y habla · pulsa: siguiente · ◎ vistazo',
+  cookPeek: '● mantén y habla · pulsa para volver · ◎ vistazo',
+  cookBand: '● mantén y habla · pulsa para quitar el aviso',
+  done: '● mantén y habla · pulsa para seguir',
+  taste: '● di un número · ◎ gira · pulsa para elegir',
+  diff: '● sí o no · ◎ gira · pulsa para marcar',
+  cookbook: '● mantén y habla · ◎ despensa · pulsa para abrir',
+  cookbookEmpty: '● mantén y habla · ◎ despensa',
+  pantry: '● mantén y habla · ◎ gira · pulsa para cambiar',
+  notes: '● mantén y habla · ◎ gira · pulsa para salir',
+};
+
+/** Voice states: static, no motion. */
+export const VOICE_STATE = {
+  listening: 'Te escucho.',
+  thinking: 'Pensando…',
+  notUnderstood: 'No te entendí. Mantén el botón y dilo otra vez.',
+};
+
+export const LIMIT_LINE = 'Por hoy llegué a mi límite. Las recetas guardadas siguen aquí.';
+export const OFFLINE_LINE = 'Sin conexión con el cerebro. Sigo con lo guardado.';
+
+/** Onboarding: four questions, each with its why-line (setup/interview.md). */
+export const ONBOARDING = [
+  { ask: '¿En qué ciudad cocinas?', why: 'Para sugerirte lo que está de temporada y lo que encuentras cerca.' },
+  { ask: '¿Para cuántas personas cocinas normalmente?', why: 'Para ajustar las cantidades.' },
+  { ask: '¿Hay algo que no comas o que no te guste?', why: 'Para no sugerirte algo que vas a descartar.' },
+  { ask: '¿Qué tienes hoy a la mano? Dime unas cosas, o sáltalo.', why: 'Para que la primera receta use lo que ya tienes.' },
+];
+export const progress = (i: number, n: number) => `${i} / ${n}`;
+
+/** Poionotas written from onboarding answers and defaults. */
+export const NOTES = {
+  city: (c: string) => `Cocinas en ${c}.`,
+  servings: (n: number) => `Cocinas para ${n}.`,
+  noRestrictions: 'Sin restricciones. Picante medio.',
+  restriction: (t: string) => (/^no\b/i.test(t.trim()) ? sentence(t) : `No comes: ${t.trim().replace(/[.]+$/, '')}.`),
+  rating: (dish: string, n: number) => `${dish}: ${n}/10.`,
+  checkin: (dish: string, t: string) => `${dish}: ${t.trim().replace(/[.]+$/, '')}.`,
+};
+
+/** "No restrictions" answers to Q3. */
+export const NOTHING_WORDS = ['nada', 'no', 'ninguna', 'ninguno', 'todo', 'como de todo', 'nada en especial', 'no nada'];
+
+export const CHOOSE = {
+  row: (title: string) => title,
+  meta: (minutes: number, difficulty: string) => `${minutes} min · ${difficulty}`,
+};
+
+export const INTRO = {
+  meta: (minutes: number, difficulty: string | undefined, serves: number) =>
+    `${minutes} min${difficulty ? ` · ${difficulty}` : ''} · ${serves} ${serves === 1 ? 'porción' : 'porciones'}`,
+};
+
+export const CHECK = {
+  heading: 'Antes de empezar:',
+  ready: '¿Todo listo?',
+};
+
+export const MISSING = {
+  /** When the brain gives no options: the line and a single way on. */
+  line: (display: string) => `No hay ${display}. Seguimos sin eso; cambia un poco el plato.`,
+  dropFallback: 'Seguir sin eso',
+};
+
+export const COOK = {
+  progress: (n: number, total: number) => `${n} / ${total}`,
+  peek: 'vistazo',
+  /** The checkpoint band: on its own step, or prefixed with the step it belongs to. */
+  checkpointHere: (msg: string) => `Checkpoint · ${msg}`,
+  checkpointOther: (n: number, msg: string) => `Paso ${n} · ${msg}`,
+};
+
+export const DONE = {
+  line: 'Listo. Provecho.',
+  taste: '¿Cómo quedó, del 1 al 10?',
+  skip: 'Saltar',
+  confirm: 'Listo',
+  diffOut: (names: string[]) => {
+    const a = listAgreement(names);
+    return `Usaste ${joinY(names)}. ¿${cap(pronoun(a))} marco como ${agree('agotad', a)}?`;
+  },
+  diffMixed: (names: string[]) => {
+    const a = listAgreement(names);
+    return `Usaste ${joinY(names)}. ¿${cap(pronoun(a))} marco así?`;
+  },
+};
+
+export const STATUS_LABEL: Record<PantryStatus, string> = { plenty: 'hay', low: 'poco', out: 'no hay' };
+export const ASSUMED = 'supuesto';
+
+export const COOKBOOK = {
+  today: 'Hoy:',
+  meta: (minutes: number, difficulty: string) => `${minutes} min · ${difficulty}`,
+  checkin: (dish: string) => {
+    const a = agreement(dish);
+    const art = a.fem ? (a.plural ? 'las' : 'la') : a.plural ? 'los' : 'el';
+    return `¿Qué tal ${art} ${lowerFirst(dish)}?`;
+  },
+};
+
+export const PANTRY = {
+  empty: 'Todavía no sé qué hay. Dime «compré…» o «se acabó…».',
+  more: (n: number) => `y ${n} más`,
+};
+
+export const NOTES_SCREEN = {
+  empty: 'Todavía no sé mucho de ti.',
+  change: '¿Cambio algo?',
+};
+
+/** One-line confirmations. */
+export const REPLY = {
+  noted: 'Anotado.',
+  notedOut: (display: string) => `Anotado: ${display}, ${agree('agotad', agreement(display))}.`,
+  notedLow: (display: string) => `Anotado: queda poco ${display}.`,
+  forgotten: 'Listo, ya no lo tomo en cuenta.',
+  soon: 'Pronto.',
+};
+
+function cap(s: string): string { return s.charAt(0).toUpperCase() + s.slice(1); }
+function lowerFirst(s: string): string { return s.charAt(0).toLowerCase() + s.slice(1); }
+export function sentence(s: string): string {
+  const t = s.trim().replace(/[.!]+$/, '');
+  return t ? `${cap(t)}.` : '';
+}
+
 // ---------------------------------------------------------------------------
 // Device chrome (DOM around the screen)
 // ---------------------------------------------------------------------------
