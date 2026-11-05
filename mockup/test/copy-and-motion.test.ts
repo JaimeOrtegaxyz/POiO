@@ -48,6 +48,7 @@ describe('screen copy (B-C voice, Mexican Spanish)', () => {
     expect(copy.DONE.taste).toBe('¿Cómo quedó, del 1 al 10?');
     expect(copy.VOICE_STATE).toEqual({ listening: 'Te escucho.', thinking: 'Pensando…', notUnderstood: 'No te entendí. Mantén el botón y dilo otra vez.' });
     expect(copy.CHECK.heading).toBe('Antes de empezar:');
+    expect(copy.COOK.checkpointHere('Revisa el pollo.')).toBe('Ojo · Revisa el pollo.');
     expect(copy.REPLY.forgotten).toBe('Listo, ya no lo tomo en cuenta.');
     expect(copy.DEVICE.typedPlaceholder).toBe('Escribe en lugar de hablar');
     expect(copy.ONBOARDING.map((q) => q.ask)).toEqual([

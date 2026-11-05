@@ -98,7 +98,7 @@ export const COOK = {
   progress: (n: number, total: number) => `${n} / ${total}`,
   peek: 'vistazo',
   /** The checkpoint band: on its own step, or prefixed with the step it belongs to. */
-  checkpointHere: (msg: string) => `Checkpoint · ${msg}`,
+  checkpointHere: (msg: string) => `Ojo · ${msg}`,
   checkpointOther: (n: number, msg: string) => `Paso ${n} · ${msg}`,
 };
 
