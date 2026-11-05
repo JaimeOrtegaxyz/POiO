@@ -9,7 +9,7 @@ Lineage: the grammar started in the archived [`eink-glance/`](../archive/mockups
 - **Color e-paper, panel TBD** (picked by the [bench test](PROTOTYPE.md)). Size, resolution, color depth and repaint times get filled in once the panel is chosen.
 - Read at **arm's length** on a kitchen counter, often mid-task. Type is big, density is low.
 - **Always on.** When nothing is cooking, it shows the open cookbook screen.
-- No keyboard, no pointer, no hover. Inputs: **voice** (push-to-talk on the **red button**) and the **encoder** (rotate to browse, press to select or step).
+- No keyboard, no pointer, no hover. Inputs: **voice** (hold the **red star knob** to talk) and the same knob as an **encoder** (rotate to browse, press to select or step), plus two pills either side (back, home; provisional).
 
 ## First principles
 
@@ -18,7 +18,7 @@ Lineage: the grammar started in the archived [`eink-glance/`](../archive/mockups
 3. **Type does most of the hierarchy.** Two typefaces, set against each other.
 4. **Status is color plus pattern**, never color alone.
 5. **Discrete repaints by default.** No spinners, ever.
-6. **One job per screen.** Each screen does one thing; you move between them with the encoder or by voice.
+6. **One job per screen.** Each screen does one thing; you move between them with the knob or by voice.
 7. **Sparse by default.** Show the essentials and nothing more. Add an element only when something genuinely feels missing in use — never to fill space. It's easier to add later than to claw density back. When in doubt, leave it out.
 
 ## Color
@@ -78,7 +78,7 @@ Three bands:
 
 - **Masthead-lite.** Small POiO mark, the current context (dish name / "Despensa" / "Lista"), meta in mono on the right. No clock: time isn't shown.
 - **Body is the screen.** One job.
-- **Affordances band.** Static glyphs label what the red button and the encoder do *here*.
+- **Affordances band.** Static glyphs label what the star knob does *here*: ● = hold to talk, ◎ = turn, "pulsa" = a short press.
 
 ### The open cookbook screen
 
@@ -97,7 +97,7 @@ The primary cooking screen. One step per screen:
 - The instruction in the step-body size, the largest comfortable reading size.
 - Only the ingredients/quantities relevant to *this* step, with status markers if stock matters.
 - **Checkpoints instead of a timer cue.** No time on screen and no countdown. When a checkpoint arrives, the step shows its message ("Voltea el pollo.") and the checkpoint sound plays.
-- The advance verb is **encoder press** or saying **"siguiente"**; the affordance band says so.
+- The advance verb is **knob press** or saying **"siguiente"**; the affordance band says so.
 
 ## Voice-state feedback
 
@@ -106,7 +106,7 @@ Text plus sound, never motion:
 | State | Screen | Sound |
 |---|---|---|
 | Idle | Whatever screen you're on | — |
-| Listening (red button held) | A static listening state; LED by the button on | Press tick |
+| Listening (star knob held) | A static listening state; LED by the knob on | Press tick |
 | Thinking (button released) | A static "thinking" state | Release tick |
 | Didn't understand | "No te entendí. Mantén el botón y dilo otra vez." | "Didn't understand" sound |
 | Answered | The resulting screen, repainted once | — |
@@ -129,12 +129,14 @@ Generic rules; panel-specific numbers TBD after the bench test.
 
 | Control | Does |
 |---|---|
-| **Voice** (while the red button is held) | Free input: ask, tweak, "siguiente", "se acabó el X", "¿qué sabes de mí?" |
-| **Red button** | Push-to-talk: hold while speaking, release when done |
-| **Encoder rotate** | Browse: options, steps, lists |
-| **Encoder press** | Select / advance a step / confirm |
+| **Voice** (while the star knob is held) | Free input: ask, tweak, "siguiente", "se acabó el X", "¿qué sabes de mí?" |
+| **Star knob hold** | Push-to-talk: hold while speaking, release when done |
+| **Star knob rotate** | Browse: options, steps, lists |
+| **Star knob press** | Select / advance a step / confirm |
+| **Left pill** | Back *(provisional, pending the bench test)* |
+| **Right pill** | Home: the cookbook *(provisional, pending the bench test)* |
 
-State lives in the screen, not in a cursor. Selection is shown by **inversion or a solid caret**, not a hover color. A back control is added only if the bench test shows a need.
+State lives in the screen, not in a cursor. Selection is shown by **inversion or a solid caret**, not a hover color. The front layout (red star knob center, pills either side) is in [`PLAN.md`](PLAN.md#form-factor).
 
 ## Adaptive UI
 

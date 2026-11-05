@@ -6,7 +6,7 @@ Notes and plan for running POiO on a physical device in the kitchen. What's in V
 
 ## Direction
 
-A chicken-shaped, always-on countertop companion. A **color e-paper** screen (the leading option; panel TBD after the [bench test](PROTOTYPE.md)), a **red push-to-talk button** and an **encoder**, a mic, and a speaker with a small set of learnable sounds. It never speaks. The V1 device is a thin client to a hosted brain.
+A chicken-shaped, always-on countertop companion. A **color e-paper** screen (the leading option; panel TBD after the [bench test](PROTOTYPE.md)), a **red star knob** (turn, press, hold to talk) between two small pills, a mic, and a speaker with a small set of learnable sounds. It never speaks. The V1 device is a thin client to a hosted brain.
 
 Not the wall-mounted ambient glance device the earliest plan called for, and no longer the palm-sized mono companion of mid-2026 (see [Earlier direction](#earlier-direction-archived) below).
 
@@ -23,9 +23,11 @@ What this means for the design now: **keep the brain swappable.** The device tal
 Chicken-shaped; size and proportions per [`POiO.3dm`](POiO.3dm). 3D-printed shell for the prototype, injection-molded for volume. A render gets added to `assets/` once one is exported.
 
 Elements:
-- Color e-paper screen, front and center
-- **Red button** (the old "eye"): push-to-talk, with a listening LED beside it
-- Rotary encoder with push
+- Color e-paper screen, front and center, in a recessed rounded frame
+- One row of controls under the screen, centered (per the Rhino render):
+  - **Red star knob** in the middle: six soft points, raised, a slightly darker red than the brand red. A rotary encoder with push, and the push is also push-to-talk. It replaces the separate red button (the old "eye"); a listening LED sits beside it
+  - A small yellow **pill button** on each side, level with the knob: left = back, right = home (the cookbook). *Functions provisional, pending the bench test*
+- "POiO" wordmark under the controls
 - Mic port
 - Speaker grille
 - USB-C power
@@ -46,10 +48,10 @@ ESP32-S3 class, likely with PSRAM (a color framebuffer plus audio capture buffer
 
 ### Input
 
-- **Voice, via push-to-talk on the red button.** Hold while speaking, release when done. Required: the device doesn't work without it. The fine details (feel, length limits, edge cases) are open.
-- **Rotary encoder with push.** Rotate to browse, press to select or step. Not a free-input path.
+- **The red star knob: a rotary encoder with push, and the push-to-talk.** Rotate to browse. A short press selects or steps. **Holding** it is push-to-talk: hold while speaking, release when done. Voice is required: the device doesn't work without it. The firmware tells a press from a hold by time (the mockup uses 300 ms), so listening starts a beat after the knob goes down. The fine details (hold threshold, feel, length limits, edge cases) are open.
+- **Two pill buttons**, either side of the knob: **back** (left) and **home**, the cookbook (right). *Provisional*: the bench test decides whether they keep these jobs, or whether voice and the knob cover them.
 
-Parked in Future: tap-to-advance, side thumbwheel, capacitive slider, extra tactile buttons. A back button gets added only if the bench test shows it's needed.
+Parked in Future: tap-to-advance, side thumbwheel, capacitive slider, more tactile buttons.
 
 ### Mic
 
@@ -69,7 +71,7 @@ Cut: ambient hen noises and frantic timer clucking.
 
 ### LEDs
 
-A listening indicator by the red button. Nothing else.
+A listening indicator by the red star knob. Nothing else.
 
 ### PIR
 
@@ -90,7 +92,7 @@ BOM and price come after the panel is picked.
 ## Firmware shape
 
 - ESP32-S3, Arduino or ESP-IDF.
-- **The display driver sits behind a seam**: one isolated module behind a clean interface, with audio, the voice capture path, the recipe state machine and encoder/button handling on top. The driver library depends on the panel (SPI color panels and parallel-driven color-filter panels use different stacks), which is exactly why the seam matters.
+- **The display driver sits behind a seam**: one isolated module behind a clean interface, with audio, the voice capture path, the recipe state machine and knob/pill handling on top. The driver library depends on the panel (SPI color panels and parallel-driven color-filter panels use different stacks), which is exactly why the seam matters.
 - Talks HTTPS/JSON to the hosted brain. The device is a thin client; the brain, the pantry and the poionotas live behind that boundary.
 - Wi-Fi setup is a V1 must-have; the method (captive portal vs BLE) is open.
 - Recipe data follows [`reference/recipe.schema.json`](../reference/recipe.schema.json).

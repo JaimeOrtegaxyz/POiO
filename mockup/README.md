@@ -1,8 +1,9 @@
 # POiO online mockup (first local build)
 
-A browser emulation of the POiO device: a yellow bezel around a color e-paper
-screen at real resolution and palette, a red push-to-talk button with its LED,
-and an encoder. Voice in; text and a few sounds out, never speech. A small Node
+A browser emulation of the POiO device's face (after the Rhino render): a matte
+yellow panel with a color e-paper screen at real resolution and palette in a
+recessed frame, and one row of controls under it: a back pill, the red star knob
+(turn, press, hold to talk) with its LED, and a home pill. Voice in; text and a few sounds out, never speech. A small Node
 server holds the Anthropic API key and runs the `SKILL.md` brain. Device state
 lives in the browser's localStorage: the device works without the app.
 
@@ -38,13 +39,23 @@ same.
 
 ## Controls
 
-| Device | Keyboard / mouse | Does |
+The red star knob is one part: the encoder and the push-to-talk. A press shorter
+than 300 ms is a press; past 300 ms without turning, it's a hold and listening
+starts. The star turns one detent per step.
+
+| Device | Keyboard / mouse / touch | Does |
 |---|---|---|
-| Red button (hold) | hold the button, or hold **Space** (field not focused) | Push-to-talk, `es-MX`. Release to send. Under 300 ms or silence = "No te entendí". |
-| Typed fallback | the field under the device, **Enter** | Same as releasing the button with that text. |
-| Encoder rotate | mouse wheel, **arrow keys**, or drag the knob up/down | Browse, move the selection, peek at steps. |
-| Encoder press | **Enter** or click the knob | Select, advance, skip, confirm. |
+| Star knob: turn | **← → ↑ ↓**, mouse wheel (over the knob or the screen), or drag around the knob | Browse, move the selection, peek at steps. |
+| Star knob: press | **Enter**, or a click/tap on the knob | Select, advance, skip, confirm. |
+| Star knob: hold | hold **Space**, or hold the knob (mouse or touch) | Push-to-talk, `es-MX`. Release to send. Space under 300 ms or silence = "No te entendí". |
+| Left pill | **Esc** or **Backspace**, or click it | Back: what saying "atrás" does here; clears a band first. *Provisional.* |
+| Right pill | **H**, or click it | Home: the cookbook. Leaves a recipe (drops its checkpoints). Ignored during the first-run questions. *Provisional.* |
+| Typed fallback | the field under the device, **Enter** (Esc leaves the field) | Same as releasing the knob with that text. |
 | Power | **Encender / Apagar** | A session runs from turn-on to turn-off (or 12 h idle). |
+
+Keys are ignored while the typed field has focus, and with Ctrl/Cmd/Alt held.
+The pill functions are provisional until the bench test
+([`hardware/PROTOTYPE.md`](../hardware/PROTOTYPE.md)).
 
 Things to say (the local parser catches these with no tokens): `siguiente`,
 `listo`, `ya`, `atrás`, `otras`, `ninguna`, `la primera`, `2`, `sáltalo`,

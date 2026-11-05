@@ -18,7 +18,7 @@ Voice/copy/sounds: [`VOICE.md`](VOICE.md).
    loop feels right; see `mockup/README.md` → "Not yet".
 3. **Device** — *direction set, nothing ordered.* Color e-paper (panel TBD; the
    bench test in `hardware/PROTOTYPE.md` is next), voice via push-to-talk on the
-   red button + encoder, always-on, thin client to the hosted brain. Shell model
+   red star knob (turn, press, hold to talk) between back/home pills, always-on, thin client to the hosted brain. Shell model
    in `hardware/POiO.3dm`. Direction: `hardware/PLAN.md`; screen language:
    `hardware/UI-LANGUAGE.md`.
 4. **On-device brain** — *the endgame, not buildable yet.* Everything before it

@@ -22,6 +22,7 @@ What's in scope today lives in [SCOPE.md](SCOPE.md); this file records when and 
 - Output is on-screen text plus a small set of learnable sounds. **Never speech (no TTS)** · supersedes "on-device TTS is a v2 question" · decided
 
 **Input**
+- **Front layout** (Nov 4, 2026): red star knob center (rotate, press, hold-to-talk), back and home pills either side, per the Rhino render. The red button and the encoder are one part: a short press selects or steps, a hold is push-to-talk. Pill functions (left back, right home) are provisional, pending the bench test · supersedes a separate red button plus encoder, and "a back button only if the bench test shows it's needed" · decided layout; pill functions open, pending bench test
 - **Voice is required.** Push-to-talk on the **red button**: hold while speaking, release when done · supersedes "voice undecided, never required" (2026-07) · decided; fine details open
 - The **encoder** (rotate + press) browses, selects and steps; it isn't a free-input path · — · decided
 - The old "eye" *is* the red button; no separate wake/power button · supersedes "eye = power/wake" · decided

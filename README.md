@@ -54,7 +54,7 @@ A hosted web app: Google login, the Anthropic API behind it, text-first, with vo
 
 ### 3. Device
 
-Chicken-shaped (size and proportions per [`hardware/POiO.3dm`](hardware/POiO.3dm)), always-on, on the counter. A color e-paper screen (the leading option; panel TBD after a bench test), a red push-to-talk button and an encoder. It answers with text and a few sounds, never speech. V1 is a thin client to the hosted brain.
+Chicken-shaped (size and proportions per [`hardware/POiO.3dm`](hardware/POiO.3dm)), always-on, on the counter. A color e-paper screen (the leading option; panel TBD after a bench test), and under it a red star knob (turn, press, hold to talk) between two small pills. It answers with text and a few sounds, never speech. V1 is a thin client to the hosted brain.
 
 See [`hardware/PLAN.md`](hardware/PLAN.md) for the product direction, [`hardware/UI-LANGUAGE.md`](hardware/UI-LANGUAGE.md) for the screen's design language, and [`hardware/PROTOTYPE.md`](hardware/PROTOTYPE.md) for the bench-test plan.
 

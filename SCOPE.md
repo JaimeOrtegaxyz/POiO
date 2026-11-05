@@ -6,7 +6,7 @@ Source of truth for what's in V1, V2, Future and Discarded. Figma is for explori
 
 - A chicken-first kitchen companion: chicken by default, other dishes when you ask, when there's no chicken in the house, or when your habits call for it.
 - An always-on countertop device with a color e-paper screen (panel TBD).
-- You speak (push-to-talk on the red button) and it answers with text on screen and a few sounds. Never speech.
+- You speak (hold the red star knob to talk) and it answers with text on screen and a few sounds. Never speech.
 
 ## Phases
 
@@ -40,7 +40,7 @@ From someone cooking for themselves on weeknights up to the person who cooks for
 | **Onboarding** | First run: four questions, each answerable by voice and skippable, each with a one-line reason, then three options right away. After the first cook: ten more topics surfaced one or two at a time, or all at once on "pregúntame todo". No hard gate, never re-asks what it knows, every answer changeable by asking. Questions, reasons and defaults: [`setup/interview.md`](setup/interview.md#first-run). |
 | **Choosing** | Three options, each title · time · difficulty. No commentary, no narrowing follow-up. Discard = three new options, no comment, logged as a taste signal. |
 | **Missing ingredient** | Short practical options: skip it, or substitute it, each with its trade-off. |
-| **Cooking** | Ingredient check before the first step. Then step by step (encoder press or "siguiente" to advance). No running countdown and no time on screen: **checkpoints** only, a message ("voltea el pollo", "revisa que dore") plus the checkpoint sound. "Se acabó el X" / "we're out of X" is logged by voice mid-cook. |
+| **Cooking** | Ingredient check before the first step. Then step by step (knob press or "siguiente" to advance). No running countdown and no time on screen: **checkpoints** only, a message ("voltea el pollo", "revisa que dore") plus the checkpoint sound. "Se acabó el X" / "we're out of X" is logged by voice mid-cook. |
 | **Finish** | One cluck, then silence. One optional taste question by voice ("¿Cómo quedó, del 1 al 10?"). Then the predicted pantry diff to confirm. |
 | **Learning** | **Poionotas**: what POiO knows about you, visible and editable by asking ("¿qué sabes de mí?"). Discards count as a taste signal. Check-ins live on the cookbook screen. Habit learning starts with the mockup (see V2). |
 | **Pantry** | Context, not a requirement: POiO suggests with whatever it knows. Fridge/receipt photos come through the app. Kept current by the predicted post-cook diff and "se acabó" by voice. |
@@ -55,8 +55,9 @@ Details in [`hardware/PLAN.md`](hardware/PLAN.md).
 
 - Color e-paper screen (panel TBD after the [bench test](hardware/PROTOTYPE.md))
 - Mic
-- Red push-to-talk button with a listening LED
-- Encoder (rotate + press)
+- One row of controls under the screen, per the Rhino render:
+  - **Red star knob**, center: rotate to browse, press to select or step, **hold to talk** (push-to-talk). One part: it replaces the separate red button and encoder. Listening LED beside it
+  - **Two yellow pills**, either side: back (left), home / the cookbook (right). *Functions provisional, pending the bench test*
 - Speaker
 - Mains / USB-C power, always-on
 - No camera, no PIR
@@ -119,7 +120,8 @@ Details in [`hardware/PLAN.md`](hardware/PLAN.md).
 - **On-device LLM feasibility.** When a small model is good, fast and cheap enough to live in the shell.
 - **Photo transfer without the app.** Bluetooth/AirDrop-like transfer straight to the device.
 - **Batch cooking.** Whether and how to support it; probe in the mockup.
-- **Push-to-talk details.** Hold/release feel, max length, what happens on a too-short press.
+- **Push-to-talk details.** Hold/release feel, max length, what happens on a too-short press. Talk now rides on the star knob's hold, so also: the press/hold threshold (300 ms in the mockup).
+- **Pill functions.** Back (left) and home (right) are provisional. The bench test decides if they keep those jobs, or whether the knob and voice cover them.
 - **How proactive is too proactive.** Frequency and tone of suggestions and check-ins.
 - **Sound design.** Final sounds are Jaime's call.
 - **Product render.** To be exported from [`hardware/POiO.3dm`](hardware/POiO.3dm) into `assets/`.

@@ -2,7 +2,7 @@
   "name": "poio-mockup",
   "version": "0.1.0",
   "private": true,
-  "description": "POiO online mockup: a browser emulation of the device (color e-paper screen, red push-to-talk button, encoder) driven by a small brain proxy.",
+  "description": "POiO online mockup: a browser emulation of the device (color e-paper screen, red star knob that turns, presses and holds to talk, back and home pills) driven by a small brain proxy.",
   "license": "Apache-2.0",
   "type": "module",
   "engines": {
