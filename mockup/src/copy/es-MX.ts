@@ -5,6 +5,23 @@
  */
 
 // ---------------------------------------------------------------------------
+// Device chrome (DOM around the screen)
+// ---------------------------------------------------------------------------
+
+export const DEVICE = {
+  powerOn: 'Encender',
+  powerOff: 'Apagar',
+  typedPlaceholder: 'Escribe en lugar de hablar',
+  typedHint: 'Enter para enviar',
+  pttLabel: 'Mantén para hablar (o la barra espaciadora)',
+  knobLabel: 'Perilla: rueda o flechas para girar, Enter o clic para pulsar',
+  noSpeech: 'Este navegador no reconoce voz. Escribe abajo, funciona igual.',
+  demoMode: 'modo demo',
+  usageLine: (sessionK: string, capK: string, dayUsd: string, monthUsd: string, monthCap: string) =>
+    `Sesión ${sessionK} / ${capK} tokens · Hoy US$${dayUsd} · Mes US$${monthUsd} / US$${monthCap}`,
+};
+
+// ---------------------------------------------------------------------------
 // Pantry names
 // ---------------------------------------------------------------------------
 

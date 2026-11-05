@@ -1,2 +1,58 @@
-/* Page and device chrome. The e-paper screen itself is a canvas, never DOM. */
-body { margin: 0; background: #ddd8cc; font-family: 'Quicksand', system-ui, sans-serif; }
+/*
+ * Page and device chrome. The e-paper screen itself is a canvas, never DOM.
+ * No CSS animations or transitions anywhere: the only motion on the page is
+ * the refresh emulation (discrete repaints) and variant a's frame repaints.
+ */
+:root {
+  --ink: #1a1816;
+  --paper: #f4efe4;
+  --yellow: #e9c92a;
+  --yellow-deep: #d4b31c;
+  --red: #b8322a;
+  --page: #e6e1d6;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Quicksand', system-ui, sans-serif; }
+.page { min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; gap: 24px; padding: 40px 24px; }
+.stage { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+.device { position: relative; display: flex; align-items: center; gap: 22px; padding: 28px 30px 28px 28px;
+  background: var(--yellow); border-radius: 44px; box-shadow: inset 0 -6px 0 var(--yellow-deep), 0 18px 40px rgba(26, 24, 22, 0.18); }
+.bezel { background: #2a2724; padding: 10px; border-radius: 14px; line-height: 0; }
+.screen { display: block; image-rendering: pixelated; image-rendering: crisp-edges; background: var(--paper); }
+
+.controls { display: flex; flex-direction: column; align-items: center; gap: 34px; }
+.ptt-wrap { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.led { width: 10px; height: 10px; border-radius: 50%; background: #6b5d1a; box-shadow: inset 0 1px 2px rgba(0,0,0,.4); }
+.led.on { background: #ff3b2a; box-shadow: 0 0 10px 3px rgba(255, 59, 42, 0.7); }
+.ptt { width: 74px; height: 74px; border-radius: 50%; border: none; background: var(--red); cursor: pointer;
+  box-shadow: inset 0 -6px 0 #8f241e, 0 4px 0 rgba(0,0,0,.18); touch-action: none; }
+.ptt.held { box-shadow: inset 0 2px 4px #8f241e; transform: translateY(3px); }
+.ptt:focus-visible, .power:focus-visible, .typed:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+.knob { width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #3a3632, #1d1b19);
+  box-shadow: 0 4px 0 rgba(0,0,0,.25); cursor: ns-resize; touch-action: none; display: grid; place-items: center; }
+.knob.pressed { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.25); }
+.knob-dial { width: 100%; height: 100%; position: relative; }
+.knob-mark { position: absolute; left: 50%; top: 8px; width: 4px; height: 14px; margin-left: -2px; border-radius: 2px; background: var(--paper); }
+
+.power { position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); font: 600 14px 'Quicksand', sans-serif;
+  padding: 6px 18px; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.power.off-state { background: var(--ink); color: var(--paper); }
+
+.under { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px; width: 100%; }
+.typed-row { display: flex; align-items: center; gap: 10px; }
+.typed { width: 420px; max-width: 70vw; font: 600 16px 'Quicksand', sans-serif; padding: 9px 14px; border-radius: 10px;
+  border: 2px solid var(--ink); background: var(--paper); color: var(--ink); }
+.typed-hint { font: 500 12px 'JetBrains Mono', monospace; opacity: .6; }
+.notice { font: 600 14px 'Quicksand', sans-serif; min-height: 1.2em; }
+.usage { font: 500 12px 'JetBrains Mono', monospace; letter-spacing: .02em; opacity: .8; }
+
+.debug { width: 300px; font: 500 12px 'JetBrains Mono', monospace; background: #fffdf8; border: 2px solid var(--ink); border-radius: 12px; padding: 12px 14px; }
+.debug h2 { font: 700 13px 'JetBrains Mono', monospace; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .08em; }
+.debug label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0; }
+.debug select, .debug input, .debug button { font: inherit; }
+.debug button { padding: 3px 8px; border: 1.5px solid var(--ink); background: var(--paper); border-radius: 6px; cursor: pointer; }
+.debug .row { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+.debug pre { white-space: pre-wrap; word-break: break-word; max-height: 180px; overflow: auto; background: #f4efe4; padding: 6px; border-radius: 6px; margin: 4px 0 10px; }
+.debug .badge { display: inline-block; padding: 1px 6px; border-radius: 4px; background: var(--ink); color: var(--paper); }
