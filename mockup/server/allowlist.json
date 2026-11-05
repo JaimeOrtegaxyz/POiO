@@ -1,0 +1,14 @@
+{
+  "prompt": [
+    "SKILL.md",
+    "VOICE.md",
+    "references/style-guide.md",
+    "reference/recipe.schema.json",
+    "pantry.example.md"
+  ],
+  "fixtures": [
+    "reference/recipes/tinga-de-pollo.json",
+    "reference/recipes/pollo-a-la-crema-con-rajas.json",
+    "reference/recipes/gochujang-glazed-thighs.json"
+  ]
+}

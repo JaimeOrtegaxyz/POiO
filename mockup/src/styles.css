@@ -1,0 +1,2 @@
+/* Page and device chrome. The e-paper screen itself is a canvas, never DOM. */
+body { margin: 0; background: #ddd8cc; font-family: 'Quicksand', system-ui, sans-serif; }

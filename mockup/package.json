@@ -1,0 +1,35 @@
+{
+  "name": "poio-mockup",
+  "version": "0.1.0",
+  "private": true,
+  "description": "POiO online mockup: a browser emulation of the device (color e-paper screen, red push-to-talk button, encoder) driven by a small brain proxy.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c yellow,red \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "tsx watch server/index.ts",
+    "dev:web": "vite",
+    "build": "tsc --noEmit && vite build && node scripts/copy-brain.mjs",
+    "start": "npm run build && POIO_STATIC_DIR=dist POIO_BRAIN_DIR=dist/brain tsx server/index.ts",
+    "serve": "POIO_STATIC_DIR=dist POIO_BRAIN_DIR=dist/brain tsx server/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.5.0",
+    "@hono/node-server": "^2.1.6",
+    "ajv": "^8.20.0",
+    "hono": "^4.13.16",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "concurrently": "^10.0.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}
