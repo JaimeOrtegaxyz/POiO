@@ -4,6 +4,8 @@
  * device powered off; the Encender click also unlocks audio.
  */
 import type { UsageSummary } from '../shared/types';
+import { EventLog } from './ab/events';
+import { assignVariant } from './ab/variant';
 import { Api } from './api';
 import { Sounds } from './audio/sounds';
 import { DEVICE } from './copy/es-MX';
@@ -40,8 +42,15 @@ async function boot(): Promise<void> {
   const api = new Api();
   const sounds = new Sounds();
   sounds.muted = state.settings.muted;
+
+  // A/B: random per device, ?variant=a|b overrides.
+  const assigned = assignVariant(state.variant, location.search);
+  state.variant = assigned.variant;
   const app = new App(state, screen, api, sounds);
   app.save();
+  const events = new EventLog(api, () => app.state.deviceId, () => app.variant);
+  app.track = (type, data) => events.log(type, data);
+  if (assigned.changed) events.log('variant', { variant: assigned.variant, source: assigned.source });
 
   const typing = () => {
     const a = document.activeElement;
@@ -99,8 +108,8 @@ async function boot(): Promise<void> {
   if (params.get('debug') === '1') {
     debugUpdate = initDebug(dom.debug, app, {
       usage: () => usage,
-      events: () => [],
-      setVariant: (v) => { app.state.variant = v; app.save(); },
+      events: () => events.tail(),
+      setVariant: (v) => { app.state.variant = v; app.save(); events.log('variant', { variant: v, source: 'debug' }); },
     });
     app.onRendered = () => debugUpdate?.();
   }

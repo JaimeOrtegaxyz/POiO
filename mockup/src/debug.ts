@@ -74,6 +74,7 @@ export function initDebug(host: HTMLElement, app: App, src: DebugSources): () =>
   q<HTMLButtonElement>('reset').onclick = () => {
     if (!confirm('Reset this device? Pantry, poionotas and history are cleared.')) return;
     clearState();
+    localStorage.removeItem('poio.events.v1');
     location.reload();
   };
 
