@@ -22,7 +22,10 @@ export const CONTEXT = {
   notes: 'Lo que sé de ti',
 };
 
-/** Affordance band: ● = red button, ◎ = encoder. Static glyphs, what the controls do here. */
+/**
+ * Affordance band: ● = hold the red star knob (talk), ◎ = turn it; "pulsa"
+ * is a short press of the same knob. Static glyphs, what the controls do here.
+ */
 export const AFFORD = {
   onboarding: '● mantén y responde · pulsa para saltar',
   choose: '● mantén y habla · ◎ gira · pulsa para elegir',
@@ -165,8 +168,10 @@ export const DEVICE = {
   powerOff: 'Apagar',
   typedPlaceholder: 'Escribe en lugar de hablar',
   typedHint: 'Enter para enviar',
-  pttLabel: 'Mantén para hablar (o la barra espaciadora)',
-  knobLabel: 'Perilla: rueda o flechas para girar, Enter o clic para pulsar',
+  knobLabel: 'Estrella: gira con la rueda o las flechas, pulsa con clic o Enter, mantén para hablar (o la barra espaciadora)',
+  backLabel: 'Atrás (Esc)',
+  homeLabel: 'Recetario (H)',
+  controlsLine: 'Estrella: gira, pulsa o mantén para hablar · izquierdo: atrás · derecho: recetario',
   noSpeech: 'Este navegador no reconoce voz. Escribe abajo, funciona igual.',
   demoMode: 'modo demo',
   usageLine: (sessionK: string, capK: string, dayUsd: string, monthUsd: string, monthCap: string) =>

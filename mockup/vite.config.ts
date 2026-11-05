@@ -10,9 +10,10 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: { '/api': `http://localhost:${apiPort}` },
-    // The client imports exactly one file from outside mockup/: the committed
-    // pantry template (item keys). Nothing else in the repo is reachable.
-    fs: { allow: [here, join(here, '..', 'pantry.example.md')] },
+    // The client imports exactly two files from outside mockup/: the committed
+    // pantry template (item keys) and the wordmark on the device face.
+    // Nothing else in the repo is reachable.
+    fs: { allow: [here, join(here, '..', 'pantry.example.md'), join(here, '..', 'assets', 'logo-bw.svg')] },
   },
   build: { outDir: 'dist', emptyOutDir: true },
   test: {

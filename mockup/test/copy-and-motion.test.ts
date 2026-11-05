@@ -69,9 +69,12 @@ describe('screen copy (B-C voice, Mexican Spanish)', () => {
 });
 
 describe('no motion while pending', () => {
-  it('no CSS animations or transitions', () => {
+  it('no CSS animations, and one transition only: the star knob turning a detent', () => {
     const css = walk(join(MOCKUP_DIR, 'src')).filter((f) => f.endsWith('.css')).map((f) => readFileSync(f, 'utf8')).join('\n');
-    expect(css).not.toMatch(/@keyframes|animation\s*:|transition\s*:/);
+    expect(css).not.toMatch(/@keyframes|animation\s*:/);
+    const transitions = [...css.matchAll(/([^{}]*)\{[^}]*transition\s*:\s*([^;}]*)/g)].map((m) => ({ sel: m[1].trim(), value: m[2].trim() }));
+    const moving = transitions.filter((t) => t.value !== 'none');
+    expect(moving).toEqual([{ sel: '.knob-turn', value: 'transform 110ms ease-out' }]);
   });
 
   it('no requestAnimationFrame loops anywhere in the client', () => {

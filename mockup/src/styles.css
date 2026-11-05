@@ -1,52 +1,105 @@
 /*
  * Page and device chrome. The e-paper screen itself is a canvas, never DOM.
- * No CSS animations or transitions anywhere: the only motion on the page is
- * the refresh emulation (discrete repaints) and variant a's frame repaints.
+ * No CSS animations anywhere and one transition only: the star knob's short
+ * turn per detent (device chrome answering a hand, never the screen, never
+ * a loop). The screen's only motion is the refresh emulation (discrete
+ * repaints) and variant a's frame repaints.
+ *
+ * The face follows the Rhino render (hardware/POiO.3dm): matte warm yellow,
+ * the screen in a recessed frame, one row of controls under it.
  */
 :root {
   --ink: #1a1816;
   --paper: #f4efe4;
-  --yellow: #e9c92a;
-  --yellow-deep: #d4b31c;
-  --red: #b8322a;
-  --page: #e6e1d6;
+  --yellow: #f7d466;
+  --yellow-hi: #fbe08c;
+  --yellow-lo: #efc350;
+  --yellow-deep: #d9a93a;
+  --red: #c93b36;
+  --red-deep: #a92d2b;
+  --page: #ece8df;
+  --star: clamp(76px, 19vw, 148px);
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Quicksand', system-ui, sans-serif; }
-.page { min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; gap: 24px; padding: 40px 24px; }
-.stage { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.page { min-height: 100vh; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 24px; padding: 40px 24px; }
+.stage { display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 100%; }
 
-.device { position: relative; display: flex; align-items: center; gap: 22px; padding: 28px 30px 28px 28px;
-  background: var(--yellow); border-radius: 44px; box-shadow: inset 0 -6px 0 var(--yellow-deep), 0 18px 40px rgba(26, 24, 22, 0.18); }
-.bezel { background: #2a2724; padding: 10px; border-radius: 14px; line-height: 0; }
-.screen { display: block; image-rendering: pixelated; image-rendering: crisp-edges; background: var(--paper); }
+/* The face: a rounded yellow panel, soft-touch matte. */
+.device { position: relative; display: flex; flex-direction: column; align-items: center; max-width: 100%;
+  padding: 34px 34px 30px; border-radius: 56px;
+  background: radial-gradient(120% 90% at 38% 18%, var(--yellow-hi) 0%, var(--yellow) 46%, var(--yellow-lo) 100%);
+  box-shadow: inset 0 3px 2px rgba(255, 247, 214, 0.7), inset 0 -10px 18px rgba(196, 136, 24, 0.32),
+    0 2px 0 rgba(176, 124, 22, 0.35), 0 26px 50px rgba(92, 66, 14, 0.2); }
 
-.controls { display: flex; flex-direction: column; align-items: center; gap: 34px; }
-.ptt-wrap { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.led { width: 10px; height: 10px; border-radius: 50%; background: #6b5d1a; box-shadow: inset 0 1px 2px rgba(0,0,0,.4); }
-.led.on { background: #ff3b2a; box-shadow: 0 0 10px 3px rgba(255, 59, 42, 0.7); }
-.ptt { width: 74px; height: 74px; border-radius: 50%; border: none; background: var(--red); cursor: pointer;
-  box-shadow: inset 0 -6px 0 #8f241e, 0 4px 0 rgba(0,0,0,.18); touch-action: none; }
-.ptt.held { box-shadow: inset 0 2px 4px #8f241e; transform: translateY(3px); }
-.ptt:focus-visible, .power:focus-visible, .typed:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+/* The screen sits in a recessed rounded frame. */
+.bezel { max-width: 100%; padding: 12px; border-radius: 22px; line-height: 0;
+  background: linear-gradient(180deg, var(--yellow-deep), var(--yellow-lo) 60%);
+  box-shadow: inset 0 5px 8px rgba(130, 86, 6, 0.45), inset 0 -2px 0 rgba(255, 238, 180, 0.75); }
+.glass { max-width: 100%; padding: 8px; border-radius: 8px; background: #e6e3dc;
+  box-shadow: inset 0 0 0 1px rgba(26, 24, 22, 0.12), 0 1px 0 rgba(255, 240, 200, 0.6); }
+/* Integer scale where it fits; on narrow windows the canvas shrinks to fit. */
+.screen { display: block; max-width: 100%; height: auto !important; image-rendering: pixelated; image-rendering: crisp-edges; background: var(--paper); }
 
-.knob { width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #3a3632, #1d1b19);
-  box-shadow: 0 4px 0 rgba(0,0,0,.25); cursor: ns-resize; touch-action: none; display: grid; place-items: center; }
-.knob.pressed { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,.25); }
-.knob-dial { width: 100%; height: 100%; position: relative; }
-.knob-mark { position: absolute; left: 50%; top: 8px; width: 4px; height: 14px; margin-left: -2px; border-radius: 2px; background: var(--paper); }
+/* One row of controls, centered: back pill, star knob, home pill. */
+.control-row { display: flex; align-items: center; justify-content: center; gap: calc(var(--star) * 0.32); margin-top: calc(var(--star) * 0.2); }
+
+.pill { width: calc(var(--star) * 0.6); height: calc(var(--star) * 0.29); border: none; border-radius: 999px; padding: 0; cursor: pointer;
+  margin-top: calc(var(--star) * -0.18); /* sits level with the star's upper half, as in the render */
+  background: linear-gradient(180deg, var(--yellow-hi) 0%, var(--yellow) 55%, var(--yellow-lo) 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 250, 225, 0.9), inset 0 -2px 2px rgba(196, 136, 24, 0.35),
+    0 3px 0 var(--yellow-deep), 0 6px 8px rgba(110, 74, 6, 0.22);
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.pill:active { transform: translateY(2px); box-shadow: inset 0 1px 2px rgba(150, 100, 10, 0.35), 0 1px 0 var(--yellow-deep), 0 2px 3px rgba(110, 74, 6, 0.2); }
+
+/* The star knob: raised, a deeper red side under a domed top. */
+.knob-wrap { position: relative; }
+.knob { position: relative; width: var(--star); height: var(--star); cursor: grab; touch-action: none;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 3px 0 rgba(150, 40, 30, 0.55)) drop-shadow(0 7px 7px rgba(110, 60, 6, 0.3)); }
+.knob-turn { width: 100%; height: 100%; transition: transform 110ms ease-out; }
+.knob-turn svg { display: block; width: 100%; height: 100%; }
+.star-side { fill: var(--red-deep); }
+.knob-shine { position: absolute; inset: 18%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 38% 32%, rgba(255, 214, 210, 0.38) 0%, rgba(255, 205, 200, 0.12) 34%, rgba(255, 255, 255, 0) 62%); }
+.knob.pressed, .knob.held { transform: translateY(2px);
+  filter: drop-shadow(0 1px 0 rgba(150, 40, 30, 0.55)) drop-shadow(0 3px 4px rgba(110, 60, 6, 0.3)); }
+.knob.held .knob-turn { filter: brightness(0.94); }
+@media (prefers-reduced-motion: reduce) { .knob-turn { transition: none; } }
+
+/* The listening LED: a small dot by the knob. */
+.led { position: absolute; top: 6%; left: calc(100% + var(--star) * 0.06); width: 8px; height: 8px; border-radius: 50%;
+  background: #b9902c; box-shadow: inset 0 1px 2px rgba(80, 50, 0, 0.5); }
+.led.on { background: #ff3b2a; box-shadow: 0 0 8px 3px rgba(255, 59, 42, 0.65); }
+
+.wordmark { width: calc(var(--star) * 0.62); margin-top: calc(var(--star) * 0.16); margin-bottom: 14px; color: var(--red); line-height: 0; }
+.wordmark svg { display: block; width: 100%; height: auto; }
+
+.pill:focus-visible, .power:focus-visible, .typed:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
 .power { position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); font: 600 14px 'Quicksand', sans-serif;
   padding: 6px 18px; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
 .power.off-state { background: var(--ink); color: var(--paper); }
 
-.under { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px; width: 100%; }
-.typed-row { display: flex; align-items: center; gap: 10px; }
+.under { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px; width: 100%; text-align: center; }
+.typed-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
 .typed { width: 420px; max-width: 70vw; font: 600 16px 'Quicksand', sans-serif; padding: 9px 14px; border-radius: 10px;
   border: 2px solid var(--ink); background: var(--paper); color: var(--ink); }
 .typed-hint { font: 500 12px 'JetBrains Mono', monospace; opacity: .6; }
+.controls-line { font: 500 13px 'Quicksand', sans-serif; opacity: .75; }
 .notice { font: 600 14px 'Quicksand', sans-serif; min-height: 1.2em; }
 .usage { font: 500 12px 'JetBrains Mono', monospace; letter-spacing: .02em; opacity: .8; }
+
+/* Phones: a tighter face, the screen scaled to fit (smooth, since it can't be an integer scale). */
+@media (max-width: 600px) {
+  .page { padding: 20px 10px 28px; }
+  .device { padding: 16px 14px 24px; border-radius: 34px; }
+  .bezel { padding: 7px; border-radius: 14px; }
+  .glass { padding: 4px; border-radius: 5px; }
+  .screen { image-rendering: auto; }
+  .typed { max-width: 100%; width: 92vw; }
+  .usage { font-size: 11px; }
+}
 
 .debug { width: 300px; font: 500 12px 'JetBrains Mono', monospace; background: #fffdf8; border: 2px solid var(--ink); border-radius: 12px; padding: 12px 14px; }
 .debug h2 { font: 700 13px 'JetBrains Mono', monospace; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .08em; }

@@ -1,6 +1,6 @@
 /**
- * Boot: build the device, wait for fonts, wire the red button, the typed
- * fallback and the encoder to the state machine. The page opens with the
+ * Boot: build the device, wait for fonts, wire the star knob, the two
+ * pills, the keyboard map and the typed fallback to the state machine. The page opens with the
  * device powered off; the Encender click also unlocks audio.
  */
 import type { UsageSummary } from '../shared/types';
@@ -12,7 +12,8 @@ import { DEVICE } from './copy/es-MX';
 import { initDebug } from './debug';
 import { buildDevice } from './device/dom';
 import { App } from './flows/app';
-import { Encoder } from './input/encoder';
+import { bindKeys } from './input/keys';
+import { Knob } from './input/knob';
 import { PushToTalk, speechSupported } from './input/ptt';
 import { Screen, loadFonts } from './screen/emulator';
 import { PROFILES, type ProfileId } from './screen/profiles';
@@ -56,13 +57,34 @@ async function boot(): Promise<void> {
     const a = document.activeElement;
     return a instanceof HTMLInputElement || a instanceof HTMLSelectElement || a instanceof HTMLTextAreaElement;
   };
-  new PushToTalk(dom.ptt, dom.led, {
+  // The star knob: turn, press, hold to talk. One part, so push-to-talk
+  // rides on the knob's hold.
+  const ptt = new PushToTalk(dom.knob, dom.led, {
     canListen: () => app.on,
     onStart: () => app.pttStart(),
     onEnd: (r) => void app.pttEnd(r.text, r.heldMs, false),
     onUnsupported: () => { dom.notice.textContent = DEVICE.noSpeech; },
+  });
+  const knob = new Knob(dom.knob, dom.knobTurn, {
+    onRotate: (d) => app.rotate(d),
+    onPress: () => app.press(),
+    onHoldStart: (since) => ptt.begin(since),
+    onHoldEnd: () => ptt.end(),
+  }, [dom.canvas]);
+
+  // The pills either side: back and home (provisional functions).
+  const pill = (b: HTMLButtonElement, act: () => void) => b.addEventListener('click', () => { act(); b.blur(); });
+  pill(dom.back, () => app.back());
+  pill(dom.home, () => app.home());
+
+  bindKeys({
+    rotate: (d) => knob.turn(d),
+    press: () => knob.press(),
+    talkStart: () => ptt.begin(),
+    talkEnd: () => ptt.end(),
+    back: () => app.back(),
+    home: () => app.home(),
   }, typing);
-  new Encoder(dom.knob, dom.dial, { onRotate: (d) => app.rotate(d), onPress: () => app.press() }, typing, [dom.canvas]);
 
   dom.typed.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
@@ -71,6 +93,8 @@ async function boot(): Promise<void> {
       dom.typed.value = '';
       void app.pttEnd(text, 0, true);
     } else if (e.key === 'Escape') {
+      // Leave the field only; the same Esc must not also press back.
+      e.stopPropagation();
       dom.typed.blur();
     }
   });

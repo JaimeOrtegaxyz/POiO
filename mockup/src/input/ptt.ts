@@ -1,9 +1,10 @@
 /**
- * Push-to-talk on the red button. Hold with the pointer (pointer capture) or
- * Space (when the text field isn't focused). Press -> LED on, press tick,
- * speech recognition in es-MX with interim results. Release -> release
- * tick, use the final transcript. We own the hold: if the recognizer ends
- * early while the button is still held, it restarts and keeps what it heard.
+ * Push-to-talk on the star knob. The knob's hold (pointer, see knob.ts) or
+ * Space (keys.ts) calls begin(); letting go calls end(). Begin -> LED on,
+ * press tick, speech recognition in es-MX with interim results. End ->
+ * release tick, use the final transcript. We own the hold: if the
+ * recognizer ends early while the knob is still held, it restarts and
+ * keeps what it heard.
  */
 
 export interface PttResult {
@@ -52,39 +53,19 @@ export class PushToTalk {
   private ended: (() => void) | null = null;
   private blocked = false;
 
-  constructor(private button: HTMLElement, private led: HTMLElement, private h: PttHandlers, private isTyping: () => boolean) {
-    button.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      try { button.setPointerCapture(e.pointerId); } catch { /* ignore */ }
-      this.down();
-    });
-    const up = (e: PointerEvent) => {
-      try { button.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
-      this.up();
-    };
-    button.addEventListener('pointerup', up);
-    button.addEventListener('pointercancel', up);
-    window.addEventListener('keydown', (e) => {
-      if (e.code !== 'Space' || this.isTyping()) return;
-      e.preventDefault();
-      if (!e.repeat) this.down();
-    });
-    window.addEventListener('keyup', (e) => {
-      if (e.code !== 'Space' || this.isTyping()) return;
-      e.preventDefault();
-      this.up();
-    });
-    window.addEventListener('blur', () => this.up());
+  constructor(private button: HTMLElement, private led: HTMLElement, private h: PttHandlers) {
+    window.addEventListener('blur', () => this.end());
   }
 
   get isHolding(): boolean { return this.holding; }
 
-  private down(): void {
+  /** Start listening. `since` backdates the hold: a pointer hold is only known HOLD_MS after the press. */
+  begin(since = performance.now()): void {
     if (this.holding) return;
     if (!this.h.canListen()) { this.blocked = true; return; }
     this.blocked = false;
     this.holding = true;
-    this.startedAt = performance.now();
+    this.startedAt = since;
     this.committed = ''; this.finals = ''; this.interim = '';
     this.led.classList.add('on');
     this.button.classList.add('held');
@@ -132,7 +113,8 @@ export class PushToTalk {
     try { rec.start(); } catch { /* already started */ }
   }
 
-  private up(): void {
+  /** Stop listening and send what was heard. */
+  end(): void {
     if (this.blocked) { this.blocked = false; return; }
     if (!this.holding) return;
     this.holding = false;

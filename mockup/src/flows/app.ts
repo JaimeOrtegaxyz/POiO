@@ -263,6 +263,35 @@ export class App {
     if (band && this.renders === before) this.repaint();
   }
 
+  /**
+   * Left pill: back (provisional, pending the bench test). Does what saying
+   * "atrás" does on this screen; any band on screen is cleared first.
+   */
+  back(): void {
+    if (!this.on) return;
+    this.touch();
+    if (this.band?.kind === 'thinking') return; // waiting on the brain
+    const hadBand = this.band !== null;
+    this.band = null;
+    const before = this.renders;
+    SCREENS[this.rt.screen].intent?.(this, { kind: 'back' });
+    if (hadBand && this.renders === before) this.repaint();
+  }
+
+  /**
+   * Right pill: home, the cookbook (provisional, pending the bench test).
+   * Leaving a recipe drops its checkpoints. Ignored during the first-run
+   * questions, which a press already skips.
+   */
+  home(): void {
+    if (!this.on || this.rt.screen === 'onboarding') return;
+    this.touch();
+    if (this.rt.screen === 'cookbook') { this.clearBand(); return; }
+    this.rt.cook.pending = [];
+    this.rt.cook.fired = [];
+    this.go('cookbook');
+  }
+
   pttStart(): void {
     if (!this.on) return;
     this.touch();
@@ -270,7 +299,7 @@ export class App {
     this.setBand('listening', VOICE_STATE.listening);
   }
 
-  /** Release of the red button, or Enter in the typed field. */
+  /** Release of the knob's hold (or Space), or Enter in the typed field. */
   async pttEnd(text: string, heldMs: number, typed: boolean): Promise<void> {
     if (!this.on) return;
     if (!typed) this.sounds.play('release');
