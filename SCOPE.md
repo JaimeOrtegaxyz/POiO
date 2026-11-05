@@ -123,6 +123,10 @@ Details in [`hardware/PLAN.md`](hardware/PLAN.md).
 - **How proactive is too proactive.** Frequency and tone of suggestions and check-ins.
 - **Sound design.** Final sounds are Jaime's call.
 - **Product render.** To be exported from [`hardware/POiO.3dm`](hardware/POiO.3dm) into `assets/`.
+- **Time words in step text.** SKILL.md lets a step say when to look ("A los 5 min, checkpoint: …"); the screen draws no time while cooking. The mockup hides that clause on the device and lets the checkpoint carry it. Keep it that way, or show "a los 5 min"?
+- **Clearing a checkpoint.** In the mockup, the press that clears a checkpoint band doesn't also advance the step (one press clears, the next advances). Is the extra press right in the kitchen?
+- **Unknown items on screen.** Items POiO doesn't know get a hollow keyline in the mockup, next to the three status markers. Does that read as a fourth state (discarded), or should unknown items show no marker at all?
+- **Food imagery source.** Variant A needs CC0/public-domain food photos, commissioned photos, or illustrations made for the panel. The first mockup build ships glyphs only.
 
 ## Testing plan (online mockup)
 

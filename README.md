@@ -148,7 +148,7 @@ poio/
 │   ├── UI-LANGUAGE.md                    # The screen's design language
 │   ├── PROTOTYPE.md                      # Color e-paper bench-test plan
 │   └── POiO.3dm                          # Rhino shell model (WIP)
-├── mockup/                               # Online mockup (coming)
+├── mockup/                               # Online mockup (first local build)
 ├── archive/                              # Earlier work, frozen (Stage 2 app, mockups, mono rig)
 ├── assets/                               # Logo, animation, journal images
 ├── LICENSES/                             # Full license texts (Apache-2.0, CERN-OHL-S, CC-BY-SA)
