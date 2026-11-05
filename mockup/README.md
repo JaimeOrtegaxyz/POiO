@@ -74,11 +74,11 @@ Things to say (the local parser catches these with no tokens): `siguiente`,
   | `kaleido3-6in` | 1448×1072 text; color at half resolution | 4,096 muted colors, 16-level gray, grayish paper | ~550 ms full, partial OK |
 
   The Spectra palette (`#1a1816`, `#f4efe4`, `#e9c92a`, `#b8322a`, `#2d4f9e`, `#3a6b3c`) is a starting approximation, to be tuned after the bench test. UI chrome uses only ink, paper, yellow and red.
-- **Honest by construction.** Each frame is drawn with canvas 2D at native resolution, food images are Floyd-Steinberg dithered to the pigments, and a panel pass snaps every pixel to what the panel can show (text comes out aliased). The result is shown at an integer scale with `image-rendering: pixelated`. Nothing on the screen is DOM.
+- **Honest by construction.** Each frame is drawn with canvas 2D at native resolution, food images are Floyd-Steinberg dithered to the pigments, and a panel pass snaps every pixel to what the panel can show (text comes out aliased). The face keeps the device's proportions (capped at 620 px wide, screen about 78% of the face), so the canvas is scaled down to fit the frame and drawn smooth: a 600 px panel can't land on an integer scale at that size. Nothing on the screen is DOM.
 - **Refresh.** A view change is a full refresh (ink → paper → new frame); a small change is a partial repaint of the changed rectangle, where the panel allows it, with a full refresh every 8 partials. Timing `fast` (default) or `real` (profile numbers; on Spectra every change is a ~16 s full refresh). No spinners, no animation loops: listening and thinking are static states.
 - **Status** is color plus pattern everywhere: `hay` solid ink, `poco` yellow + 45° ink hatch, `no hay` red + paper dots. Unknown items get a hollow keyline.
 
-URL options: `?profile=kaleido3-6in`, `?timing=real`, `?scale=3`, `?variant=a|b`,
+URL options: `?profile=kaleido3-6in`, `?timing=real`, `?scale=3` (no visible effect for now: the frame fits the screen to the face), `?variant=a|b`,
 `?speed=10` (checkpoints and check-ins 10× faster), `?checkinQuiet=60` (seconds
 check-ins stay hidden after turn-on; default 600), `?debug=1`, `?access=<code>`.
 

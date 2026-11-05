@@ -4,12 +4,14 @@
  * of controls (after the Rhino render, hardware/POiO.3dm):
  *
  *   [ back pill ]   ( red star knob )   [ home pill ]
- *                       · LED
+ *                         · LED by the knob
  *                       POiO
  *
+ * The face keeps the render's proportions: compact and roughly square,
+ * capped in width, with everything on it sized from the face width.
  * The star knob turns, presses and holds to talk (input/knob.ts). Below the
- * device: the power control, the typed fallback and the usage line. The
- * screen itself is only the canvas.
+ * device, off the face: the power control, the typed fallback, the hint line
+ * and the usage line. The screen itself is only the canvas.
  */
 import wordmarkSvg from '../../../assets/logo-bw.svg?raw';
 import { DEVICE } from '../copy/es-MX';
@@ -120,11 +122,11 @@ export function buildDevice(mount: HTMLElement): DeviceDom {
   mark.innerHTML = wordmarkSvg.replace(/fill="black"/g, 'fill="currentColor"');
   mark.setAttribute('aria-hidden', 'true');
 
-  const power = el('button', 'power', device);
+  // Off the face: the power control leads the area under the device.
+  const under = el('div', 'under', stage);
+  const power = el('button', 'power', under);
   power.type = 'button';
   power.textContent = DEVICE.powerOn;
-
-  const under = el('div', 'under', stage);
   const typedRow = el('div', 'typed-row', under);
   const typed = el('input', 'typed', typedRow);
   typed.type = 'text';

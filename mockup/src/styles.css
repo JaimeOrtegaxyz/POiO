@@ -6,7 +6,10 @@
  * repaints) and variant a's frame repaints.
  *
  * The face follows the Rhino render (hardware/POiO.3dm): matte warm yellow,
- * the screen in a recessed frame, one row of controls under it.
+ * the screen in a recessed frame, one row of controls under it. It keeps the
+ * render's proportions: compact and roughly square, capped at 620 px and
+ * centered, with everything on it sized from the face width (cqi units of
+ * .stage, the size container).
  */
 :root {
   --ink: #1a1816;
@@ -18,39 +21,51 @@
   --red: #c93b36;
   --red-deep: #a92d2b;
   --page: #ece8df;
-  --star: clamp(76px, 19vw, 148px);
+  /* Pills: the body's yellow, a touch more saturated. */
+  --pill-hi: #fddc74;
+  --pill: #f8cd4c;
+  --pill-lo: #eebb36;
+  --pill-side: #cf9a2a;
+  /* The star is about 1/5 of the face width. */
+  --star: 19cqi;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--page); color: var(--ink); font-family: 'Quicksand', system-ui, sans-serif; }
 .page { min-height: 100vh; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 24px; padding: 40px 24px; }
-.stage { display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 100%; }
+.stage { container-type: inline-size; width: min(620px, 100%); display: flex; flex-direction: column; align-items: center; }
 
 /* The face: a rounded yellow panel, soft-touch matte. */
-.device { position: relative; display: flex; flex-direction: column; align-items: center; max-width: 100%;
-  padding: 34px 34px 30px; border-radius: 56px;
+.device { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%;
+  padding: 5.5cqi 0 4.5cqi; border-radius: 10cqi;
   background: radial-gradient(120% 90% at 38% 18%, var(--yellow-hi) 0%, var(--yellow) 46%, var(--yellow-lo) 100%);
   box-shadow: inset 0 3px 2px rgba(255, 247, 214, 0.7), inset 0 -10px 18px rgba(196, 136, 24, 0.32),
     0 2px 0 rgba(176, 124, 22, 0.35), 0 26px 50px rgba(92, 66, 14, 0.2); }
 
-/* The screen sits in a recessed rounded frame. */
-.bezel { max-width: 100%; padding: 12px; border-radius: 22px; line-height: 0;
+/* The screen sits in a recessed rounded frame; the visible screen is ~78% of the face width. */
+.bezel { width: 84cqi; padding: 2cqi; border-radius: 3.6cqi; line-height: 0;
   background: linear-gradient(180deg, var(--yellow-deep), var(--yellow-lo) 60%);
   box-shadow: inset 0 5px 8px rgba(130, 86, 6, 0.45), inset 0 -2px 0 rgba(255, 238, 180, 0.75); }
-.glass { max-width: 100%; padding: 8px; border-radius: 8px; background: #e6e3dc;
+.glass { padding: 1.3cqi; border-radius: 1.3cqi; background: #e6e3dc;
   box-shadow: inset 0 0 0 1px rgba(26, 24, 22, 0.12), 0 1px 0 rgba(255, 240, 200, 0.6); }
-/* Integer scale where it fits; on narrow windows the canvas shrinks to fit. */
-.screen { display: block; max-width: 100%; height: auto !important; image-rendering: pixelated; image-rendering: crisp-edges; background: var(--paper); }
+/*
+ * The canvas keeps its native pixels and aspect ratio; the frame scales it to
+ * fit. At the face's real proportions a 600 px panel can't land on an integer
+ * scale (about 0.8x on desktop, 0.5x on a phone), so it's drawn smooth rather
+ * than nearest-neighbour, which would drop rows unevenly.
+ */
+.screen { display: block; max-width: 100%; height: auto !important; image-rendering: auto; background: var(--paper); }
 
 /* One row of controls, centered: back pill, star knob, home pill. */
-.control-row { display: flex; align-items: center; justify-content: center; gap: calc(var(--star) * 0.32); margin-top: calc(var(--star) * 0.2); }
+.control-row { display: flex; align-items: center; justify-content: center; gap: calc(var(--star) * 0.17); margin-top: calc(var(--star) * 0.24); }
 
-.pill { width: calc(var(--star) * 0.6); height: calc(var(--star) * 0.29); border: none; border-radius: 999px; padding: 0; cursor: pointer;
-  margin-top: calc(var(--star) * -0.18); /* sits level with the star's upper half, as in the render */
-  background: linear-gradient(180deg, var(--yellow-hi) 0%, var(--yellow) 55%, var(--yellow-lo) 100%);
-  box-shadow: inset 0 1px 1px rgba(255, 250, 225, 0.9), inset 0 -2px 2px rgba(196, 136, 24, 0.35),
-    0 3px 0 var(--yellow-deep), 0 6px 8px rgba(110, 74, 6, 0.22);
+.pill { width: calc(var(--star) * 0.62); height: calc(var(--star) * 0.3); border: none; border-radius: 999px; padding: 0; cursor: pointer;
+  margin-top: calc(var(--star) * -0.2); /* sits level with the star's upper half, as in the render */
+  background: linear-gradient(180deg, var(--pill-hi) 0%, var(--pill) 52%, var(--pill-lo) 100%);
+  box-shadow: inset 0 1.5px 1px rgba(255, 250, 225, 0.95), inset 0 -2px 3px rgba(190, 128, 18, 0.4),
+    0 calc(var(--star) * 0.04) 0 var(--pill-side), 0 calc(var(--star) * 0.08) calc(var(--star) * 0.1) rgba(110, 74, 6, 0.28);
   touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-.pill:active { transform: translateY(2px); box-shadow: inset 0 1px 2px rgba(150, 100, 10, 0.35), 0 1px 0 var(--yellow-deep), 0 2px 3px rgba(110, 74, 6, 0.2); }
+.pill:active { transform: translateY(calc(var(--star) * 0.03));
+  box-shadow: inset 0 1px 2px rgba(150, 100, 10, 0.35), 0 calc(var(--star) * 0.01) 0 var(--pill-side), 0 2px 3px rgba(110, 74, 6, 0.2); }
 
 /* The star knob: raised, a deeper red side under a domed top. */
 .knob-wrap { position: relative; }
@@ -67,37 +82,36 @@ html, body { margin: 0; background: var(--page); color: var(--ink); font-family:
 .knob.held .knob-turn { filter: brightness(0.94); }
 @media (prefers-reduced-motion: reduce) { .knob-turn { transition: none; } }
 
-/* The listening LED: a small dot by the knob. */
-.led { position: absolute; top: 6%; left: calc(100% + var(--star) * 0.06); width: 8px; height: 8px; border-radius: 50%;
-  background: #b9902c; box-shadow: inset 0 1px 2px rgba(80, 50, 0, 0.5); }
-.led.on { background: #ff3b2a; box-shadow: 0 0 8px 3px rgba(255, 59, 42, 0.65); }
+/* The listening LED, by the knob: a dark dot in a darker ring when off, a warm red glow while listening. */
+.led { position: absolute; top: 2%; left: calc(100% + var(--star) * 0.04); width: max(11px, 2cqi); height: max(11px, 2cqi); border-radius: 50%;
+  background: #8a6418; border: 2px solid #5a3f0c;
+  box-shadow: inset 0 1px 2px rgba(40, 24, 0, 0.6), 0 1px 0 rgba(255, 238, 180, 0.7); }
+.led.on { background: radial-gradient(circle at 40% 35%, #ffb3a0 0%, #ff4a30 45%, #e3261a 100%); border-color: #a51d14;
+  box-shadow: 0 0 0 3px rgba(255, 80, 50, 0.3), 0 0 12px 5px rgba(255, 64, 40, 0.6); }
 
-.wordmark { width: calc(var(--star) * 0.62); margin-top: calc(var(--star) * 0.16); margin-bottom: 14px; color: var(--red); line-height: 0; }
+.wordmark { width: calc(var(--star) * 0.68); margin-top: calc(var(--star) * 0.2); color: var(--red); line-height: 0; }
 .wordmark svg { display: block; width: 100%; height: auto; }
 
 .pill:focus-visible, .power:focus-visible, .typed:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
-.power { position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); font: 600 14px 'Quicksand', sans-serif;
+/* Below the device, off the face: power, the typed field, the hints, the usage line. */
+.under { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 26px; width: 100%; text-align: center; }
+.power { font: 600 14px 'Quicksand', sans-serif; margin-bottom: 6px;
   padding: 6px 18px; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
 .power.off-state { background: var(--ink); color: var(--paper); }
-
-.under { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px; width: 100%; text-align: center; }
-.typed-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; }
-.typed { width: 420px; max-width: 70vw; font: 600 16px 'Quicksand', sans-serif; padding: 9px 14px; border-radius: 10px;
+.typed-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; width: 100%; }
+.typed { width: 420px; max-width: 100%; font: 600 16px 'Quicksand', sans-serif; padding: 9px 14px; border-radius: 10px;
   border: 2px solid var(--ink); background: var(--paper); color: var(--ink); }
 .typed-hint { font: 500 12px 'JetBrains Mono', monospace; opacity: .6; }
 .controls-line { font: 500 13px 'Quicksand', sans-serif; opacity: .75; }
 .notice { font: 600 14px 'Quicksand', sans-serif; min-height: 1.2em; }
 .usage { font: 500 12px 'JetBrains Mono', monospace; letter-spacing: .02em; opacity: .8; }
 
-/* Phones: a tighter face, the screen scaled to fit (smooth, since it can't be an integer scale). */
+/* Phones: the face fills the width and scales itself from it. */
 @media (max-width: 600px) {
   .page { padding: 20px 10px 28px; }
-  .device { padding: 16px 14px 24px; border-radius: 34px; }
-  .bezel { padding: 7px; border-radius: 14px; }
-  .glass { padding: 4px; border-radius: 5px; }
-  .screen { image-rendering: auto; }
-  .typed { max-width: 100%; width: 92vw; }
+  .under { margin-top: 22px; }
+  .typed { width: 100%; }
   .usage { font-size: 11px; }
 }
 
