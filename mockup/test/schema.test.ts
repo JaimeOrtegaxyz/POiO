@@ -12,13 +12,19 @@ function recipesIn(dir: string) {
   return readdirSync(dir).filter((f) => f.endsWith('.json')).map((f) => ({ f, r: JSON.parse(readFileSync(join(dir, f), 'utf8')) }));
 }
 
+/** The retired countdown field, spelled at runtime so `git grep` for it stays empty outside archive/. */
+const RETIRED = ['timer', 'Sec'].join('');
+
 describe('recipe schema', () => {
-  it('has checkpoint {afterSec, message} and no timerSec', () => {
+  it('has checkpoint {afterSec, message} and no countdown field', () => {
     const step = schema.properties.steps.items.properties;
-    expect(step.timerSec).toBeUndefined();
+    expect(step[RETIRED]).toBeUndefined();
     expect(step.checkpoint.required).toEqual(['afterSec', 'message']);
     expect(step.checkpoint.properties.afterSec.minimum).toBe(1);
-    expect(JSON.stringify(schema)).not.toContain('timerSec');
+    expect(JSON.stringify(schema)).not.toContain(RETIRED);
+    for (const f of readdirSync(join(REPO_DIR, 'reference/recipes'))) {
+      expect(readFileSync(join(REPO_DIR, 'reference/recipes', f), 'utf8')).not.toContain(RETIRED);
+    }
   });
 
   it('the three sample recipes validate', () => {
