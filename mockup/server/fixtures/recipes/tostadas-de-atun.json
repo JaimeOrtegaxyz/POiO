@@ -1,0 +1,30 @@
+{
+  "id": "tostadas-de-atun",
+  "name": "Tostadas de atún con chipotle",
+  "vibe": "Atún con mayonesa y chipotle, cebolla morada curtida en limón. Sin estufa.",
+  "serves": 2,
+  "time": { "activeMin": 15, "totalMin": 15 },
+  "flavor": "latin",
+  "tags": ["no-cook", "under-20", "no-chicken"],
+  "season": [],
+  "cut": "none",
+  "ingredients": [
+    { "item": "canned-tuna-atun", "display": "atún en lata", "qty": "2 latas, escurrido", "group": "Protein", "required": true, "depletes": "heavy" },
+    { "item": "mayonnaise", "display": "mayonesa", "qty": "2 cucharadas", "group": "Sauce", "required": true, "depletes": "some" },
+    { "item": "chipotle-in-adobo-canned", "display": "chile chipotle en adobo", "qty": "1, picado", "group": "Sauce", "star": true, "required": true, "depletes": "light" },
+    { "item": "tomatoes-jitomate", "display": "jitomate", "qty": "1, picado", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "red-onion", "display": "cebolla morada", "qty": "¼, picada", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "limes", "display": "limón", "qty": "1", "group": "Veg & Aromatics", "required": true, "depletes": "light" },
+    { "item": "salt-kosher-table", "display": "sal", "qty": "al gusto", "group": "Pantry & Spices", "required": true, "depletes": "none" },
+    { "item": "avocado", "display": "aguacate", "qty": "1, en rebanadas", "group": "Veg & Aromatics", "required": false, "depletes": "finishes" },
+    { "item": "tostadas", "display": "tostadas", "qty": "6", "group": "Starch", "required": true, "depletes": "finishes" }
+  ],
+  "steps": [
+    { "n": 1, "text": "Pica el jitomate y la cebolla. Exprime el limón sobre la cebolla con una pizca de sal.", "glyph": "knife", "uses": ["tomatoes-jitomate", "red-onion", "limes", "salt-kosher-table"] },
+    { "n": 2, "text": "Mezcla el atún con la mayonesa y el chipotle picado.", "glyph": "bowl", "uses": ["canned-tuna-atun", "mayonnaise", "chipotle-in-adobo-canned"] },
+    { "n": 3, "text": "Agrega el jitomate y la cebolla al atún. Prueba de sal.", "glyph": "bowl", "uses": ["tomatoes-jitomate", "red-onion"] },
+    { "n": 4, "text": "Unta las tostadas con la mezcla y termina con aguacate en rebanadas.", "glyph": "bowl", "uses": ["tostadas", "avocado"] }
+  ],
+  "finish": "Cómelas en cuanto estén: las tostadas se aguadan rápido.",
+  "notes": ["Se acaban las tostadas y el aguacate. Al terminar te propongo marcarlos."]
+}

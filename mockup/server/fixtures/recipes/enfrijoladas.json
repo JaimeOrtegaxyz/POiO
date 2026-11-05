@@ -1,0 +1,30 @@
+{
+  "id": "enfrijoladas",
+  "name": "Enfrijoladas con queso fresco",
+  "vibe": "Tortillas bañadas en frijol negro con un toque de chipotle. Queso fresco y crema encima.",
+  "serves": 2,
+  "time": { "activeMin": 15, "totalMin": 20 },
+  "flavor": "latin",
+  "tags": ["weeknight", "under-30", "no-chicken"],
+  "season": [],
+  "cut": "none",
+  "ingredients": [
+    { "item": "canned-black-beans", "display": "frijoles negros de lata", "qty": "1 lata (unos 400 g)", "group": "Starch", "star": true, "required": true, "depletes": "finishes" },
+    { "item": "chipotle-in-adobo-canned", "display": "chile chipotle en adobo", "qty": "1", "group": "Pantry & Spices", "required": false, "depletes": "light" },
+    { "item": "white-onion", "display": "cebolla blanca", "qty": "¼", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "garlic", "display": "ajo", "qty": "1 diente", "group": "Veg & Aromatics", "required": true, "depletes": "light" },
+    { "item": "corn-tortillas", "display": "tortillas de maíz", "qty": "8", "group": "Starch", "required": true, "depletes": "heavy" },
+    { "item": "vegetable-oil", "display": "aceite", "qty": "2 cucharadas (30 ml)", "group": "Pantry & Spices", "required": true, "depletes": "light" },
+    { "item": "queso-fresco", "display": "queso fresco", "qty": "100 g, desmoronado", "group": "Dairy & Finish", "required": true, "depletes": "some" },
+    { "item": "crema-mexican-sour-cream", "display": "crema", "qty": "un chorrito", "group": "Dairy & Finish", "required": false, "depletes": "some" }
+  ],
+  "steps": [
+    { "n": 1, "text": "Licúa los frijoles con su caldo, la cebolla, el ajo y el chipotle.", "glyph": "bowl", "uses": ["canned-black-beans", "white-onion", "garlic", "chipotle-in-adobo-canned"] },
+    { "n": 2, "text": "Fríe la salsa de frijol en 1 cucharada de aceite. A los 5 min, checkpoint: espesa pero todavía se mueve.", "glyph": "pot", "checkpoint": { "afterSec": 300, "message": "La salsa debe estar espesa, pero todavía moverse." }, "uses": ["canned-black-beans", "vegetable-oil"] },
+    { "n": 3, "text": "Pasa las tortillas por el aceite caliente, unos segundos por lado.", "glyph": "griddle", "uses": ["corn-tortillas", "vegetable-oil"] },
+    { "n": 4, "text": "Sumerge cada tortilla en la salsa, dóblala en cuatro y acomódala en el plato.", "glyph": "bowl", "uses": ["corn-tortillas"] },
+    { "n": 5, "text": "Termina con más salsa, queso fresco y crema.", "glyph": "bowl", "uses": ["queso-fresco", "crema-mexican-sour-cream"] }
+  ],
+  "finish": "Cebolla morada en rodajas y aguacate les dan frescura.",
+  "notes": ["Con frijoles de la olla quedan mejor; usa 2 tazas con su caldo."]
+}

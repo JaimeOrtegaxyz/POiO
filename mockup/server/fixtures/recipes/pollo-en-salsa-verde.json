@@ -1,0 +1,34 @@
+{
+  "id": "pollo-en-salsa-verde",
+  "name": "Pollo en salsa verde",
+  "vibe": "Tomate verde, serrano y cilantro licuados en crudo y luego cocidos con el pollo. Ácido y fresco.",
+  "serves": 2,
+  "time": { "activeMin": 15, "totalMin": 30 },
+  "flavor": "latin",
+  "tags": ["weeknight", "one-pan", "under-30"],
+  "season": [],
+  "cut": "thigh-boneless",
+  "ingredients": [
+    { "item": "chicken-thighs-boneless", "display": "muslos sin hueso", "qty": "500 g, en trozos", "group": "Protein", "required": true, "depletes": "heavy" },
+    { "item": "tomatillo", "display": "tomates verdes", "qty": "400 g", "group": "Veg & Aromatics", "star": true, "required": true, "depletes": "heavy" },
+    { "item": "serranos", "display": "chiles serranos", "qty": "2", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "white-onion", "display": "cebolla blanca", "qty": "¼", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "garlic", "display": "ajo", "qty": "1 diente", "group": "Veg & Aromatics", "required": true, "depletes": "light" },
+    { "item": "cilantro", "display": "cilantro", "qty": "un puño", "group": "Veg & Aromatics", "required": false, "depletes": "some" },
+    { "item": "vegetable-oil", "display": "aceite", "qty": "1 cucharada (15 ml)", "group": "Pantry & Spices", "required": true, "depletes": "light" },
+    { "item": "salt-kosher-table", "display": "sal", "qty": "al gusto", "group": "Pantry & Spices", "required": true, "depletes": "none" },
+    { "item": "corn-tortillas", "display": "tortillas de maíz", "qty": "para acompañar", "group": "Starch", "required": false, "depletes": "some" }
+  ],
+  "steps": [
+    { "n": 1, "text": "Hierve los tomates verdes, los serranos, la cebolla y el ajo en poca agua. A los 8 min, checkpoint: los tomates cambian a verde olivo.", "glyph": "pot", "checkpoint": { "afterSec": 480, "message": "Los tomates ya cambiaron a verde olivo." }, "uses": ["tomatillo", "serranos", "white-onion", "garlic"] },
+    { "n": 2, "text": "Licúa todo con el cilantro, un poco del agua de cocción y sal.", "glyph": "bowl", "uses": ["cilantro", "salt-kosher-table"] },
+    { "n": 3, "text": "Dora el pollo en el aceite bien caliente. A los 6 min, checkpoint: dorado por fuera.", "glyph": "pan", "checkpoint": { "afterSec": 360, "message": "Revisa que el pollo esté dorado por fuera." }, "uses": ["chicken-thighs-boneless", "vegetable-oil"] },
+    { "n": 4, "text": "Vierte la salsa sobre el pollo y baja el fuego. A los 10 min, checkpoint: la salsa espesó.", "glyph": "pot", "checkpoint": { "afterSec": 600, "message": "La salsa ya espesó. Parte un trozo: nada rosa." }, "uses": ["chicken-thighs-boneless", "tomatillo"] },
+    { "n": 5, "text": "Prueba y ajusta de sal. Calienta las tortillas en el comal.", "glyph": "griddle", "uses": ["salt-kosher-table", "corn-tortillas"] }
+  ],
+  "finish": "Sírvelo con arroz o frijoles y cebolla picada encima. Un chorrito de limón lo despierta.",
+  "notes": [
+    "¿No hay serranos? Un jalapeño sirve; pica menos.",
+    "La salsa dura 4 días en el refri. Haz de más para chilaquiles."
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "id": "caldo-de-pollo",
+  "name": "Caldo de pollo con verduras",
+  "vibe": "Caldo claro con chayote, calabacita y papa. Limón y cilantro al final.",
+  "serves": 4,
+  "time": { "activeMin": 15, "totalMin": 45 },
+  "flavor": "latin",
+  "tags": ["one-pot", "batch", "brothy"],
+  "season": ["oct", "nov", "dec", "jan"],
+  "cut": "thigh-bonein",
+  "ingredients": [
+    { "item": "chicken-legs-whole", "display": "pierna y muslo de pollo", "qty": "2 piezas (unos 600 g)", "group": "Protein", "required": true, "depletes": "heavy" },
+    { "item": "chayote", "display": "chayote", "qty": "1, en trozos", "group": "Veg & Aromatics", "star": true, "required": true, "depletes": "some" },
+    { "item": "zucchini", "display": "calabacitas", "qty": "2, en trozos", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "carrots", "display": "zanahorias", "qty": "2, en trozos", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "potatoes", "display": "papas", "qty": "2, en cubos", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "white-onion", "display": "cebolla blanca", "qty": "½", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "garlic", "display": "ajo", "qty": "2 dientes", "group": "Veg & Aromatics", "required": true, "depletes": "light" },
+    { "item": "salt-kosher-table", "display": "sal", "qty": "al gusto", "group": "Pantry & Spices", "required": true, "depletes": "none" },
+    { "item": "limes", "display": "limón", "qty": "para servir", "group": "Pantry & Spices", "required": false, "depletes": "light" },
+    { "item": "cilantro", "display": "cilantro", "qty": "picado", "group": "Veg & Aromatics", "required": false, "depletes": "some" }
+  ],
+  "steps": [
+    { "n": 1, "text": "Pon el pollo en una olla con 2 litros de agua, la cebolla, el ajo y sal. Calienta a fuego medio.", "glyph": "pot", "uses": ["chicken-legs-whole", "white-onion", "garlic", "salt-kosher-table"] },
+    { "n": 2, "text": "Quita la espuma cuando suelte el hervor y baja el fuego. A los 20 min, checkpoint: el pollo casi cocido.", "glyph": "pot", "checkpoint": { "afterSec": 1200, "message": "El pollo ya casi está cocido. Sigue con las verduras." }, "uses": ["chicken-legs-whole"] },
+    { "n": 3, "text": "Agrega la zanahoria y la papa. A los 8 min, checkpoint: la papa empieza a ceder.", "glyph": "pot", "checkpoint": { "afterSec": 480, "message": "Pica una papa: debe ceder un poco." }, "uses": ["carrots", "potatoes"] },
+    { "n": 4, "text": "Agrega el chayote y la calabacita. A los 7 min, checkpoint: suaves pero enteros.", "glyph": "pot", "checkpoint": { "afterSec": 420, "message": "Las verduras deben estar suaves pero enteras." }, "uses": ["chayote", "zucchini"] },
+    { "n": 5, "text": "Prueba de sal. Sirve con limón y cilantro picado.", "glyph": "bowl", "uses": ["salt-kosher-table", "limes", "cilantro"] }
+  ],
+  "finish": "Con tortillas calientes y una salsa de chile de árbol al lado.",
+  "notes": [
+    "Dura 4 días en el refri. Al recalentar, agrega las verduras al final para que no se deshagan.",
+    "Deshebra el pollo que sobre para tostadas o tacos."
+  ]
+}

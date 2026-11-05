@@ -1,0 +1,29 @@
+{
+  "id": "huevos-a-la-mexicana",
+  "name": "Huevos a la mexicana",
+  "vibe": "Jitomate, cebolla y serrano con huevo apenas cuajado. Diez minutos.",
+  "serves": 2,
+  "time": { "activeMin": 10, "totalMin": 15 },
+  "flavor": "latin",
+  "tags": ["weeknight", "under-20", "no-chicken"],
+  "season": [],
+  "cut": "none",
+  "ingredients": [
+    { "item": "eggs", "display": "huevos", "qty": "4", "group": "Protein", "required": true, "depletes": "heavy" },
+    { "item": "tomatoes-jitomate", "display": "jitomate", "qty": "1, picado", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "white-onion", "display": "cebolla blanca", "qty": "¼, picada", "group": "Veg & Aromatics", "required": true, "depletes": "some" },
+    { "item": "serranos", "display": "chile serrano", "qty": "1, picado", "group": "Veg & Aromatics", "star": true, "required": true, "depletes": "some" },
+    { "item": "vegetable-oil", "display": "aceite", "qty": "1 cucharada (15 ml)", "group": "Pantry & Spices", "required": true, "depletes": "light" },
+    { "item": "salt-kosher-table", "display": "sal", "qty": "al gusto", "group": "Pantry & Spices", "required": true, "depletes": "none" },
+    { "item": "corn-tortillas", "display": "tortillas de maíz", "qty": "para acompañar", "group": "Starch", "required": false, "depletes": "some" }
+  ],
+  "steps": [
+    { "n": 1, "text": "Calienta el aceite a fuego medio y sofríe la cebolla y el chile. A los 3 min, checkpoint: la cebolla transparente.", "glyph": "pan", "checkpoint": { "afterSec": 180, "message": "La cebolla ya debe verse transparente." }, "uses": ["vegetable-oil", "white-onion", "serranos"] },
+    { "n": 2, "text": "Agrega el jitomate y cocina hasta que suelte su jugo.", "glyph": "pan", "uses": ["tomatoes-jitomate"] },
+    { "n": 3, "text": "Bate los huevos con sal y viértelos. Mueve despacio con la pala.", "glyph": "pan", "uses": ["eggs", "salt-kosher-table"] },
+    { "n": 4, "text": "Retira del fuego cuando todavía se vean un poco húmedos.", "glyph": "pan", "uses": [] },
+    { "n": 5, "text": "Sirve con tortillas calientes.", "glyph": "griddle", "uses": ["corn-tortillas"] }
+  ],
+  "finish": "Unos frijoles de la olla al lado y queso fresco encima, si hay.",
+  "notes": ["El huevo se sigue cociendo fuera del fuego: sácalo antes de que se vea seco."]
+}
