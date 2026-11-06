@@ -6,19 +6,22 @@
 import type { UsageSummary } from '../shared/types';
 import type { App } from './flows/app';
 import { PROFILES, type ProfileId, type TimingMode } from './screen/profiles';
-import { clearState } from './state/store';
 
 export interface DebugSources {
   usage: () => UsageSummary | null;
   events: () => { time: string; type: string; data?: unknown }[];
   setVariant: (v: 'a' | 'b') => void;
+  /** Clears this device: the current profile's server copy too, never another profile. */
+  reset: () => Promise<void>;
+  /** "invited profile …" or "local mode". */
+  who: string;
 }
 
 export function initDebug(host: HTMLElement, app: App, src: DebugSources): () => void {
   host.hidden = false;
   host.innerHTML = `
     <h2>POiO debug</h2>
-    <div><span class="badge" data-k="brain"></span></div>
+    <div><span class="badge" data-k="brain"></span> <span data-k="who"></span></div>
     <label>profile <select data-k="profile">${Object.values(PROFILES).map((p) => `<option value="${p.id}">${p.id}</option>`).join('')}</select></label>
     <label>timing <select data-k="timing"><option value="fast">fast</option><option value="real">real</option></select></label>
     <label>scale <select data-k="scale"><option>1</option><option>2</option><option>3</option></select></label>
@@ -71,11 +74,10 @@ export function initDebug(host: HTMLElement, app: App, src: DebugSources): () =>
       update();
     };
   });
+  q('who').textContent = src.who;
   q<HTMLButtonElement>('reset').onclick = () => {
-    if (!confirm('Reset this device? Pantry, poionotas and history are cleared.')) return;
-    clearState();
-    localStorage.removeItem('poio.events.v1');
-    location.reload();
+    if (!confirm('Reset this device? Pantry, poionotas and history are cleared (this profile only).')) return;
+    void src.reset();
   };
 
   const update = () => {

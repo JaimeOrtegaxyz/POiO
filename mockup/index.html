@@ -3,12 +3,35 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>POiO · mockup</title>
+    <title>POiO</title>
+    <meta name="description" content="POiO es una gallina para la cocina que te ayuda a decidir qué cocinar y te acompaña paso a paso. Está en desarrollo." />
     <link rel="stylesheet" href="/fonts/fonts.css" />
-    <link rel="stylesheet" href="/src/styles.css" />
+    <link rel="stylesheet" href="/src/landing/landing.css" />
   </head>
   <body>
-    <main id="app"></main>
-    <script type="module" src="/src/main.ts"></script>
+    <main class="landing">
+      <header class="hero">
+        <vaiven-figure class="hero-figure" preset="poio-hero" aria-hidden="true"></vaiven-figure>
+        <h1 class="mark"><span class="sr-only">POiO</span></h1>
+        <p class="lead">Una gallina para tu cocina que te ayuda a decidir qué cocinar.</p>
+      </header>
+
+      <section class="points" aria-label="Qué hace">
+        <p>Te da tres opciones con lo que tienes. Si no te late ninguna, te da otras tres.</p>
+        <p>Te lleva paso a paso y te avisa cuándo voltear el pollo. Sin cronómetro.</p>
+        <p>Se acuerda de lo que te gusta y de lo que hay en tu despensa.</p>
+        <p>Le hablas manteniendo la estrella. Te contesta en la pantalla, nunca en voz alta.</p>
+      </section>
+
+      <section class="status">
+        <p>Está en desarrollo: pantalla de tinta electrónica a color, una perilla en forma de estrella y voz. El demo corre en el navegador.</p>
+      </section>
+
+      <section class="cta" aria-live="polite">
+        <a class="cta-button" href="/demo" hidden>Abrir el demo</a>
+        <p class="cta-invite">El demo es por invitación. Si te llegó un enlace, ábrelo en este navegador y entras directo.</p>
+      </section>
+    </main>
+    <script type="module" src="/src/landing/main.ts"></script>
   </body>
 </html>

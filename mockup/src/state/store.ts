@@ -1,7 +1,11 @@
 /**
- * Device state, in localStorage: the device works without the app. Pantry,
- * poionotas, discards, history and check-ins are the brain's context; the
- * settings are the debug panel's.
+ * Device state: pantry, poionotas, discards, history and check-ins are the
+ * brain's context; the settings are the debug panel's.
+ *
+ * Local mode (localhost, the access code): localStorage is the store, as
+ * always. Invited profile: the server is the source of truth (state/sync.ts)
+ * and localStorage is a cache under a per-profile key, so a second invite in
+ * the same browser starts empty instead of inheriting the first one's data.
  */
 import type { PantryStatus } from '../../shared/pantry';
 import type { SuggestOption } from '../../shared/types';
@@ -36,6 +40,8 @@ export interface DeviceState {
   deviceId: string;
   variant: 'a' | 'b' | null;
   onboarded: boolean;
+  /** The tutorial ran to the end or was closed once (the first turn-on of an invited profile starts it). */
+  tutorialSeen?: boolean;
   firstTurnOnAt?: number;
   firstRecipeAt?: number;
   prefs: { city?: string; servings: number };
@@ -49,7 +55,17 @@ export interface DeviceState {
   settings: Settings;
 }
 
-const KEY = 'poio.device.v1';
+const BASE_KEY = 'poio.device.v1';
+let key = BASE_KEY;
+let onSave: ((s: DeviceState) => void) | null = null;
+
+/** Switch to an invited profile's cache key, and hand every save to the server sync. */
+export function useProfileStore(tag: string, save: (s: DeviceState) => void): void {
+  key = `${BASE_KEY}.p.${tag}`;
+  onSave = save;
+}
+
+export function storageKey(): string { return key; }
 
 export function newId(): string {
   const c = globalThis.crypto as Crypto | undefined;
@@ -74,24 +90,27 @@ export function freshState(): DeviceState {
   };
 }
 
+/** A stored state (cache or server copy) merged over a fresh one, or null if it isn't one. */
+export function normalizeState(raw: unknown): DeviceState | null {
+  const s = raw as DeviceState | null;
+  if (!s || s.version !== 1 || !s.deviceId) return null;
+  const f = freshState();
+  return { ...f, ...s, prefs: { ...f.prefs, ...s.prefs }, settings: { ...f.settings, ...s.settings } };
+}
+
 export function loadState(storage: Storage = localStorage): DeviceState {
   try {
-    const raw = storage.getItem(KEY);
-    if (raw) {
-      const s = JSON.parse(raw) as DeviceState;
-      if (s?.version === 1 && s.deviceId) {
-        const f = freshState();
-        return { ...f, ...s, prefs: { ...f.prefs, ...s.prefs }, settings: { ...f.settings, ...s.settings } };
-      }
-    }
+    const raw = storage.getItem(key);
+    if (raw) return normalizeState(JSON.parse(raw)) ?? freshState();
   } catch { /* fall through */ }
   return freshState();
 }
 
 export function saveState(s: DeviceState, storage: Storage = localStorage): void {
-  storage.setItem(KEY, JSON.stringify(s));
+  try { storage.setItem(key, JSON.stringify(s)); } catch { /* storage full or blocked: the server copy still lands */ }
+  onSave?.(s);
 }
 
 export function clearState(storage: Storage = localStorage): void {
-  storage.removeItem(KEY);
+  storage.removeItem(key);
 }

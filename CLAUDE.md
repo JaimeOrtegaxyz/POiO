@@ -12,10 +12,12 @@ Voice/copy/sounds: [`VOICE.md`](VOICE.md).
 1. **Skill** — *works.* `SKILL.md` at the repo root is the skill and the base
    brain; install is a symlink (`ln -s <repo> ~/.claude/skills/poio`). First use
    runs the short first-run part of `setup/interview.md`.
-2. **Online mockup** — *in progress: first local build in `mockup/`.* Hosted,
-   Google login, Anthropic API, text-first, voice input, emulates the device
-   screen (Apache-2.0, secrets in env). Login and hosting come after the local
-   loop feels right; see `mockup/README.md` → "Not yet".
+2. **Online mockup** — *in progress in `mockup/`.* Public landing (`/`),
+   invite links that each mint an isolated browser profile (`/invite/:token`,
+   `npm run invites`), the device demo in the frontal render's face (`/demo`),
+   Anthropic API with server-side budgets, text-first, voice input (Apache-2.0,
+   secrets in env). Served from the iMac tunnel for now; Cloudflare Workers + D1
+   is prepared, not provisioned (`mockup/docs/CLOUDFLARE.md`).
 3. **Device** — *direction set, nothing ordered.* Color e-paper (panel TBD; the
    bench test in `hardware/PROTOTYPE.md` is next), voice via push-to-talk on the
    red star knob (turn, press, hold to talk) between back/home pills, always-on, thin client to the hosted brain. Shell model
@@ -65,7 +67,7 @@ The archived local app still runs from the repo root; see
 `archive/stage2/README.md`.
 
 The mockup: `cd mockup && npm install && npm run dev` → http://localhost:5173
-(API on :8787). No `ANTHROPIC_API_KEY` in `mockup/.env` = fake brain, zero API
+(the landing; the device at `/demo`; API on :8787). Invites: `npm run invites`. No `ANTHROPIC_API_KEY` in `mockup/.env` = fake brain, zero API
 calls. `npm test` before committing. `?debug=1` opens the debug panel; full
 notes, env vars and cost controls in `mockup/README.md`.
 

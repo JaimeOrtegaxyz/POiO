@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { LIMIT_LINE } from '../src/copy/es-MX';
 import { costUsd, sessionTokens } from '../server/pricing';
 import { MAX_TOKENS } from '../server/brain/service';
-import { ctx, post, reply, rig } from './helpers';
+import { ctx, local, post, reply, rig } from './helpers';
 
 const OPTIONS = { options: [
   { title: 'Pollo al chipotle con papas', minutes: 35, difficulty: 'fácil' },
@@ -95,7 +95,7 @@ describe('cost controls', () => {
     expect(res.body.limited).toBe('session');
     expect(res.body.options).toHaveLength(3);
     // Another session still works.
-    expect(await r.usage.guard('other-session')).toBeNull();
+    expect(await r.usage.guard(local('other-session'))).toBeNull();
   });
 
   it('blocks over the daily budget', async () => {
@@ -111,9 +111,9 @@ describe('cost controls', () => {
     const r = rig({ env: { POIO_MONTHLY_BUDGET_USD: '0.002', POIO_DAILY_BUDGET_USD: '3' }, clock: () => now, replies: [reply(OPTIONS, { input_tokens: 25000, cache_creation_input_tokens: 0, cache_read_input_tokens: 0, output_tokens: 0 })] });
     await post(r.app, '/api/suggest', { context: ctx() });
     now = new Date('2026-11-04T18:00:00Z');
-    expect(await r.usage.guard('fresh-session')).toBe('monthly');
+    expect(await r.usage.guard(local('fresh-session'))).toBe('monthly');
     now = new Date('2026-12-01T18:00:00Z');
-    expect(await r.usage.guard('fresh-session')).toBeNull();
+    expect(await r.usage.guard(local('fresh-session'))).toBeNull();
   });
 
   it('limits calls per IP', async () => {

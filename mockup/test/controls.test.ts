@@ -103,3 +103,81 @@ describe('back and home pills', () => {
     expect(a.rt.screen).toBe('off');
   });
 });
+
+describe('tutorial: a practice run on the screen', () => {
+  function device(): { app: App; brainCalls: string[]; hints: (string | null)[] } {
+    const mem = new Map<string, string>();
+    (globalThis as any).localStorage = { getItem: (k: string) => mem.get(k) ?? null, setItem: (k: string, v: string) => void mem.set(k, v), removeItem: (k: string) => void mem.delete(k) };
+    const state = freshState();
+    state.variant = 'b';
+    const brainCalls: string[] = [];
+    const screen = { profile: PROFILES['spectra6-4in'], timing: 'fast', render: () => {} } as any;
+    const api = { session: '', suggest: async () => { brainCalls.push('suggest'); return null; }, recipe: async () => { brainCalls.push('recipe'); return null; }, utterance: async () => { brainCalls.push('utterance'); return null; }, usage: async () => null } as any;
+    const app = new App(state, screen, api, { play: () => {}, muted: true } as any);
+    const hints: (string | null)[] = [];
+    app.onHint = (c) => hints.push(c);
+    return { app, brainCalls, hints };
+  }
+
+  it('walks press → turn → pick → back → talk → home → done, asking for one control at a time', async () => {
+    const { app, brainCalls, hints } = device();
+    app.startTutorial(); // from off: turns on straight into the tutorial
+    expect(app.on).toBe(true);
+    expect(app.rt.screen).toBe('tutorial');
+    expect(hints.at(-1)).toBe('knob');
+
+    app.press();
+    expect(app.rt.tutorial.step).toBe(1);
+    app.press(); // pick before turning: told to turn first
+    expect(app.rt.tutorial.step).toBe(1);
+    expect(app.band?.text).toMatch(/Primero gírala/);
+    app.rotate(1); app.rotate(1);
+    expect(app.rt.tutorial.sel).toBe(2);
+    app.press();
+    expect(app.rt.tutorial.step).toBe(2);
+    expect(app.rt.tutorial.dish).toBe('pollo a la crema');
+    expect(hints.at(-1)).toBe('back');
+
+    app.home(); // wrong pill
+    expect(app.rt.tutorial.step).toBe(2);
+    expect(app.band?.text).toMatch(/izquierda/);
+    app.back();
+    expect(app.rt.tutorial.step).toBe(3);
+
+    app.press(); // a press isn't a hold
+    expect(app.band?.text).toMatch(/Mantenla presionada/);
+    await app.pttEnd('¿qué hago de cenar?', 900, false);
+    expect(app.rt.tutorial.step).toBe(4);
+    expect(app.rt.tutorial.heard).toBe('¿qué hago de cenar?');
+    expect(hints.at(-1)).toBe('home');
+
+    app.back(); // wrong pill
+    expect(app.rt.tutorial.step).toBe(4);
+    app.home();
+    expect(app.rt.tutorial.step).toBe(5);
+    app.press();
+    expect(app.rt.screen).toBe('onboarding'); // a fresh device goes on to the first-run questions
+    expect(app.state.tutorialSeen).toBe(true);
+    expect(hints.at(-1)).toBeNull();
+    expect(brainCalls).toEqual([]); // practice never reaches the brain
+    app.turnOff();
+  });
+
+  it('nothing said or typed during the tutorial reaches the brain', async () => {
+    const { app, brainCalls } = device();
+    app.startTutorial();
+    for (const t of ['otras', 'hazme unas tostadas de tinga', 'atrás', 'no hay crema']) await app.pttEnd(t, 0, true);
+    expect(brainCalls).toEqual([]);
+    app.turnOff();
+  });
+
+  it('closing it early lands where a turn-on would, and counts as seen', () => {
+    const { app } = device();
+    app.state.onboarded = true;
+    app.startTutorial();
+    app.endTutorial();
+    expect(app.rt.screen).toBe('cookbook');
+    expect(app.state.tutorialSeen).toBe(true);
+    app.turnOff();
+  });
+});

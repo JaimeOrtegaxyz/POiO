@@ -4,6 +4,19 @@ Dated product decisions. Decisions only: no meeting notes, no names, no personal
 
 What's in scope today lives in [SCOPE.md](SCOPE.md); this file records when and why it changed.
 
+## 2026-11-05
+
+**Sharing the online mockup**
+- **Invite links, not a shared password and not Google login, for the shared demo**: short-lived, single-use, opaque links; each one becomes an isolated browser profile (an HttpOnly session cookie). No accounts or email in this slice; cross-device continuity isn't promised · supersedes "Google login" in the mockup testing plan (2026-10-28) for this slice; a login can attach to a profile later · decided
+- **The server is the source of truth for an invited profile's state** (pantry, poionotas, history, settings); the browser keeps a cache. Reset clears the current profile only. The access code and localhost keep working as local mode, state in the browser, for the interim iMac tunnel · — · decided
+- **Budgets are enforced server-side with atomic holds**: the existing $3/day, $100/month and 60k tokens per session, plus caps per invited profile · — · decided
+- **Site shape**: a public landing (`/`, the wordmark as a Vaivén figure, product copy in Mexican Spanish), `/invite/:token`, `/demo`, `/api` · — · decided
+- **Hosting direction: Cloudflare Workers + D1**, prepared (notes, draft config, tested D1 seam) but not provisioned; the iMac tunnel stays until a cutover is approved · — · direction set, cutover open
+
+**Mockup device face**
+- **The demo's face is the frontal render**, cut into layers (transparent screen hole, the star as its own turning layer, hit targets over the pills); no hand-drawn substitute. The panel keeps its 3:2 design units and is letterboxed in the render's ~4:3 hole, never stretched · supersedes the CSS-drawn face · decided
+- **Size on screen**: fit to the window by default, labeled uncalibrated; an optional ruler calibration shows the panel at the candidate panel's real size. Only the panel is to scale; no claim about the shell's size · — · decided
+
 ## 2026-11-04
 
 **Recipe schema**

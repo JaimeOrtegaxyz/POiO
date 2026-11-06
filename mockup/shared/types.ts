@@ -91,7 +91,7 @@ export interface Action {
 }
 
 /** Why a response came from fixtures instead of the model. */
-export type LimitReason = 'session' | 'daily' | 'monthly' | 'rate';
+export type LimitReason = 'session' | 'daily' | 'monthly' | 'profile' | 'rate';
 
 export interface BrainMeta {
   fake: boolean;
@@ -110,6 +110,14 @@ export interface UsageSummary {
   day: { usd: number; cap: number };
   month: { usd: number; cap: number };
   recent: UsageRecord[];
+}
+
+/** Who the server thinks this browser is (GET /api/me). */
+export interface Me {
+  /** 'profile' = an invited browser profile (state lives on the server); 'local' = localhost or the access code (state stays in this browser). */
+  mode: 'profile' | 'local';
+  /** A short, non-secret tag for the profile (the debug panel shows it). */
+  tag?: string;
 }
 
 export interface UsageRecord {

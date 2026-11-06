@@ -50,7 +50,7 @@ Lives in `~/.claude/skills/poio` as a symlink to this repo. Type `/poio` in a Cl
 
 ### 2. Online mockup *(next)*
 
-A hosted web app: Google login, the Anthropic API behind it, text-first, with voice input. It emulates the device's color e-paper screen and A/B-tests images + animation against text. Code will live in this repo under `mockup/`.
+A web app: a public landing, invite links that each open an isolated browser profile, and the device demo with the Anthropic API behind it, text-first, with voice input. It emulates the device's color e-paper screen in the frontal render's face and A/B-tests images + animation against text. Code lives in [`mockup/`](mockup/).
 
 ### 3. Device
 

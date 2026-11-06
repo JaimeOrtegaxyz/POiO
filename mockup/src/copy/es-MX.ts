@@ -167,15 +167,136 @@ export const DEVICE = {
   powerOn: 'Encender',
   powerOff: 'Apagar',
   typedPlaceholder: 'Escribe en lugar de hablar',
-  typedHint: 'Enter para enviar',
   knobLabel: 'Estrella: gira con la rueda o las flechas, pulsa con clic o Enter, mantén para hablar (o la barra espaciadora)',
   backLabel: 'Atrás (Esc)',
   homeLabel: 'Recetario (H)',
-  controlsLine: 'Estrella: gira, pulsa o mantén para hablar · izquierdo: atrás · derecho: recetario',
   noSpeech: 'Este navegador no reconoce voz. Escribe abajo, funciona igual.',
   demoMode: 'modo demo',
   usageLine: (sessionK: string, capK: string, dayUsd: string, monthUsd: string, monthCap: string) =>
     `Sesión ${sessionK} / ${capK} tokens · Hoy US$${dayUsd} · Mes US$${monthUsd} / US$${monthCap}`,
+  /** The quiet links under the device; each opens one small panel. */
+  helpLink: 'Cómo se usa',
+  sizeLink: 'Tamaño',
+  feedbackLink: 'Comentarios',
+  resetProfile: 'Borrar mis datos del demo',
+  resetConfirm: '¿Borrar la despensa, las poionotas y el historial de este perfil? No se puede deshacer.',
+};
+
+// ---------------------------------------------------------------------------
+// Size of the device on screen (fit vs. calibrated real size)
+// ---------------------------------------------------------------------------
+
+export const SIZE = {
+  fit: 'Tamaño ajustado a la ventana, sin calibrar.',
+  real: (inches: string) => `Pantalla a tamaño real (${inches}″, calibrada). El cuerpo no está a escala.`,
+  toReal: 'Ver la pantalla a tamaño real',
+  toFit: 'Ajustar a la ventana',
+  recalibrate: 'Calibrar otra vez',
+  rulerHint: 'Apoya una regla justo debajo de la barra negra y mueve el control hasta que la barra mida 5 cm.',
+  rulerLabel: 'Largo de la barra',
+  letterbox: 'La pantalla emulada es 3:2 y el hueco del render es 4:3. Por eso las franjas arriba y abajo.',
+  done: 'Listo',
+  cancel: 'Cancelar',
+};
+
+// ---------------------------------------------------------------------------
+// Invites and the demo gate (pages around the device, not device UI)
+// ---------------------------------------------------------------------------
+
+export const INVITE = {
+  title: 'Invitación a POiO',
+  heading: 'Te invitaron a probar POiO.',
+  body: 'Es un demo en el navegador: la pantalla, la estrella y los botones funcionan como en el aparato. Lo que guardes queda en este navegador.',
+  once: 'El enlace sirve una sola vez. Ábrelo en el navegador donde vas a usar el demo.',
+  enter: 'Entrar al demo',
+  usedHeading: 'Esta invitación ya no sirve.',
+  usedBody: 'Ya se usó, venció o la cancelaron. Pide una nueva a quien te la mandó.',
+  home: 'Ir al inicio',
+};
+
+/**
+ * The tutorial ("Cómo se usa"): a practice run on the screen itself. Each
+ * step asks for one real action with one control and moves on when it's
+ * done. Nothing in it is saved or sent to the brain.
+ */
+export const TUTORIAL = {
+  context: 'Tutorial',
+  meta: (n: number, total: number) => `${n} de ${total}`,
+  /** Practice rows for the turn step: not real suggestions. */
+  practice: [
+    { title: 'Tinga de pollo', minutes: 25, difficulty: 'fácil' },
+    { title: 'Caldo de pollo', minutes: 45, difficulty: 'fácil' },
+    { title: 'Pollo a la crema', minutes: 30, difficulty: 'fácil' },
+  ],
+  hello: {
+    title: 'Así se usa POiO.',
+    body: 'Unos pasos cortos con la estrella y los dos botones. Es práctica: nada de esto se guarda.',
+    ask: 'Pulsa la estrella para empezar.',
+  },
+  turn: {
+    title: 'Gira la estrella.',
+    ask: 'Gírala para mover la selección.',
+    nowPress: 'Bien. Ahora púlsala para elegir.',
+  },
+  back: {
+    title: (dish: string) => `Elegiste ${dish}.`,
+    body: 'Así se abre una receta. Para regresar, usa el botón de la izquierda.',
+    ask: 'Pulsa el botón izquierdo.',
+  },
+  talk: {
+    title: 'Regresaste. Ahora háblale.',
+    body: 'Mantén la estrella presionada, di algo y suéltala. La luz junto a la estrella se prende mientras te escucha.',
+    example: 'Prueba con: «¿qué hago de cenar?»',
+    ask: 'Mantén la estrella y habla. O escribe abajo.',
+    holdLonger: 'Mantenla presionada mientras hablas, no solo la pulses.',
+  },
+  home: {
+    title: (heard: string) => `Te escuché: «${heard}».`,
+    body: 'POiO entiende lo que pides y te contesta en la pantalla, nunca en voz alta. El botón de la derecha te lleva al recetario, la pantalla principal.',
+    ask: 'Pulsa el botón derecho.',
+  },
+  done: {
+    title: 'Listo. Ya sabes usar POiO.',
+    body: 'Gira para moverte, pulsa para elegir, mantén para hablar. Izquierdo regresa, derecho al recetario.',
+    ask: 'Pulsa la estrella para empezar.',
+  },
+  wrong: {
+    knob: 'Ese es un botón. Ahora es la estrella, la roja del centro.',
+    back: 'Casi. Es el botón de la izquierda.',
+    home: 'Casi. Es el botón de la derecha.',
+    turnFirst: 'Primero gírala.',
+  },
+  afford: {
+    press: 'pulsa para seguir',
+    turn: '◎ gira · pulsa para elegir',
+    back: 'botón izquierdo: regresar',
+    talk: '● mantén y habla',
+    home: 'botón derecho: recetario',
+  },
+  /** Under the device while the tutorial runs. */
+  exit: 'Salir del tutorial',
+  running: 'Tutorial',
+};
+
+export const MY_DATA = {
+  link: 'Mis datos',
+  body: 'Tu despensa, tus poionotas y lo que has cocinado se guardan para este navegador.',
+};
+
+export const FEEDBACK = {
+  label: 'Tu comentario',
+  placeholder: '¿Qué te gustó? ¿Qué se sintió raro?',
+  why: 'Lo leemos para mejorar POiO. No incluyas datos personales.',
+  send: 'Enviar',
+  sent: 'Gracias. Lo vamos a leer.',
+  failed: 'No se pudo enviar. Intenta otra vez en un rato.',
+};
+
+export const GATE = {
+  heading: 'El demo es por invitación.',
+  body: 'Si te llegó un enlace, ábrelo en este navegador y entras directo.',
+  home: 'Ir al inicio',
+  open: 'Abrir el demo',
 };
 
 // ---------------------------------------------------------------------------

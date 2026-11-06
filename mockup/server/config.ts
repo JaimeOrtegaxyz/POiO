@@ -26,6 +26,17 @@ export interface Config {
   timeZone: string;
   ipLimit: number;
   ipWindowMs: number;
+  /** SQLite file: invites, profiles, sessions, profile state, the spend ledger. */
+  dbPath: string;
+  /** Per invited profile, on top of the global caps. */
+  profileDailyUsd: number;
+  profileMonthlyUsd: number;
+  /** Default invite lifetime (the CLI can override per invite). */
+  inviteTtlMs: number;
+  /** How long an invite's session cookie lives. */
+  profileSessionMs: number;
+  /** The site's public origin, for the links the invites CLI prints. */
+  publicUrl: string;
 }
 
 /** Load mockup/.env (if present) into process.env without overriding the shell. */
@@ -62,5 +73,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     timeZone: str(env.POIO_TZ) ?? 'America/Mexico_City',
     ipLimit: num(env.POIO_IP_LIMIT, 30),
     ipWindowMs: num(env.POIO_IP_WINDOW_MS, 10 * 60 * 1000),
+    dbPath: env.POIO_DB_PATH ? resolve(MOCKUP_DIR, env.POIO_DB_PATH) : join(abs(env.POIO_DATA_DIR, join(MOCKUP_DIR, 'data')), 'poio.sqlite'),
+    profileDailyUsd: num(env.POIO_PROFILE_DAILY_USD, 0.5),
+    profileMonthlyUsd: num(env.POIO_PROFILE_MONTHLY_USD, 5),
+    inviteTtlMs: num(env.POIO_INVITE_HOURS, 72) * 60 * 60 * 1000,
+    profileSessionMs: num(env.POIO_PROFILE_SESSION_DAYS, 30) * 24 * 60 * 60 * 1000,
+    publicUrl: (str(env.POIO_PUBLIC_URL) ?? `http://localhost:${num(env.PORT, 8787)}`).replace(/\/+$/, ''),
   };
 }

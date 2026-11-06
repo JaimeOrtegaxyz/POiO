@@ -124,7 +124,10 @@ Details in [`hardware/PLAN.md`](hardware/PLAN.md).
 - **Pill functions.** Back (left) and home (right) are provisional. The bench test decides if they keep those jobs, or whether the knob and voice cover them.
 - **How proactive is too proactive.** Frequency and tone of suggestions and check-ins.
 - **Sound design.** Final sounds are Jaime's call.
-- **Product render.** To be exported from [`hardware/POiO.3dm`](hardware/POiO.3dm) into `assets/`.
+- **Product render.** A frontal render is in [`assets/render-frontal.png`](assets/render-frontal.png) (the mockup's device face is cut from it). Other angles still to be exported from [`hardware/POiO.3dm`](hardware/POiO.3dm).
+- **Screen recess vs. panel.** The render's screen hole is about 4:3; the default Spectra candidate is 3:2 (600×400). The mockup letterboxes. The recess should follow the chosen panel after the bench test.
+- **Shell size.** Not documented outside the Rhino model; the mockup only shows the panel to scale.
+- **Hosting cutover.** Cloudflare Workers + D1 is the direction ([`mockup/docs/CLOUDFLARE.md`](mockup/docs/CLOUDFLARE.md)); when to move off the iMac tunnel, and whether the access-code path survives it.
 - **Time words in step text.** SKILL.md lets a step say when to look ("A los 5 min, checkpoint: …"); the screen draws no time while cooking. The mockup hides that clause on the device and lets the checkpoint carry it. Keep it that way, or show "a los 5 min"?
 - **Clearing a checkpoint.** In the mockup, the press that clears a checkpoint band doesn't also advance the step (one press clears, the next advances). Is the extra press right in the kitchen?
 - **Unknown items on screen.** Items POiO doesn't know get a hollow keyline in the mockup, next to the three status markers. Does that read as a fourth state (discarded), or should unknown items show no marker at all?
@@ -133,7 +136,7 @@ Details in [`hardware/PLAN.md`](hardware/PLAN.md).
 ## Testing plan (online mockup)
 
 - Text-first
-- Google login
+- Invite links: each one an isolated browser profile, no accounts yet (a login can come later)
 - Shared widely
 - Voice input
 - A/B: images + animation vs text

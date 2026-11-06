@@ -17,6 +17,7 @@ import { partialAllowed } from '../screen/profiles';
 import type { RefreshKind } from '../screen/refresh';
 import { newId, saveState, type DeviceState } from '../state/store';
 import { SCREENS, type ScreenId } from './screens';
+import type { Control } from './tutorial';
 
 export interface Area { x: number; y: number; w: number; h: number }
 
@@ -37,6 +38,7 @@ export interface Runtime {
   pantry: { sel: number; keys: string[] };
   notes: { sel: number };
   cookbook: { loading: boolean; checkinShown: string | null };
+  tutorial: { step: number; sel: number; turns: number; dish: string; heard: string };
 }
 
 export interface Track { (type: string, data?: Record<string, string | number | boolean>): void }
@@ -56,6 +58,7 @@ function freshRuntime(): Runtime {
     pantry: { sel: 0, keys: [] },
     notes: { sel: 0 },
     cookbook: { loading: false, checkinShown: null },
+    tutorial: { step: 0, sel: 0, turns: 0, dish: '', heard: '' },
   };
 }
 
@@ -74,6 +77,10 @@ export class App {
   private tickTimer: ReturnType<typeof setInterval> | null = null;
   track: Track = () => {};
   onRendered: (() => void) | null = null;
+  /** Every screen change (and turn-off): the page around the device follows it (the tutorial's exit line). */
+  onScreen: ((id: ScreenId) => void) | null = null;
+  /** After each render: the control the screen is asking for, or null (rings it on the face). */
+  onHint: ((c: Control | null) => void) | null = null;
 
   constructor(
     public state: DeviceState,
@@ -93,7 +100,8 @@ export class App {
 
   // ---------------- power ----------------
 
-  turnOn(): void {
+  /** `first`: open on this screen instead of the usual one (the tutorial). */
+  turnOn(first?: ScreenId): void {
     if (this.on) return;
     this.on = true;
     this.turnOnAt = this.now();
@@ -105,7 +113,7 @@ export class App {
     this.state.firstTurnOnAt ??= this.now();
     this.save();
     this.track('turn_on', { onboarded: this.state.onboarded });
-    this.go(this.state.onboarded ? 'cookbook' : 'onboarding');
+    this.go(first ?? (this.state.onboarded ? 'cookbook' : 'onboarding'));
     this.sounds.play('chirp');
     this.tickTimer = setInterval(() => this.tick(), 500);
   }
@@ -119,7 +127,27 @@ export class App {
     if (this.tickTimer) clearInterval(this.tickTimer);
     this.tickTimer = null;
     this.api.session = '';
+    this.onScreen?.('off');
     // E-paper keeps the last image with no power: nothing to repaint.
+  }
+
+  // ---------------- tutorial ----------------
+
+  /** "Cómo se usa": a practice run on the screen (flows/tutorial.ts). Turns the device on if needed; a recipe in progress is left, as with home. */
+  startTutorial(): void {
+    if (!this.on) this.turnOn('tutorial');
+    this.rt.tutorial = { step: 0, sel: 0, turns: 0, dish: '', heard: '' };
+    this.rt.cook.pending = [];
+    this.rt.cook.fired = [];
+    this.go('tutorial');
+  }
+
+  /** Done or closed: back to where a turn-on would land. Seen either way. */
+  endTutorial(): void {
+    if (this.rt.screen !== 'tutorial') return;
+    this.state.tutorialSeen = true;
+    this.save();
+    this.go(this.state.onboarded ? 'cookbook' : 'onboarding');
   }
 
   // ---------------- navigation and rendering ----------------
@@ -128,6 +156,7 @@ export class App {
     this.epoch++;
     this.rt.screen = id;
     if (!opts.keepBand) this.band = null;
+    this.onScreen?.(id);
     SCREENS[id].enter?.(this);
     if (this.rt.screen === id) this.render('full');
   }
@@ -145,6 +174,7 @@ export class App {
       this.drawBands(p);
     }, kind);
     this.renders++;
+    this.onHint?.(def.hint?.(this) ?? null);
     if (kind === 'full') this.state.lastFullRefreshDay = this.dayKey();
     this.onRendered?.();
   }
@@ -284,7 +314,10 @@ export class App {
    * questions, which a press already skips.
    */
   home(): void {
-    if (!this.on || this.rt.screen === 'onboarding') return;
+    if (!this.on) return;
+    const def = SCREENS[this.rt.screen];
+    if (def.home) { this.touch(); def.home(this); return; }
+    if (this.rt.screen === 'onboarding') return;
     this.touch();
     if (this.rt.screen === 'cookbook') { this.clearBand(); return; }
     this.rt.cook.pending = [];
@@ -309,6 +342,7 @@ export class App {
 
   async utterance(text: string): Promise<void> {
     const def = SCREENS[this.rt.screen];
+    if (def.hear?.(this, text)) return;
     const intent = parseIntent(text);
     if (intent && this.handleIntent(intent)) return;
     if (def.utterance && (await def.utterance(this, text))) return;

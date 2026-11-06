@@ -13,8 +13,9 @@ import { missing } from './missing';
 import { notes } from './notes';
 import { onboarding } from './onboarding';
 import { pantry } from './pantry';
+import { tutorial, type Control } from './tutorial';
 
-export type ScreenId = 'off' | 'onboarding' | 'choose' | 'intro' | 'check' | 'missing' | 'cook' | 'done' | 'cookbook' | 'pantry' | 'notes';
+export type ScreenId = 'off' | 'onboarding' | 'choose' | 'intro' | 'check' | 'missing' | 'cook' | 'done' | 'cookbook' | 'pantry' | 'notes' | 'tutorial';
 
 export interface ScreenDef {
   /** Masthead context. */
@@ -37,10 +38,16 @@ export interface ScreenDef {
   contents?(app: App): unknown;
   /** Called by the scheduler; return true to repaint. */
   tick?(app: App, now: number): boolean;
+  /** The right pill, when this screen handles it itself (the tutorial). */
+  home?(app: App): boolean;
+  /** Every utterance, before the intent parser and the brain; return true to stop there (the tutorial). */
+  hear?(app: App, text: string): boolean;
+  /** The control this screen is asking for, ringed on the face (the tutorial). */
+  hint?(app: App): Control | null;
 }
 
 const off: ScreenDef = { context: () => '', afford: () => '', draw: () => {} };
 
 export const SCREENS: Record<ScreenId, ScreenDef> = {
-  off, onboarding, choose, intro, check, missing, cook, done, cookbook, pantry, notes,
+  off, onboarding, choose, intro, check, missing, cook, done, cookbook, pantry, notes, tutorial,
 };

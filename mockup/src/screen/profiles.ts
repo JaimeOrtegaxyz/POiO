@@ -19,6 +19,8 @@ export interface Timing {
 export interface Profile {
   id: ProfileId;
   label: string;
+  /** Candidate panel's active-area diagonal in inches (a candidate, not fixed hardware): the target of the calibrated real-size view. */
+  diagonalIn: number;
   /** Native resolution, landscape. */
   width: number;
   height: number;
@@ -60,6 +62,7 @@ export const PROFILES: Record<ProfileId, Profile> = {
   'spectra6-4in': {
     id: 'spectra6-4in',
     label: 'Spectra 6 · 4" · 600×400',
+    diagonalIn: 4,
     width: 600,
     height: 400,
     mode: 'palette',
@@ -74,6 +77,7 @@ export const PROFILES: Record<ProfileId, Profile> = {
   'kaleido3-6in': {
     id: 'kaleido3-6in',
     label: 'Kaleido 3 · 6" · 1448×1072',
+    diagonalIn: 6,
     width: 1448,
     height: 1072,
     mode: 'kaleido',
