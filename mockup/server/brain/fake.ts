@@ -199,25 +199,32 @@ export function fakeEquipment(utterance: string): Action {
   const lacks = new Set<string>();
   const adds: string[] = [];
   // "no tengo horno", "sin licuadora", "no hay horno ni licuadora"
-  const neg = /(no tengo|no hay|sin|me falta|no cuento con)\b(.*)/.exec(n)?.[2] ?? '';
+  // The negation ends at "pero" / "aunque" ("no tengo horno pero sí freidora").
+  const neg = (/(no tengo|no hay|sin|me falta|no cuento con)\b(.*)/.exec(n)?.[2] ?? '').split(/\b(?:pero|aunque)\b/)[0];
   for (const [re, name] of EQUIPMENT) {
     if (neg && re.test(neg)) lacks.add(name);
     else if (re.test(n) && !DEFAULT_EQUIPMENT.includes(name)) adds.push(name);
   }
   if (!lacks.size && !adds.length) return { action: 'not_understood' };
   const have = [...DEFAULT_EQUIPMENT.filter((e) => !lacks.has(e)), ...adds];
-  return { action: 'poionotas', add: [NOTES.equipment(have, [...lacks])], reply: 'Anotado.' };
+  // Said back above the first-round wait: "Sin horno, con freidora de aire."
+  const heard = [lacks.size ? `sin ${joinY([...lacks])}` : '', adds.length ? `con ${joinY(adds)}` : ''].filter(Boolean).join(', ');
+  return { action: 'poionotas', add: [NOTES.equipment(have, [...lacks])], reply: `${heard.charAt(0).toUpperCase()}${heard.slice(1)}.` };
 }
 
 /** Onboarding Q3 in fake mode: a diet word becomes a clear note; anything else is kept as said. */
 export function fakeDiet(utterance: string): Action {
   const n = normalizeText(utterance);
-  if (/vegan/.test(n)) return { action: 'poionotas', add: ['Dieta vegana: nada de origen animal.'], reply: 'Anotado.' };
-  if (/vegetarian|no como carne|no comemos carne/.test(n)) return { action: 'poionotas', add: ['Dieta vegetariana: sin carne, pollo ni pescado.'], reply: 'Anotado.' };
-  if (/pescetarian|solo pescado/.test(n)) return { action: 'poionotas', add: ['Sin carne ni pollo; pescado sí.'], reply: 'Anotado.' };
-  // Notes speak to the user: "no como cerdo" -> "No comes cerdo."
+  // `reply` is said back above the next question: what was understood, in a few words.
+  if (/vegan/.test(n)) return { action: 'poionotas', add: ['Dieta vegana: nada de origen animal.'], reply: 'Nada de origen animal, entonces.' };
+  if (/vegetarian|no como carne|no comemos carne/.test(n)) return { action: 'poionotas', add: ['Dieta vegetariana: sin carne, pollo ni pescado.'], reply: 'Sin carne, entonces.' };
+  if (/pescetarian|solo pescado/.test(n)) return { action: 'poionotas', add: ['Sin carne ni pollo; pescado sí.'], reply: 'Pescado sí, carne no.' };
+  // Notes speak to the user: "no como cerdo" -> "No comes cerdo."; said back as "Sin cerdo."
   const note = sentence(utterance).replace(/^No como\b/, 'No comes').replace(/^No comemos\b/, 'No comen');
-  return note ? { action: 'poionotas', add: [/^no\b/i.test(note) ? note : `No comes: ${note.replace(/\.$/, '')}.`], reply: 'Anotado.' } : { action: 'not_understood' };
+  if (!note) return { action: 'not_understood' };
+  const what = note.replace(/^No (comes|comen)\s+/i, '').replace(/\.$/, '');
+  const heard = /^no\b/i.test(note) && what.split(/\s+/).length <= 4 ? `Sin ${what}.` : 'Anotado.';
+  return { action: 'poionotas', add: [/^no\b/i.test(note) ? note : `No comes: ${note.replace(/\.$/, '')}.`], reply: heard };
 }
 
 /**
