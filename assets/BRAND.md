@@ -29,8 +29,8 @@ the panel's red and yellow.
 | File | What |
 |---|---|
 | [`logo-bw.svg`](logo-bw.svg) | The POiO wordmark, one color (`currentColor` on the site). |
-| [`chicken-color.svg`](chicken-color.svg) | The hen: red on the yellow disc. The device's sleep image. |
-| [`chicken-alone.svg`](chicken-alone.svg) | The hen's silhouette, one color. The device's thinking state. |
+| [`chicken-color.svg`](chicken-color.svg) | The hen: red on the yellow disc. Brand use (landing, print); no longer on the device. |
+| [`chicken-alone.svg`](chicken-alone.svg) | The hen's silhouette, one color. The device's thinking state and its sleep image (ink on paper). |
 
 ## Type
 
