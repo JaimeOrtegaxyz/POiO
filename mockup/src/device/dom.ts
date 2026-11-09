@@ -1,12 +1,16 @@
 /**
- * The DOM around the screen: the device face from the frontal render
- * (assets/render-frontal.png, cut by scripts/face/build-face.py). Layers,
- * back to front:
+ * The DOM around the screen: the device face from the frontal renders
+ * (assets/render/, cut by scripts/face/build-face.py). Layers, back to front:
  *
- *   panel   the emulated e-paper panel, letterboxed in the screen hole
- *   face    the render, with a transparent screen hole and the star painted out
- *   parts   hit targets over the render: back pill, the star knob (its own
- *           image, so it can turn a detent), home pill; the listening LED
+ *   panel        the emulated e-paper panel, behind the screen opening
+ *   face         the shell alone (POiO-main.png): transparent background and opening
+ *   pill layers  each pill and the shell around it, at rest or pushed in, from
+ *                the pill renders; the pushed one shows while it's held
+ *   knob shadow  the knob's shadow on the shell, a multiply layer per frame
+ *   knob         the star, one rendered frame per 15° (four frames: 60° is
+ *                the star's symmetry), so the highlights stay where the light is
+ *   LED          drawn only while listening (the model has none)
+ *   hit targets  over the pills
  *
  *   [ back pill ]   ( red star knob )   [ home pill ]
  *
@@ -26,9 +30,12 @@ import { sizeControls, type SizePref } from './size';
 export interface DeviceDom {
   root: HTMLElement;
   canvas: HTMLCanvasElement;
-  /** The star knob (pointer target), and the part of it that turns. */
+  /** The star knob (pointer target). */
   knob: HTMLElement;
-  knobTurn: HTMLElement;
+  /** Show the knob `step` detents from rest: one rendered frame per 15°. */
+  showKnob(step: number): void;
+  /** Show a pill pushed in for a moment (keyboard Esc / H). */
+  flashPill(which: 'back' | 'home'): void;
   led: HTMLElement;
   back: HTMLButtonElement;
   home: HTMLButtonElement;
@@ -65,6 +72,17 @@ function place(e: HTMLElement, r: Rect): void {
 
 const srcset = (name: string, renderW: number) =>
   FACE.widths.map((w) => `/face/${name}-${w}.webp ${Math.round((renderW * w) / FACE.width)}w`).join(', ');
+
+/** One render layer, sized by the browser from its box (`sizes` set on relayout). */
+function layer(name: string, renderW: number, cls: string, parent: HTMLElement): HTMLImageElement {
+  const img = el('img', cls, parent);
+  img.alt = '';
+  img.decoding = 'async';
+  img.draggable = false;
+  img.srcset = srcset(name, renderW);
+  img.src = `/face/${name}-${FACE.widths[0]}.webp`;
+  return img;
+}
 
 /** The feedback panel: a text box and a send button; says thanks, or that it didn't go. */
 function feedbackForm(host: HTMLElement, send: (text: string) => Promise<boolean>): void {
@@ -111,40 +129,62 @@ export function buildDevice(mount: HTMLElement, panelSize: () => { w: number; h:
   const canvas = el('canvas', 'screen', panel);
   canvas.setAttribute('aria-label', 'Pantalla de POiO');
 
-  const face = el('img', 'face', device);
-  face.alt = '';
-  face.decoding = 'async';
-  face.draggable = false;
-  face.srcset = srcset('face', FACE.width);
-  face.src = `/face/face-${FACE.widths[0]}.webp`;
+  layer('face', FACE.width, 'face', device);
 
-  const back = el('button', 'pill pill-back', device);
-  back.type = 'button';
-  back.title = DEVICE.backLabel;
-  back.setAttribute('aria-label', DEVICE.backLabel);
-  place(back, FACE.pills.back);
+  // Pills: the rendered pill at rest and pushed in, over the bare shell. The
+  // pushed one shows while the hit target is held (or flashes for a key).
+  const pillLayers = {} as Record<'back' | 'home', HTMLElement>;
+  for (const name of ['back', 'home'] as const) {
+    const box = el('div', `pill-layer pill-layer-${name}`, device);
+    place(box, FACE.pills[name].layer);
+    layer(`pill-${name}-up`, FACE.pills[name].layer.w, 'up', box);
+    layer(`pill-${name}-down`, FACE.pills[name].layer.w, 'down', box);
+    pillLayers[name] = box;
+  }
 
+  // The knob: its shadow on the shell (multiply), then the star, one frame per detent.
+  const shadow = el('div', 'knob-shadow', device);
+  place(shadow, FACE.shadow);
   const knob = el('div', 'knob', device);
   knob.title = DEVICE.knobLabel;
   knob.setAttribute('role', 'button');
   knob.setAttribute('aria-label', DEVICE.knobLabel);
-  place(knob, FACE.star);
-  const knobTurn = el('div', 'knob-turn', knob);
-  knobTurn.style.transformOrigin = `${((FACE.star.cx / FACE.star.w) * 100).toFixed(3)}% ${((FACE.star.cy / FACE.star.h) * 100).toFixed(3)}%`;
-  const star = el('img', 'star', knobTurn);
-  star.alt = '';
-  star.draggable = false;
-  star.srcset = srcset('star', FACE.star.w);
-  star.src = `/face/star-${FACE.widths[0]}.webp`;
+  place(knob, FACE.knob);
+  const frames: { star: HTMLImageElement; shade: HTMLImageElement }[] = [];
+  for (let i = 0; i < FACE.knob.frames; i++) {
+    frames.push({
+      shade: layer(`knob-shadow-${i}`, FACE.shadow.w, 'kf', shadow),
+      star: layer(`knob-${i}`, FACE.knob.w, 'kf star', knob),
+    });
+  }
+  const showKnob = (step: number) => {
+    const n = FACE.knob.frames;
+    const k = ((step % n) + n) % n;
+    frames.forEach((f, i) => { f.star.classList.toggle('on', i === k); f.shade.classList.toggle('on', i === k); });
+  };
+  showKnob(0);
 
   const led = el('span', 'led', device);
   place(led, FACE.led);
 
-  const home = el('button', 'pill pill-home', device);
-  home.type = 'button';
-  home.title = DEVICE.homeLabel;
-  home.setAttribute('aria-label', DEVICE.homeLabel);
-  place(home, FACE.pills.home);
+  const pillButton = (name: 'back' | 'home', label: string) => {
+    const b = el('button', `pill pill-${name}`, device);
+    b.type = 'button';
+    b.title = label;
+    b.setAttribute('aria-label', label);
+    place(b, FACE.pills[name]);
+    const box = pillLayers[name];
+    const up = () => box.classList.remove('down');
+    b.addEventListener('pointerdown', () => box.classList.add('down'));
+    for (const ev of ['pointerup', 'pointercancel', 'pointerleave'] as const) b.addEventListener(ev, up);
+    return b;
+  };
+  const back = pillButton('back', DEVICE.backLabel);
+  const home = pillButton('home', DEVICE.homeLabel);
+  const flashPill = (name: 'back' | 'home') => {
+    pillLayers[name].classList.add('down');
+    setTimeout(() => pillLayers[name].classList.remove('down'), 140);
+  };
 
   // Off the face, kept quiet: power and the typed field are always there;
   // help, size and feedback wait behind three small links, one panel open
@@ -226,10 +266,15 @@ export function buildDevice(mount: HTMLElement, panelSize: () => { w: number; h:
     device.style.height = `${l.devH}px`;
     device.style.left = `${-l.offX}px`;
     device.style.top = `${-l.offY}px`;
-    face.sizes = `${Math.ceil(l.devW)}px`;
-    star.sizes = `${Math.ceil(FACE.star.w * s)}px`;
+    for (const img of device.querySelectorAll('img')) {
+      const box = img.parentElement === device ? FACE.width : img.parentElement === shadow ? FACE.shadow.w : img.parentElement === knob ? FACE.knob.w
+        : img.parentElement === pillLayers.back ? FACE.pills.back.layer.w : FACE.pills.home.layer.w;
+      img.sizes = `${Math.ceil(box * s)}px`;
+    }
   };
-  const size = sizeControls(sizeHost, (s) => { pref = s; relayout(); }, () => panelSize().diagonalIn);
+  // The panel fills the opening when their aspects match (the profile the shell was modeled for).
+  const fills = () => { const p = panelSize(); return Math.abs(p.w / p.h / (FACE.hole.w / FACE.hole.h) - 1) < 0.02; };
+  const size = sizeControls(sizeHost, (s) => { pref = s; relayout(); }, () => panelSize().diagonalIn, fills);
   window.addEventListener('resize', relayout);
   // A profile change resizes the canvas: the real-size scale depends on it.
   new MutationObserver(() => size.refresh()).observe(canvas, { attributes: true, attributeFilter: ['width', 'height'] });
@@ -247,5 +292,5 @@ export function buildDevice(mount: HTMLElement, panelSize: () => { w: number; h:
     home.classList.toggle('hint', c === 'home');
   };
 
-  return { root, canvas, knob, knobTurn, led, back, home, power, typed, notice, usage, tutorialLink, tutorialExit, myDataLink, reset, debug, relayout, setTutorialMode, setHint };
+  return { root, canvas, knob, showKnob, flashPill, led, back, home, power, typed, notice, usage, tutorialLink, tutorialExit, myDataLink, reset, debug, relayout, setTutorialMode, setHint };
 }

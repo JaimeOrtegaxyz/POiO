@@ -1,20 +1,35 @@
 /**
  * First run: four skippable questions, each with its why-line, then straight
  * to three options. No summary, no "¿listo?". Defaults per setup/interview.md.
+ *
+ * City and servings are read here. The diet answer ("soy vegetariano", "no
+ * como cerdo") and the equipment answer ("no tengo horno, pero sí freidora")
+ * go to the brain, which writes them as poionotas; "sí", "de todo" and a
+ * skip take the defaults without a call. The pantry isn't asked: the first
+ * options don't depend on it, and the ingredient check fills it in.
  */
 import { normalizeText } from '../../shared/slug';
-import { AFFORD, CONTEXT, NOTES, NOTHING_WORDS, ONBOARDING, pantryName, progress, sentence } from '../copy/es-MX';
+import type { Action } from '../../shared/types';
+import { AFFORD, CONTEXT, DEFAULT_EQUIPMENT, EQUIPMENT_WHAT, NOTES, NOTHING_WORDS, ONBOARDING, pantryName, progress, sentence } from '../copy/es-MX';
 import { parseServings } from '../input/intent';
 import type { App } from './app';
 import { T } from './draw';
 import type { ScreenDef } from './screens';
 
-/** Q4 skipped or partial: assume the basics and chicken, marked "supuesto". */
-export const ASSUMED_BASICS = ['salt-kosher-table', 'vegetable-oil', 'white-onion', 'garlic', 'chicken-thighs-boneless', 'chicken-breast-boneless'];
+/** The pantry nobody was asked about: the basics, marked "supuesto" (and sent to the brain as guesses). */
+export const ASSUMED_BASICS = ['salt-kosher-table', 'vegetable-oil', 'white-onion', 'garlic'];
+/** Chicken too, unless the diet answer rules it out. */
+export const ASSUMED_CHICKEN = ['chicken-thighs-boneless', 'chicken-breast-boneless'];
+
+/** Does a note say this person doesn't eat chicken? (vegetarian, vegan, "no como pollo") */
+export function noChicken(notes: string[]): boolean {
+  return notes.some((n) => /(vegetarian|vegan|sin carne, pollo|no come[s]? (carne|pollo)|no como (carne|pollo)|sin pollo)/.test(normalizeText(n)));
+}
 
 function assumeBasics(app: App): void {
   const t = app.now();
-  for (const key of ASSUMED_BASICS) {
+  const keys = noChicken(app.state.poionotas.map((n) => n.text)) ? ASSUMED_BASICS : [...ASSUMED_BASICS, ...ASSUMED_CHICKEN];
+  for (const key of keys) {
     if (!app.state.pantry[key]) app.state.pantry[key] = { status: 'plenty', display: pantryName(key), assumed: true, at: t };
   }
 }
@@ -33,14 +48,27 @@ function finish(app: App): void {
   assumeBasics(app);
   app.state.onboarded = true;
   app.save();
-  void app.openChoose('cookbook');
+  // The first options: from 'onboarding', so the wait and the screen say what this round is.
+  void app.openChoose('onboarding');
+}
+
+/** The default for each question when it's skipped or answered "sí". */
+function takeDefault(app: App, q: number): void {
+  if (q === 1) app.addNotes([NOTES.servings(2)]);
+  if (q === 2) app.addNotes([NOTES.noRestrictions]);
+  if (q === 3) app.addNotes([NOTES.equipment(DEFAULT_EQUIPMENT)]);
 }
 
 function skip(app: App): void {
   const q = app.rt.onboardingQ;
   app.track('onboarding_skip', { q: q + 1 });
-  if (q === 1) app.addNotes([NOTES.servings(2)]);
-  if (q === 2) app.addNotes([NOTES.noRestrictions]);
+  takeDefault(app, q);
+  app.save();
+  next(app);
+}
+
+function answered(app: App, q: number, data: Record<string, number> = {}): void {
+  app.track('onboarding_answer', { q: q + 1, ...data });
   app.save();
   next(app);
 }
@@ -70,12 +98,12 @@ export const onboarding: ScreenDef = {
       next(app);
       return true;
     }
-    if (i.kind === 'no' && app.rt.onboardingQ === 2) {
-      app.addNotes([NOTES.noRestrictions]);
-      app.track('onboarding_answer', { q: 3 });
-      next(app);
-      return true;
-    }
+    const q = app.rt.onboardingQ;
+    // "¿Comes de todo…?" — "sí" or "no" (nothing I don't eat) both mean the default.
+    if ((i.kind === 'no' || i.kind === 'yes') && q === 2) { takeDefault(app, q); answered(app, q); return true; }
+    // "Supongo que tienes… ¿Así es?" — "sí" keeps the guess; a bare "no" asks what's different.
+    if (i.kind === 'yes' && q === 3) { takeDefault(app, q); answered(app, q); return true; }
+    if (i.kind === 'no' && q === 3) { app.notice(EQUIPMENT_WHAT); return true; }
     return false;
   },
 
@@ -98,26 +126,22 @@ export const onboarding: ScreenDef = {
       next(app);
       return true;
     }
-    if (q === 2) {
-      const nothing = NOTHING_WORDS.includes(normalizeText(text));
-      app.addNotes([nothing ? NOTES.noRestrictions : NOTES.restriction(text)]);
-      app.track('onboarding_answer', { q: 3 });
-      next(app);
-      return true;
-    }
-    // Q4: map what's at hand to pantry keys. One small brain call (keyword matching in fake mode).
+    if (q === 2 && NOTHING_WORDS.includes(normalizeText(text))) { takeDefault(app, q); answered(app, q); return true; }
+    // Q3 diet and Q4 equipment, in the user's words: the brain writes them as notes.
     return false;
   },
 
-  action(app, a) {
-    if (app.rt.onboardingQ !== 3) return false;
-    if (a.action === 'pantry' && a.changes?.length) {
-      app.applyPantry(a.changes.map((c) => ({ ...c, status: 'plenty' })));
-      app.track('onboarding_answer', { q: 4, items: a.changes.length });
-    } else {
-      app.track('onboarding_skip', { q: 4 });
+  actions(app, list: Action[]) {
+    const q = app.rt.onboardingQ;
+    if (q < 2) return false;
+    let notes = 0;
+    for (const a of list) {
+      if (a.action === 'poionotas') { app.removeNotes(a.remove ?? []); app.addNotes(a.add ?? []); notes += (a.add ?? []).length; }
+      // Food mentioned in passing ("no como cerdo, y tengo pollo"): it's in the kitchen.
+      if (a.action === 'pantry' && a.changes?.length) app.applyPantry(a.changes);
     }
-    finish(app);
+    if (!notes) { app.notUnderstood(); return true; }
+    answered(app, q, { notes });
     return true;
   },
 

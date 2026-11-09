@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import * as copy from '../src/copy/es-MX';
-import { fakeUtterance, FakeBrain } from '../server/brain/fake';
+import { fakeActions, fakeUtterance, FakeBrain } from '../server/brain/fake';
 import { MOCKUP_DIR } from '../server/config';
 import { ctx, files } from './helpers';
 
@@ -54,9 +54,11 @@ describe('screen copy (B-C voice, Mexican Spanish)', () => {
     expect(copy.ONBOARDING.map((q) => q.ask)).toEqual([
       '¿En qué ciudad cocinas?',
       '¿Para cuántas personas cocinas normalmente?',
-      '¿Hay algo que no comas o que no te guste?',
-      '¿Qué tienes hoy a la mano? Dime unas cosas, o sáltalo.',
+      '¿Comes de todo, o hay algo que no comas?',
+      'Supongo que tienes estufa, horno, sartén y licuadora. ¿Así es?',
     ]);
+    expect(copy.FIRST_ROUND.waiting).toBe('Van tres ideas para empezar.');
+    expect(copy.NOTES.equipment(['estufa', 'sartén'], ['horno'])).toBe('Cocinas con estufa y sartén. Sin horno.');
   });
 
   it('screen modules draw no string literals of their own (copy lives in es-MX.ts)', () => {
@@ -69,12 +71,12 @@ describe('screen copy (B-C voice, Mexican Spanish)', () => {
 });
 
 describe('no motion while pending', () => {
-  it('no CSS animations, and one transition only: the star knob turning a detent', () => {
+  it('no CSS animations and no transitions: the knob turns by swapping rendered frames', () => {
     const css = walk(join(MOCKUP_DIR, 'src')).filter((f) => f.endsWith('.css')).map((f) => readFileSync(f, 'utf8')).join('\n');
     expect(css).not.toMatch(/@keyframes|animation\s*:/);
     const transitions = [...css.matchAll(/([^{}]*)\{[^}]*transition\s*:\s*([^;}]*)/g)].map((m) => ({ sel: m[1].trim(), value: m[2].trim() }));
     const moving = transitions.filter((t) => t.value !== 'none');
-    expect(moving).toEqual([{ sel: '.knob-turn', value: 'transform 110ms ease-out' }]);
+    expect(moving).toEqual([]);
   });
 
   it('no requestAnimationFrame loops anywhere in the client', () => {
@@ -111,5 +113,22 @@ describe('fake brain', () => {
     expect(a('cook', 'cántame algo')).toEqual({ action: 'not_understood' });
     const withNote = { ...ctx('notes'), poionotas: ['No le gusta el cilantro.'] } as any;
     expect(fakeUtterance(withNote, 'Olvida lo del cilantro', brain)).toMatchObject({ action: 'poionotas', remove: ['No le gusta el cilantro.'] });
+  });
+
+  it('one sentence can ask for several things: state first, then one move', () => {
+    const options = { options: [{ title: 'Tinga de pollo' }, { title: 'Pollo a la crema con rajas' }, { title: 'Muslos glaseados con gochujang' }] };
+    expect(fakeActions(ctx('choose', options) as any, 'me gusta la primera pero no tengo perejil', brain)).toEqual([
+      { action: 'pantry', changes: [{ item: 'flat-leaf-parsley', status: 'out', display: 'perejil' }], reply: 'Anotado.' },
+      { action: 'pick', index: 1 },
+    ]);
+    expect(fakeActions(ctx('cook', tingaIngredients) as any, 'cántame algo', brain)).toEqual([{ action: 'not_understood' }]);
+  });
+
+  it('first-run answers become notes: diet and equipment', () => {
+    expect(fakeActions(ctx('onboarding-3') as any, 'soy vegetariana', brain)).toMatchObject([{ action: 'poionotas', add: ['Dieta vegetariana: sin carne, pollo ni pescado.'] }]);
+    expect(fakeActions(ctx('onboarding-3') as any, 'no como cerdo', brain)).toMatchObject([{ action: 'poionotas', add: ['No comes cerdo.'] }]);
+    expect(fakeActions(ctx('onboarding-4') as any, 'tengo freidora de aire pero no tengo horno', brain))
+      .toMatchObject([{ action: 'poionotas', add: ['Cocinas con estufa, sartén, licuadora y freidora de aire. Sin horno.'] }]);
+    expect(fakeActions(ctx('onboarding-4') as any, 'mmm', brain)).toEqual([{ action: 'not_understood' }]);
   });
 });

@@ -22,7 +22,8 @@ function firstOut(app: App) {
   return r.ingredients.find((i) => i.required !== false && app.state.pantry[i.item]?.status === 'out' && !app.rt.check.handled.has(i.item));
 }
 
-export function openMissing(app: App, a: Action): void {
+/** The missing-ingredient line for `a`; the choice returns to `from` (the check, or the step being cooked). */
+export function openMissing(app: App, a: Action, from: 'check' | 'cook' = 'check'): void {
   const display = a.display || app.displayOf(a.item ?? '');
   const action: Action = {
     ...a,
@@ -30,7 +31,7 @@ export function openMissing(app: App, a: Action): void {
     line: a.line || MISSING.line(display),
     options: a.options?.length ? a.options.slice(0, 2) : [{ label: MISSING.dropFallback, kind: 'drop' }],
   };
-  app.rt.missing = { action, sel: 0 };
+  app.rt.missing = { action, sel: 0, from };
   if (a.item) app.rt.check.handled.add(a.item);
   app.track('missing', { known: !!a.options?.length });
   app.go('missing');

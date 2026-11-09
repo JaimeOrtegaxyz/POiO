@@ -54,11 +54,12 @@ export function initDebug(host: HTMLElement, app: App, src: DebugSources): () =>
   const repaintFull = () => { if (app.on) app.render('full'); };
   profile.onchange = () => {
     s.profile = profile.value as ProfileId;
+    s.profilePicked = true;
     s.scale = undefined;
     app.screen.setProfile(s.profile);
     scale.value = String(app.screen.scale);
     app.save();
-    if (app.on) repaintFull(); else app.screen.blank();
+    if (app.on) repaintFull(); else app.showSleep();
   };
   timing.onchange = () => { s.timing = timing.value as TimingMode; app.screen.setTiming(s.timing); app.save(); };
   scale.onchange = () => { s.scale = Number(scale.value); app.screen.setScale(s.scale); app.save(); };

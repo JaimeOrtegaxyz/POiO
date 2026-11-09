@@ -1,7 +1,9 @@
 /**
  * The real brain: one Messages API call per request. Cached static prefix
- * (cache_control on the last system block), JSON-schema structured output,
- * lowest effort with thinking off, ajv validation, one retry.
+ * (cache_control on the last system block, kept for an hour: calls on one
+ * device are minutes apart, so the 5-minute cache never got a hit),
+ * JSON-schema structured output, low effort with thinking off (the prompt
+ * does the steering; see prompts/adapter.md), ajv validation, one retry.
  */
 import type { TokenUsage } from '../pricing';
 
@@ -33,7 +35,7 @@ export class RealBrain {
     return {
       model: spec.model,
       max_tokens: spec.maxTokens,
-      system: [{ type: 'text', text: this.prefix, cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: this.prefix, cache_control: { type: 'ephemeral', ttl: '1h' } }],
       messages: [{ role: 'user', content: user }],
       thinking: { type: 'disabled' },
       output_config: { effort: 'low', format: { type: 'json_schema', schema: spec.schema } },

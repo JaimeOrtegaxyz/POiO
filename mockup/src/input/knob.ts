@@ -6,9 +6,9 @@
  *   hold    keep it down past HOLD_MS without turning: push-to-talk,
  *           released = send (Space does the same)
  *
- * The star turns one detent per step. Its short turn is the only CSS
- * transition on the page: device chrome reacting to a hand, never the
- * screen, never a loop.
+ * One detent per step. The star is shown by rendered frames, 15° apart
+ * (device/dom.ts): a detent swaps to the next frame, no CSS rotation, so the
+ * highlights stay where the light puts them. Never a loop.
  */
 
 export interface KnobHandlers {
@@ -21,19 +21,19 @@ export interface KnobHandlers {
 
 /** How long a press must last to count as a hold (talk) instead of a press. */
 export const HOLD_MS = 300;
-export const DETENT_DEG = 24;
 const WHEEL_STEP = 60; // accumulated wheel delta per detent (trackpads send many small deltas)
 const DRAG_DEG = 24; // degrees of finger travel around the knob per detent
 const SLOP_PX = 6; // movement under this is still a press or a hold
 
 export class Knob {
-  private angle = 0;
+  private step = 0;
   private wheelAccum = 0;
   private lastWheel = 0;
 
   constructor(
     private knob: HTMLElement,
-    private turnEl: HTMLElement,
+    /** Show the knob turned `step` detents from rest (negative = counterclockwise). */
+    private show: (step: number) => void,
     private h: KnobHandlers,
     wheelTargets: HTMLElement[],
   ) {
@@ -116,8 +116,8 @@ export class Knob {
   }
 
   turn(dir: 1 | -1): void {
-    this.angle += dir * DETENT_DEG;
-    this.turnEl.style.transform = `rotate(${this.angle}deg)`;
+    this.step += dir;
+    this.show(this.step);
     this.h.onRotate(dir);
   }
 

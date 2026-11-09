@@ -4,6 +4,31 @@ Dated product decisions. Decisions only: no meeting notes, no names, no personal
 
 What's in scope today lives in [SCOPE.md](SCOPE.md); this file records when and why it changed.
 
+## 2026-11-09
+
+**Mockup brain and first run**
+- **The brain stays on Haiku 5.5 with thinking off; quality comes from steering the prompt**, not a bigger model. A side-by-side on the same first-run context showed Sonnet 5.5 and Opus 5.5 playing it as safe as Haiku on the old prompt, and steered Haiku beating all three. The prompt cache lasts an hour · supersedes nothing (implementation default) · decided
+- **The first round is creative, not pantry-safe**: with the pantry barely known, the first options go for range and flavor; guessed pantry items are never the reason for a dish; missing ingredients get swapped at the ingredient check · decided
+- **The first-run questions change**: diet ("¿Comes de todo, o hay algo que no comas?") and a proposed kitchen to confirm ("Supongo que tienes estufa, horno, sartén y licuadora. ¿Así es?") replace the pantry question; still four questions, all skippable · supersedes the earlier Q3 (restrictions) and Q4 (what's at hand today) · decided
+- **Their diet wins over chicken first.** A vegetarian or vegan gets no chicken, without comment · decided
+- **Anything said, anywhere, adjusts.** One utterance can carry several things ("me gusta la primera pero no tengo perejil"); the brain returns them as a short list of actions, applied in order: what to remember, then one move. A change asked for on a recipe rewrites the dish, mid-cook at the same step · supersedes one action per utterance · decided
+
+**Brand and site**
+- **Brand colors are grey `#E7E7E7`, red `#E50001` and yellow `#FFC700`** (the hen's own), with ink and white for text. Green `#2FB463` and pink `#E4007C` (rosa mexicano) are proposed accents for the site. Listed in `assets/BRAND.md`; the site reads them from `mockup/src/brand.css`. The e-paper keeps the panel's pigments · supersedes the mockup's muted page colors · colors decided, accents proposed
+- **The landing becomes color blocks**: a red hero with the Vaivén ring of wordmarks around a few words, then grey, pink and yellow sections with chunky outlined cards. Icons from Phosphor (MIT) · supersedes the single-column landing · decided for the mockup
+
+**Mockup controls**
+- **Pressing the star with the device off turns it on**, like the power button · decided
+
+**Mockup screen**
+- **The chicken is the device's static thinking and sleep image**: the ink silhouette while thinking, the red hen on yellow when off (e-paper holds it with no power). Both live in `assets/` · decided
+
+## 2026-11-08
+
+**Mockup device face**
+- **The shell's screen opening follows the Kaleido 3 6" candidate** (about 122.5 × 90.7 mm, 1448×1072), and so does the mockup's default panel profile; Spectra 6 4" stays a URL option. The panel itself is still open until the bench test · supersedes the mockup's Spectra default (an implementation default, never a recorded decision) and the letterboxed 4:3 hole · decided for the mockup; panel open
+- **The face is built from separate renders**: the shell alone as the base, the pills at rest and pushed in as layers, and the star knob as four rendered frames 15° apart (its highlights move with the light), with a modeled shadow fitted to the at-rest render · supersedes one render with the star cut out and turned by CSS · decided
+
 ## 2026-11-05
 
 **Sharing the online mockup**
@@ -14,7 +39,7 @@ What's in scope today lives in [SCOPE.md](SCOPE.md); this file records when and 
 - **Hosting direction: Cloudflare Workers + D1**, prepared (notes, draft config, tested D1 seam) but not provisioned; the iMac tunnel stays until a cutover is approved · — · direction set, cutover open
 
 **Mockup device face**
-- **The demo's face is the frontal render**, cut into layers (transparent screen hole, the star as its own turning layer, hit targets over the pills); no hand-drawn substitute. The panel keeps its 3:2 design units and is letterboxed in the render's ~4:3 hole, never stretched · supersedes the CSS-drawn face · decided
+- **The demo's face is the frontal render**, cut into layers (transparent screen hole, the star as its own turning layer, hit targets over the pills); no hand-drawn substitute. The panel keeps its 3:2 design units and is letterboxed in the render's ~4:3 hole, never stretched · supersedes the CSS-drawn face · decided; layers and opening superseded 2026-11-08
 - **Size on screen**: fit to the window by default, labeled uncalibrated; an optional ruler calibration shows the panel at the candidate panel's real size. Only the panel is to scale; no claim about the shell's size · — · decided
 
 ## 2026-11-04

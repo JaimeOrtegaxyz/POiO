@@ -20,6 +20,7 @@ import { bindKeys } from './input/keys';
 import { Knob } from './input/knob';
 import { PushToTalk, speechSupported } from './input/ptt';
 import { Screen, loadFonts } from './screen/emulator';
+import { drawSleep } from './flows/sleep';
 import { PROFILES, type ProfileId } from './screen/profiles';
 import { clearState, freshState, loadState, normalizeState, useProfileStore, type DeviceState } from './state/store';
 import { StateSync } from './state/sync';
@@ -87,7 +88,8 @@ async function boot(): Promise<void> {
   const screen = new Screen(dom.canvas, state.settings.profile, state.settings.timing, state.settings.scale);
   screenRef = screen;
   dom.relayout();
-  screen.blank();
+  // The panel opens on what it held with the power off: the sleep image.
+  screen.still(drawSleep);
   await loadFonts();
 
   const sounds = new Sounds();
@@ -115,9 +117,10 @@ async function boot(): Promise<void> {
     onEnd: (r) => void app.pttEnd(r.text, r.heldMs, false),
     onUnsupported: () => { dom.notice.textContent = DEVICE.noSpeech; },
   });
-  const knob = new Knob(dom.knob, dom.knobTurn, {
+  const knob = new Knob(dom.knob, dom.showKnob, {
     onRotate: (d) => app.rotate(d),
-    onPress: () => app.press(),
+    // Off, pressing the star turns POiO on, like the power button.
+    onPress: () => (app.on ? app.press() : powerOn()),
     onHoldStart: (since) => ptt.begin(since),
     onHoldEnd: () => ptt.end(),
   }, [dom.canvas]);
@@ -132,8 +135,8 @@ async function boot(): Promise<void> {
     press: () => knob.press(),
     talkStart: () => ptt.begin(),
     talkEnd: () => ptt.end(),
-    back: () => app.back(),
-    home: () => app.home(),
+    back: () => { dom.flashPill('back'); app.back(); },
+    home: () => { dom.flashPill('home'); app.home(); },
   }, typing);
 
   dom.typed.addEventListener('keydown', (e) => {
@@ -168,13 +171,15 @@ async function boot(): Promise<void> {
   // No focus moves to a link afterwards: Enter has to press the star again, not reopen the tutorial.
   dom.tutorialExit.addEventListener('click', () => { app.endTutorial(); dom.tutorialExit.blur(); });
 
-  dom.power.addEventListener('click', () => {
+  const powerOn = () => {
     sounds.unlock();
-    if (app.on) app.turnOff();
     // An invited profile's very first turn-on starts with the tutorial (they've never held one).
-    else if (sync && !app.state.tutorialSeen && !app.state.onboarded) app.startTutorial();
+    if (sync && !app.state.tutorialSeen && !app.state.onboarded) app.startTutorial();
     else app.turnOn();
     powerLabel();
+  };
+  dom.power.addEventListener('click', () => {
+    if (app.on) { sounds.unlock(); app.turnOff(); powerLabel(); } else powerOn();
     dom.power.blur();
   });
 

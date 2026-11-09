@@ -4,7 +4,7 @@ A shareable site in three parts:
 
 | Route | What |
 |---|---|
-| `/` | Public landing: the POiO wordmark as a Vaivén figure, a few lines in Mexican Spanish, the way into the demo. Static; it never reaches the brain. |
+| `/` | Public landing: a red hero filled edge to edge by a Vaivén figure of POiO wordmarks (it runs faster while pressed) under a few words, then what it does, the device with the hen on its screen, and the way into the demo. Brand colors from `src/brand.css` ([`assets/BRAND.md`](../assets/BRAND.md)). Static; it never reaches the brain. |
 | `/invite/:token` | A short-lived, single-use invite. Opening it shows a button; pressing it mints an isolated browser profile (an HttpOnly cookie) and sends you to `/demo`. |
 | `/demo` | The device: the frontal render's face with the live color e-paper screen in its screen hole, and one row of controls under it: a back pill, the red star knob (turn, press, hold to talk) with its LED, and a home pill. Voice in; text and a few sounds out, never speech. |
 | `/api/*` | The brain proxy. It holds the Anthropic API key, runs the `SKILL.md` brain and enforces every budget server-side. |
@@ -56,7 +56,7 @@ starts. The star turns one detent per step.
 | Device | Keyboard / mouse / touch | Does |
 |---|---|---|
 | Star knob: turn | **← → ↑ ↓**, mouse wheel (over the knob or the screen), or drag around the knob | Browse, move the selection, peek at steps. |
-| Star knob: press | **Enter**, or a click/tap on the knob | Select, advance, skip, confirm. |
+| Star knob: press | **Enter**, or a click/tap on the knob | Select, advance, skip, confirm. With the device off, turns it on. |
 | Star knob: hold | hold **Space**, or hold the knob (mouse or touch) | Push-to-talk, `es-MX`. Release to send. Space under 300 ms or silence = "No te entendí". |
 | Left pill | **Esc** or **Backspace**, or click it | Back: what saying "atrás" does here; clears a band first. *Provisional.* |
 | Right pill | **H**, or click it | Home: the cookbook. Leaves a recipe (drops its checkpoints). Ignored during the first-run questions. *Provisional.* |
@@ -74,19 +74,33 @@ Things to say (the local parser catches these with no tokens): `siguiente`,
 `no hay crema`, `se acabó la crema`, `compré poblanos y media crema`,
 `algo más rápido`, `sin horno`, `olvida lo del cilantro`, `hazme unas tostadas de tinga`.
 
+Anything said, on any screen, can change what POiO knows and what it's doing.
+The brain answers an utterance with 1-4 actions, applied in order: what to
+remember first (pantry, poionotas), quietly, then one move. `me gusta la
+primera pero no tengo perejil` marks the perejil out and opens the first
+option (the ingredient check offers the swap); `soy vegetariano, dame otras`
+saves the note and brings vegetarian options; `hazla sin picante` on a recipe
+rewrites the same dish, and mid-cook keeps your step; `no hay crema` mid-cook
+offers the swap and comes back to the step.
+
 ## Screen emulation
 
 - **Panel profiles** live in [`src/screen/profiles.ts`](src/screen/profiles.ts). The panel is TBD, so the screen runs on profiles:
 
   | id | Resolution | Color | Real refresh |
   |---|---|---|---|
-  | `spectra6-4in` (default) | 600×400 | 6 pigments: ink, paper, yellow, red, blue, green | full ~16 s, no partial |
-  | `kaleido3-6in` | 1448×1072 text; color at half resolution | 4,096 muted colors, 16-level gray, grayish paper | ~550 ms full, partial OK |
+  | `kaleido3-6in` (default) | 1448×1072 text; color at half resolution | 4,096 muted colors, 16-level gray, grayish paper | ~550 ms full, partial OK |
+  | `spectra6-4in` | 600×400 | 6 pigments: ink, paper, yellow, red, blue, green | full ~16 s, no partial |
+
+  Kaleido is the default because the shell's screen opening was modeled for it
+  (about 122.5 × 90.7 mm, 1.35). The panel itself stays open until the bench
+  test. A saved device state takes the current default on every load; only a
+  panel picked in the debug panel sticks (`settings.profilePicked`).
 
   The Spectra palette (`#1a1816`, `#f4efe4`, `#e9c92a`, `#b8322a`, `#2d4f9e`, `#3a6b3c`) is a starting approximation, to be tuned after the bench test. UI chrome uses only ink, paper, yellow and red.
 - **Honest by construction.** Each frame is drawn with canvas 2D at native resolution, food images are Floyd-Steinberg dithered to the pigments, and a panel pass snaps every pixel to what the panel can show (text comes out aliased). The canvas is scaled to the screen hole and drawn smooth: a 600 px panel can't land on an integer scale at these sizes. Nothing on the screen is DOM.
-- **Letterboxed, never stretched.** The render's screen hole is about 4:3 (684×514 render px); the Spectra panel is 3:2. The panel keeps its 600×400 design units and sits full-width in the hole with bands of the panel's inactive border above and below. Kaleido (≈1.35) gets thinner bands. If the shell's recess changes in Rhino, re-export the render and rerun `npm run face`.
-- **Refresh.** A view change is a full refresh (ink → paper → new frame); a small change is a partial repaint of the changed rectangle, where the panel allows it, with a full refresh every 8 partials. Timing `fast` (default) or `real` (profile numbers; on Spectra every change is a ~16 s full refresh). No spinners, no animation loops: listening and thinking are static states.
+- **Letterboxed, never stretched.** The render's screen opening is 766×563 render px (1.36): the Kaleido panel (1.35) fills it. Spectra (3:2) keeps its 600×400 design units and sits full-width with bands of the panel's inactive border above and below. If the opening changes in Rhino, re-export the renders and rerun `npm run face`.
+- **Refresh.** A view change is a full refresh (ink → paper → new frame); a small change is a partial repaint of the changed rectangle, where the panel allows it, with a full refresh every 8 partials. Timing `fast` (default) or `real` (profile numbers; on Spectra every change is a ~16 s full refresh). No spinners, no animation loops: listening and thinking are static states. Thinking puts the chicken (`assets/chicken-alone.svg`, drawn as vectors in the panel's ink) on the band, or large in the body when there's nothing else to show yet (the first options say what this round is while they load). Off, the panel holds the sleep image: the red hen on yellow (`assets/chicken-color.svg`), painted at turn-off and already there when the page opens.
 - **Status** is color plus pattern everywhere: `hay` solid ink, `poco` yellow + 45° ink hatch, `no hay` red + paper dots. Unknown items get a hollow keyline.
 
 URL options (on `/demo`): `?profile=kaleido3-6in`, `?timing=real`, `?scale=3` (no visible effect for now: the frame fits the screen to the hole), `?variant=a|b`,
@@ -95,33 +109,57 @@ check-ins stay hidden after turn-on; default 600), `?debug=1`, `?access=<code>`.
 
 ## The device face
 
-The face is the frontal render itself, [`assets/render-frontal.png`](../assets/render-frontal.png),
-cut by [`scripts/face/build-face.py`](scripts/face/build-face.py) (`npm run face`; needs
-Python with numpy, opencv-python and Pillow) into:
+The face is built from frontal renders, all from the same camera, in
+[`assets/render/`](../assets/render/), by
+[`scripts/face/build-face.py`](scripts/face/build-face.py) (`npm run face`; needs
+Python with numpy, opencv-python and Pillow; `-- --proof` also writes
+`scripts/face/proof.png`, the rebuilt control row over the at-rest render):
 
-- `public/face/face-{1240,720}.webp`: the body with a transparent background and a
-  transparent screen hole (the render's own screen area, measured, not guessed),
-  with the star knob painted out underneath;
-- `public/face/star-{1240,720}.webp`: the star knob alone, so it can turn a detent;
-- `src/device/face.json`: the geometry (hole, star and its pivot, pills, LED spot) in render pixels.
+| Render | Becomes |
+|---|---|
+| `POiO-main.png` (the shell, no pills, no knob) | `face-*.webp`: the base, transparent background and screen opening (measured, not guessed) |
+| `buttons-normal.png`, `buttons-pressed.png` | `pill-{back,home}-{up,down}-*.webp`: each pill with the shell around it, feathered so it sits seamlessly on the base |
+| `buttons-alone.png` | the pills' hit targets |
+| `knob01.png` … `knob04.png` (rest, then 15°, 30°, 45° clockwise) | `knob-{0..3}-*.webp`: one frame per detent; four frames cover the star's 60° symmetry |
+| `01-regularview.png` (everything at rest) | reference: the knob's shadow and the shell's color on its rim are fitted to it |
 
-The page stacks the emulated panel behind the hole, the render over it, and hit
-targets over the pills and the star (`src/device/dom.ts`). Every pixel of the
-face comes from the render; the pills' positions were measured by eye on it
-(they're the body's yellow, so no color split finds them). The LED isn't in the
-render: it's the small dot by the star, as before.
+`src/device/face.json` holds the geometry (opening, knob box and frames, shadow
+box, pill hit targets and layers, LED spot) in render pixels.
+
+The page stacks (`src/device/dom.ts`): the emulated panel behind the opening,
+the shell, the pill layers, the knob's shadow, the knob, then hit targets over
+the pills. Holding a pill (or Esc / H) shows its pushed-in render.
+
+- **The knob turns by frames, not by rotating an image**, so the highlights stay
+  where the light is. A detent clockwise shows the next frame, counterclockwise
+  the previous one; after the fourth it's back to the first.
+- **Its shadow is modeled, per frame**: a contact shade plus a soft shadow cast
+  down and to the right, fitted to the at-rest render, times a smooth correction
+  for what the fit misses. It's a multiply layer. Pressed or held, the knob sinks
+  a pixel and its shadow lightens.
+- **The rim**: the lone knob renders sit on white, so their rim reflects white;
+  on the shell it picks up yellow. The difference is learned on the rest frame
+  (by distance in from the edge and angle around the center: the light is fixed)
+  and applied to every frame.
+- **The LED** isn't in the model: it's drawn only while listening, a red glow
+  between the knob and the home pill.
+
+With the Kaleido profile the opening is the panel, so in real-size mode the whole
+shell is close to its modeled size, not only the panel.
 
 **Size on screen** (`src/device/layout.ts`), behind **Tamaño** under the device:
 
-- **Fit (default).** The face fits the window and says so: `Tamaño ajustado a la
-  ventana, sin calibrar.` The hole stays readable (up to 440 px wide); when the
-  whole chicken doesn't fit, it's cropped around the screen and the controls
-  (comb and pedestal first; the sides on a phone).
+- **Fit (default).** The whole chicken fits the window and says so: `Tamaño
+  ajustado a la ventana, sin calibrar.` When that would make the screen too small
+  to read, it grows (up to 440 px of screen) as far as the width allows, never cut;
+  a face taller than the window scrolls with the page. Only on a phone, where even
+  the full width can't hold a readable screen, is it cropped around the screen and
+  the controls.
 - **Real size.** `Ver la pantalla a tamaño real` opens a ruler: match an on-screen
   bar to 5 cm on a real ruler. Then the **panel** is drawn at the candidate panel's
-  real width (Spectra 4": 84.5 mm; Kaleido 6" for that profile). Only the panel is
-  to scale: the shell's size lives in the Rhino model and isn't claimed here, and
-  the label says so. The calibration is kept in this browser (`poio.size.v1`).
+  real width (Kaleido 6": about 122.5 mm; Spectra 4": 84.5 mm). With Kaleido the
+  opening matches the panel, so the shell follows at its modeled size; with
+  Spectra only the panel is to scale. The calibration is kept in this browser (`poio.size.v1`).
   It's a length only: no card, no form.
 
 ## A/B flag and event log
@@ -132,8 +170,9 @@ render: it's the small dot by the star, as before.
 ## The brain
 
 - **Allowlist.** At startup the server reads exactly `SKILL.md`, `VOICE.md`, `references/style-guide.md`, `reference/recipe.schema.json` and `pantry.example.md` (plus the three sample recipes as fixtures), listed in [`server/allowlist.json`](server/allowlist.json). Personal files are never read. `npm run build` copies exactly these into `dist/brain/`.
-- **Prompt.** A cached static prefix ([`server/prompts/adapter.md`](server/prompts/adapter.md), then the files above and the pantry keys; ~12k tokens) plus a short dynamic part per call (date and season, city, servings, poionotas, known pantry items, recent discards, the current screen, the utterance).
-- **Output.** JSON-schema structured output, `effort: low` with thinking off, validated with ajv; one retry, then fixtures or "No te entendí". Every recipe is validated against `reference/recipe.schema.json` before use.
+- **Prompt.** A static prefix ([`server/prompts/adapter.md`](server/prompts/adapter.md), then the files above and the pantry keys; ~13k tokens), cached for an hour, plus a short dynamic part per call (date and season, city, servings, poionotas, known pantry items with the device's guesses marked `[supuesto]`, recent discards, whether it's the first round, the current screen, the utterance).
+- **Steering, not a bigger model.** Haiku 5.5, `effort: low`, thinking off. Quality comes from the adapter: every option needs a reason to exist (a flavor family, a texture contrast, an acid finish), three different families and techniques, a seasonal one, titles that name what makes the dish worth it; guessed pantry items are never the reason for a dish; the first round goes for range over what's on hand; recipes order the prep so nothing waits. A test on 2026-11-09 with the same first-run context: unsteered, Haiku, Sonnet 5.5 and Opus 5.5 all offered variations of "pollo con cebolla y ajo"; steered Haiku offered guajillo adobo, rajas con crema and a soy-ginger glaze in ~2 s.
+- **Output.** JSON-schema structured output, validated with ajv; one retry, then fixtures or "No te entendí". `max_tokens`: utterance 500, suggest 400, recipe 3000. Every recipe is validated against `reference/recipe.schema.json` before use.
 - **Endpoints.** `POST /api/suggest`, `POST /api/recipe`, `POST /api/utterance`, `POST /api/event`, `GET /api/usage`, plus `GET /api/me`, `GET|PUT|DELETE /api/state` (see Invites) and `POST /api/feedback`. The local intent parser runs first in the browser; the post-cook pantry diff is computed locally from `depletes`.
 
 ## Invites
@@ -240,7 +279,7 @@ npm run feedback -- 200
 | `POIO_MODEL` | `claude-haiku-5-5` | Model for everything. |
 | `POIO_MODEL_RECIPE` | `claude-haiku-5-5` | Recipes only; `claude-sonnet-5-5` is the upgrade. |
 | `POIO_FAKE_BRAIN` | `0` | `1` = fixtures only, zero calls. |
-| `POIO_SESSION_TOKEN_CAP` | `60000` | Per session. Input, cache writes and output count fully; cache reads at 10%. |
+| `POIO_SESSION_TOKEN_CAP` | `60000` | Per session. Input and output count fully; the cached prompt (written or read) at 10%, since one write serves every session for an hour. |
 | `POIO_DAILY_BUDGET_USD` | `3` | All profiles and local mode together. |
 | `POIO_MONTHLY_BUDGET_USD` | `100` | All profiles and local mode together. |
 | `POIO_PROFILE_DAILY_USD` | `0.5` | Per invited profile, so one invite can't drain the key. |
@@ -259,7 +298,7 @@ and `POIO_TZ` (`America/Mexico_City`) for day/month accounting.
 - Sessions are per profile: the same app-session id in two profiles is two sessions.
 - **Invitees never see costs.** The usage line, `/api/usage` and the debug panel are local mode only; an invited profile's caps apply silently (over a cap they just get the limit line on the screen).
 - Every call is in the ledger (`data/poio.sqlite`) and also appended to `data/usage.jsonl` (time, profile, session, endpoint, model, the four token counts, USD). Older `usage.jsonl` lines are folded into the ledger at start, once. In local mode a faint line under the device shows `Sesión 12.4k / 60k tokens · Hoy US$0.04 · Mes US$1.20 / US$100`.
-- Prices live in [`server/pricing.ts`](server/pricing.ts) with the date they were checked. Haiku 5.5: $0.10 / $0.50 per MTok in/out, cache writes $0.125, cache reads $0.01.
+- Prices live in [`server/pricing.ts`](server/pricing.ts) with the date they were checked. Haiku 5.5: $0.10 / $0.50 per MTok in/out, cache writes $0.20 (1-hour cache), cache reads $0.01.
 - **Use a dedicated key** in its own Console workspace with a **$100 monthly spend limit** as the hard backstop. The guard only sees this app's spend.
 
 ## Device state
@@ -267,8 +306,9 @@ and `POIO_TZ` (`America/Mexico_City`) for day/month accounting.
 Pantry, poionotas, discards, cooked dishes, check-ins and settings: on the
 server for an invited profile, in localStorage (`poio.device.v1`) in local mode
 (see Profiles and data). The pantry is seeded from `pantry.example.md`'s item
-keys; everything starts unknown except what onboarding sets (skipped Q4 assumes
-salt, oil, onion, garlic and chicken, marked `supuesto`).
+keys; everything starts unknown except what onboarding assumes: salt, oil,
+onion, garlic and chicken (no chicken if the diet answer rules it out), marked
+`supuesto` on screen and `[supuesto]` to the brain.
 
 ## Acceptance before sharing live
 
@@ -291,8 +331,10 @@ through an invited profile shows `fake: false` and lands in that profile's usage
 ## Credits and license
 
 - Code: Apache-2.0, per the root [`LICENSE`](../LICENSE).
-- Device face: cut from the frontal render (`assets/render-frontal.png`, Jaime Ortega), CC-BY-SA-4.0 like the other assets.
-- Landing hero: [Vaivén](https://github.com/JaimeOrtegaxyz/vaiven) (`@jaimeortega/vaiven`, MIT), preset `poio-hero` in `public/vaiven.presets.json` made from `assets/logo-bw.svg`. Tune it with `npx vaiven` (the playground edits that file).
+- Device face: built from the frontal renders in `assets/render/` (Jaime Ortega), CC-BY-SA-4.0 like the other assets.
+- Landing hero: [Vaivén](https://github.com/JaimeOrtegaxyz/vaiven) (`@jaimeortega/vaiven`, MIT), preset `poio-hero` in `public/vaiven.presets.json` made from `assets/logo-bw.svg`. Tune it with `npx vaiven` (the playground edits that file). It fills the whole hero, so compose it for a wide (desktop) and a tall (phone) frame.
+- Landing device picture: `public/landing/device-*.webp`, composited from the face layers with the sleep hen on the screen by [`scripts/landing/device-shot.py`](scripts/landing/device-shot.py) (hand-run after the face or the hen changes; needs `rsvg-convert`).
+- Icons: [Phosphor](https://phosphoricons.com) (`@phosphor-icons/core`, MIT), bold weight, inlined on the landing. The e-paper keeps its own line glyphs.
 - Fonts: [Quicksand](https://github.com/andrew-paglinawan/QuicksandFamily) and [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono), SIL Open Font License 1.1, self-hosted in `public/fonts/` (copied from the archived Stage 2 app).
 - Step glyphs: ported from the archived Stage 2 app (`archive/stage2/web/app.js`).
 - Food images: none yet; CC0 or public domain only, credited in [`public/food/CREDITS.md`](public/food/CREDITS.md).

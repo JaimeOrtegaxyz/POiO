@@ -2,11 +2,16 @@
  * What to cook: exactly three rows, title · time · difficulty. No commentary,
  * no follow-up. Rotate moves the inversion; press or voice picks. "Otras"
  * gives three new options with no comment and logs the discard.
+ *
+ * While the options load with nothing on screen yet, the body shows the
+ * chicken. The very first round (right after the first-run questions) says
+ * what it is while it loads, and keeps one line above the options: tell me
+ * if one doesn't fit or something's missing.
  */
 import { normalizeText } from '../../shared/slug';
-import { AFFORD, CHOOSE, CONTEXT } from '../copy/es-MX';
+import { AFFORD, CHOOSE, CONTEXT, FIRST_ROUND, VOICE_STATE } from '../copy/es-MX';
 import type { App } from './app';
-import { T, pickIndex, row } from './draw';
+import { T, pickIndex, row, waiting } from './draw';
 import type { ScreenDef } from './screens';
 
 function pick(app: App, idx: number): void {
@@ -30,11 +35,21 @@ export const choose: ScreenDef = {
   context: () => CONTEXT.choose,
   afford: () => AFFORD.choose,
 
+  waiting: (app) => app.rt.choose.loading && !app.rt.choose.options,
+
   draw(p, app, body) {
-    const opts = app.rt.choose.options;
-    if (!opts) return;
+    const c = app.rt.choose;
+    const opts = c.options;
+    const first = c.from === 'onboarding';
+    if (!opts) {
+      if (!c.loading) return;
+      if (first) waiting(p, body, FIRST_ROUND.waiting, FIRST_ROUND.waitingWhy);
+      else waiting(p, body, VOICE_STATE.thinking);
+      return;
+    }
     const rowH = 76;
-    const top = body.y + (body.h - rowH * 3) / 2 - 6;
+    const top = body.y + (body.h - rowH * 3) / 2 - 6 + (first ? 10 : 0);
+    if (first) p.text(FIRST_ROUND.above, body.x + 4, top - 18, T.why);
     opts.forEach((o, i) => {
       const y = top + i * rowH;
       const sel = i === app.rt.choose.sel;

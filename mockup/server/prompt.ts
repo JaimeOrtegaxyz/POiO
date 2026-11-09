@@ -49,7 +49,7 @@ export function sanitizeContext(raw: any): BrainContext {
     ? raw.pantry
         .filter((p: any) => p && typeof p.item === 'string' && PANTRY_STATUSES.includes(p.status))
         .slice(0, 300)
-        .map((p: any) => ({ item: clip(p.item, 60), status: p.status as PantryStatus, display: p.display ? clip(p.display, 60) : undefined }))
+        .map((p: any) => ({ item: clip(p.item, 60), status: p.status as PantryStatus, display: p.display ? clip(p.display, 60) : undefined, ...(p.assumed === true ? { assumed: true } : {}) }))
     : [];
   const strings = (a: any, n: number, len: number) => (Array.isArray(a) ? a.filter((s) => typeof s === 'string').slice(-n).map((s: string) => s.slice(0, len)) : []);
   let contents: unknown;
@@ -64,6 +64,7 @@ export function sanitizeContext(raw: any): BrainContext {
     poionotas: strings(raw?.poionotas, 40, 200),
     pantry,
     recentDiscards: strings(raw?.recentDiscards, 15, 80),
+    firstRound: raw?.firstRound === true,
     screen: { id: clip(raw?.screen?.id, 40) || 'unknown', contents },
   };
 }
@@ -90,8 +91,9 @@ export function buildUserMessage(
     `ciudad: ${ctx.city || 'desconocida'}`,
     `porciones: ${ctx.servings}`,
     `poionotas:\n${ctx.poionotas.length ? ctx.poionotas.map((n) => `- ${n}`).join('\n') : '- (ninguna)'}`,
-    `despensa conocida:\n${ctx.pantry.length ? ctx.pantry.map((p) => `- ${p.item}: ${p.status}${p.display ? ` (${p.display})` : ''}`).join('\n') : '- (nada conocido)'}`,
+    `despensa conocida:\n${ctx.pantry.length ? ctx.pantry.map((p) => `- ${p.item}: ${p.status}${p.display ? ` (${p.display})` : ''}${p.assumed ? ' [supuesto]' : ''}`).join('\n') : '- (nada conocido)'}`,
     `descartes recientes: ${ctx.recentDiscards.length ? ctx.recentDiscards.join(' | ') : '(ninguno)'}`,
+    `primera vez: ${ctx.firstRound ? 'sí' : 'no'}`,
     `pantalla: ${ctx.screen.id}`,
   ];
   if (ctx.screen.contents !== undefined && ctx.screen.contents !== null) lines.push(`contenido de la pantalla: ${JSON.stringify(ctx.screen.contents)}`);

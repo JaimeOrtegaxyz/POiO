@@ -1,7 +1,9 @@
 /**
  * Missing ingredient: one line with 1-2 options and their trade-off, e.g.
  * "No hay crema. ¿La quitamos o usamos yogur? Queda menos espesa." Pick with
- * the encoder or by voice. The item goes `out`; the recipe drops or swaps it.
+ * the encoder or by voice. The item goes `out`; the recipe drops or swaps it,
+ * and you're back where you were: the ingredient check, or the step you were
+ * cooking.
  */
 import { normalizeText } from '../../shared/slug';
 import type { MissingOption } from '../../shared/types';
@@ -24,7 +26,7 @@ function choose(app: App, idx: number): void {
   app.rt.recipe.recipe = applyMissing(app.rt.recipe.recipe, item, opt);
   app.track('missing', { kind: opt.kind });
   app.rt.missing = null;
-  app.go('check');
+  app.go(m.from);
 }
 
 export const missing: ScreenDef = {
@@ -63,7 +65,7 @@ export const missing: ScreenDef = {
       if (idx !== null) { choose(app, idx); return true; }
     }
     if (i.kind === 'yes' && n === 1) { choose(app, 0); return true; }
-    if (i.kind === 'back') { app.go('check'); return true; }
+    if (i.kind === 'back') { app.go(app.rt.missing?.from ?? 'check'); return true; }
     return false;
   },
 

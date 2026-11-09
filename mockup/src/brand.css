@@ -1,0 +1,19 @@
+/*
+ * POiO brand colors: the one place the site's colors live in code. The same
+ * values, with what each one is for, are in assets/BRAND.md (a test keeps
+ * the two in step). The landing and the page around the device both import
+ * this file.
+ *
+ * Not the e-paper: the emulated screen draws with the panel's own pigments
+ * (src/screen/profiles.ts), so the hen on the screen is the panel's red and
+ * yellow, not these.
+ */
+:root {
+  --brand-grey: #E7E7E7;   /* the background */
+  --brand-red: #E50001;    /* the hen, the star, the hero */
+  --brand-yellow: #FFC700; /* the hen's disc, the shell, highlights */
+  --brand-green: #2FB463;  /* accent (proposed 2026-11-09) */
+  --brand-pink: #E4007C;   /* accent, rosa mexicano (proposed 2026-11-09) */
+  --brand-ink: #1A1A1A;    /* text, outlines */
+  --brand-white: #FFFFFF;  /* cards; text on red and pink */
+}

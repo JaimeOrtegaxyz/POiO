@@ -5,29 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>POiO</title>
     <meta name="description" content="POiO es una gallina para la cocina que te ayuda a decidir qué cocinar y te acompaña paso a paso. Está en desarrollo." />
+    <meta name="theme-color" content="#E50001" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
     <link rel="stylesheet" href="/src/landing/landing.css" />
   </head>
   <body>
-    <main class="landing">
-      <header class="hero">
-        <vaiven-figure class="hero-figure" preset="poio-hero" aria-hidden="true"></vaiven-figure>
-        <h1 class="mark"><span class="sr-only">POiO</span></h1>
-        <p class="lead">Una gallina para tu cocina que te ayuda a decidir qué cocinar.</p>
-      </header>
+    <header class="hero">
+      <nav class="bar">
+        <a class="mark" href="/" aria-label="POiO"></a>
+        <a class="cta-button bar-cta" href="/demo" hidden>Abrir el demo</a>
+      </nav>
+      <div class="stage">
+        <vaiven-figure class="ring" preset="poio-hero" aria-hidden="true"></vaiven-figure>
+        <div class="center">
+          <h1 class="headline"><span class="sr-only">POiO. </span>Una gallina<br /> para tu cocina.</h1>
+          <a class="scroll" href="#que-hace">Desliza <span class="icon" data-icon="arrow-down"></span></a>
+        </div>
+      </div>
+    </header>
 
-      <section class="points" aria-label="Qué hace">
-        <p>Te da tres opciones con lo que tienes. Si no te late ninguna, te da otras tres.</p>
-        <p>Te lleva paso a paso y te avisa cuándo voltear el pollo. Sin cronómetro.</p>
-        <p>Se acuerda de lo que te gusta y de lo que hay en tu despensa.</p>
-        <p>Le hablas manteniendo la estrella. Te contesta en la pantalla, nunca en voz alta.</p>
+    <main>
+      <section class="does" id="que-hace" aria-labelledby="que-hace-title">
+        <h2 id="que-hace-title">Qué hace</h2>
+        <ul class="cards">
+          <li class="card yellow"><span class="icon" data-icon="bowl-steam"></span><p>Te da tres ideas para cocinar hoy. Si no te late ninguna, te da otras tres.</p></li>
+          <li class="card green"><span class="icon" data-icon="cooking-pot"></span><p>Te lleva paso a paso y te avisa cuándo voltear el pollo. Sin cronómetro.</p></li>
+          <li class="card pink"><span class="icon" data-icon="basket"></span><p>Se acuerda de lo que te gusta y de lo que hay en tu despensa.</p></li>
+          <li class="card white"><span class="icon" data-icon="microphone"></span><p>Le hablas manteniendo la estrella. Te contesta en la pantalla, nunca en voz alta.</p></li>
+        </ul>
       </section>
 
-      <section class="status">
-        <p>Está en desarrollo: pantalla de tinta electrónica a color, una perilla en forma de estrella y voz. El demo corre en el navegador.</p>
+      <section class="device" aria-labelledby="device-title">
+        <img class="device-shot" src="/landing/device-640.webp" srcset="/landing/device-640.webp 640w, /landing/device-1100.webp 1100w"
+          sizes="(min-width: 860px) 440px, 82vw" width="640" height="767" alt="POiO: una gallina amarilla con una pantalla de tinta electrónica, una estrella roja y dos botones." />
+        <div class="device-text">
+          <p class="kicker">En desarrollo</p>
+          <h2 id="device-title">Tinta electrónica a color, una estrella y tu voz.</h2>
+          <p>La pantalla se ve como papel y se queda encendida. Giras la estrella para moverte, la aprietas para elegir y la mantienes para hablarle. El demo corre en el navegador.</p>
+        </div>
       </section>
 
       <section class="cta" aria-live="polite">
+        <span class="hen" aria-hidden="true"></span>
+        <h2>¿La quieres probar?</h2>
         <a class="cta-button" href="/demo" hidden>Abrir el demo</a>
         <p class="cta-invite">El demo es por invitación. Si te llegó un enlace, ábrelo en este navegador y entras directo.</p>
       </section>

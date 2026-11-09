@@ -124,9 +124,9 @@ Details in [`hardware/PLAN.md`](hardware/PLAN.md).
 - **Pill functions.** Back (left) and home (right) are provisional. The bench test decides if they keep those jobs, or whether the knob and voice cover them.
 - **How proactive is too proactive.** Frequency and tone of suggestions and check-ins.
 - **Sound design.** Final sounds are Jaime's call.
-- **Product render.** A frontal render is in [`assets/render-frontal.png`](assets/render-frontal.png) (the mockup's device face is cut from it). Other angles still to be exported from [`hardware/POiO.3dm`](hardware/POiO.3dm).
-- **Screen recess vs. panel.** The render's screen hole is about 4:3; the default Spectra candidate is 3:2 (600×400). The mockup letterboxes. The recess should follow the chosen panel after the bench test.
-- **Shell size.** Not documented outside the Rhino model; the mockup only shows the panel to scale.
+- **Product render.** Frontal renders are in [`assets/render/`](assets/render/) (the mockup's device face is built from them). Other angles still to be exported from [`hardware/POiO.3dm`](hardware/POiO.3dm).
+- **Screen opening vs. panel.** The opening is now modeled for the Kaleido 3 6" candidate (about 122.5 × 90.7 mm). If the bench test picks another panel, the opening follows it.
+- **Listening LED.** In the plan, beside the knob; not in the model yet. The mockup draws it only while listening.
 - **Hosting cutover.** Cloudflare Workers + D1 is the direction ([`mockup/docs/CLOUDFLARE.md`](mockup/docs/CLOUDFLARE.md)); when to move off the iMac tunnel, and whether the access-code path survives it.
 - **Time words in step text.** SKILL.md lets a step say when to look ("A los 5 min, checkpoint: …"); the screen draws no time while cooking. The mockup hides that clause on the device and lets the checkpoint carry it. Keep it that way, or show "a los 5 min"?
 - **Clearing a checkpoint.** In the mockup, the press that clears a checkpoint band doesn't also advance the step (one press clears, the next advances). Is the extra press right in the kitchen?

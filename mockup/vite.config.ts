@@ -24,10 +24,10 @@ export default defineConfig({
     strictPort: true,
     // /invite is server-rendered (it mints the session cookie), so it goes to the API too.
     proxy: { '/api': `http://localhost:${apiPort}`, '/invite': `http://localhost:${apiPort}` },
-    // The client imports exactly two files from outside mockup/: the committed
-    // pantry template (item keys) and the wordmark on the landing page.
+    // The client imports exactly these files from outside mockup/: the
+    // committed pantry template (item keys), the wordmark and the two hens.
     // Nothing else in the repo is reachable.
-    fs: { allow: [here, join(here, '..', 'pantry.example.md'), join(here, '..', 'assets', 'logo-bw.svg')] },
+    fs: { allow: [here, join(here, '..', 'pantry.example.md'), ...['logo-bw.svg', 'chicken-color.svg', 'chicken-alone.svg'].map((f) => join(here, '..', 'assets', f))] },
   },
   // Two pages: the public landing (/) and the device demo (/demo/).
   build: {

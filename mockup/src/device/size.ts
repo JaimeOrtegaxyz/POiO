@@ -2,7 +2,9 @@
  * The size line under the device and its ruler calibration. Fit-to-window
  * is the default and says it's uncalibrated. "Real size" draws the panel at
  * the candidate panel's real size once the viewer has matched an on-screen
- * bar to 5 cm on a real ruler. Only a length: no card numbers, no forms.
+ * bar to 5 cm on a real ruler. When the panel fills the shell's opening (the
+ * profile it was modeled for) the body is to scale too, and the label says
+ * so. Only a length: no card numbers, no forms.
  * The calibration is a per-viewer convenience kept in this browser.
  */
 import { SIZE } from '../copy/es-MX';
@@ -42,7 +44,7 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, parent: 
  * preference whenever it changes (and once now); `diagonal` gives the active
  * profile's panel diagonal for the label.
  */
-export function sizeControls(host: HTMLElement, apply: (s: SizePref) => void, diagonal: () => number): { refresh(): void } {
+export function sizeControls(host: HTMLElement, apply: (s: SizePref) => void, diagonal: () => number, fills: () => boolean): { refresh(): void } {
   let pref = loadSize();
   const line = el('div', 'size-line', host);
   const label = el('span', 'size-label', line);
@@ -56,7 +58,7 @@ export function sizeControls(host: HTMLElement, apply: (s: SizePref) => void, di
   // Everything you touch sits above the bar; the bar comes last, at the
   // bottom edge, so a ruler held under it doesn't cover the slider.
   el('p', 'ruler-hint', ruler, SIZE.rulerHint);
-  el('p', 'ruler-note', ruler, SIZE.letterbox);
+  const note = el('p', 'ruler-note', ruler, SIZE.letterbox);
   const range = el('input', 'ruler-range', ruler);
   range.type = 'range';
   range.step = '0.01';
@@ -71,7 +73,8 @@ export function sizeControls(host: HTMLElement, apply: (s: SizePref) => void, di
   const draw = () => {
     const real = pref.mode === 'real' && !!pref.pxPerMm;
     const d = diagonal();
-    label.textContent = real ? SIZE.real(Number.isInteger(d) ? String(d) : d.toFixed(1)) : SIZE.fit;
+    label.textContent = real ? SIZE.real(Number.isInteger(d) ? String(d) : d.toFixed(1), fills()) : SIZE.fit;
+    note.hidden = fills();
     toggle.textContent = real ? SIZE.toFit : SIZE.toReal;
     again.hidden = !real;
   };

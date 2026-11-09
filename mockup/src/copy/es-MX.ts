@@ -54,27 +54,41 @@ export const VOICE_STATE = {
 export const LIMIT_LINE = 'Por hoy llegué a mi límite. Las recetas guardadas siguen aquí.';
 export const OFFLINE_LINE = 'Sin conexión con el cerebro. Sigo con lo guardado.';
 
+/** What the first run assumes you cook with, until you say otherwise. */
+export const DEFAULT_EQUIPMENT = ['estufa', 'horno', 'sartén', 'licuadora'];
+
 /** Onboarding: four questions, each with its why-line (setup/interview.md). */
 export const ONBOARDING = [
   { ask: '¿En qué ciudad cocinas?', why: 'Para sugerirte lo que está de temporada y lo que encuentras cerca.' },
   { ask: '¿Para cuántas personas cocinas normalmente?', why: 'Para ajustar las cantidades.' },
-  { ask: '¿Hay algo que no comas o que no te guste?', why: 'Para no sugerirte algo que vas a descartar.' },
-  { ask: '¿Qué tienes hoy a la mano? Dime unas cosas, o sáltalo.', why: 'Para que la primera receta use lo que ya tienes.' },
+  { ask: '¿Comes de todo, o hay algo que no comas?', why: 'Vegetariano, sin cerdo, sin picante… Para no sugerirte algo que vas a descartar.' },
+  { ask: `Supongo que tienes ${joinY(DEFAULT_EQUIPMENT)}. ¿Así es?`, why: 'Dime si te falta algo o si tienes algo más, como freidora de aire. Para no pedirte lo que no tienes.' },
 ];
+
+/** The first options: while they load, and once, above them. */
+export const FIRST_ROUND = {
+  waiting: 'Van tres ideas para empezar.',
+  waitingWhy: 'Si alguna no te late o te falta algo, dímelo. Así te voy conociendo.',
+  above: 'Si alguna no te late o te falta algo, dímelo.',
+};
 export const progress = (i: number, n: number) => `${i} / ${n}`;
 
 /** Poionotas written from onboarding answers and defaults. */
 export const NOTES = {
   city: (c: string) => `Cocinas en ${c}.`,
   servings: (n: number) => `Cocinas para ${n}.`,
-  noRestrictions: 'Sin restricciones. Picante medio.',
+  noRestrictions: 'Comes de todo. Picante medio.',
+  equipment: (have: string[], lacks: string[] = []) => `Cocinas con ${joinY(have)}.${lacks.length ? ` Sin ${joinY(lacks)}.` : ''}`,
   restriction: (t: string) => (/^no\b/i.test(t.trim()) ? sentence(t) : `No comes: ${t.trim().replace(/[.]+$/, '')}.`),
   rating: (dish: string, n: number) => `${dish}: ${n}/10.`,
   checkin: (dish: string, t: string) => `${dish}: ${t.trim().replace(/[.]+$/, '')}.`,
 };
 
 /** "No restrictions" answers to Q3. */
-export const NOTHING_WORDS = ['nada', 'no', 'ninguna', 'ninguno', 'todo', 'como de todo', 'nada en especial', 'no nada'];
+export const NOTHING_WORDS = ['nada', 'no', 'ninguna', 'ninguno', 'todo', 'de todo', 'como de todo', 'si como de todo', 'si de todo', 'nada en especial', 'no nada'];
+
+/** Q4 answered with a bare "no": ask for the difference instead of guessing. */
+export const EQUIPMENT_WHAT = 'Dime qué te falta o qué más tienes.';
 
 export const CHOOSE = {
   row: (title: string) => title,
@@ -188,13 +202,15 @@ export const DEVICE = {
 
 export const SIZE = {
   fit: 'Tamaño ajustado a la ventana, sin calibrar.',
-  real: (inches: string) => `Pantalla a tamaño real (${inches}″, calibrada). El cuerpo no está a escala.`,
+  real: (inches: string, bodyToScale: boolean) =>
+    `Pantalla a tamaño real (${inches}″, calibrada).${bodyToScale ? '' : ' El cuerpo no está a escala.'}`,
   toReal: 'Ver la pantalla a tamaño real',
   toFit: 'Ajustar a la ventana',
   recalibrate: 'Calibrar otra vez',
   rulerHint: 'Apoya una regla justo debajo de la barra negra y mueve el control hasta que la barra mida 5 cm.',
   rulerLabel: 'Largo de la barra',
-  letterbox: 'La pantalla emulada es 3:2 y el hueco del render es 4:3. Por eso las franjas arriba y abajo.',
+  /** Only when the emulated panel doesn't fill the opening (another profile than the one it was modeled for). */
+  letterbox: 'Esta pantalla no tiene la proporción del hueco del modelo. Por eso las franjas.',
   done: 'Listo',
   cancel: 'Cancelar',
 };

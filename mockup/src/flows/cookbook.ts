@@ -5,10 +5,10 @@
  * cached by date + slot. A check-in ("¿Qué tal la tinga?") shows as a second
  * line only during a running session, never on the first paint after turn-on.
  */
-import { AFFORD, COOKBOOK, CONTEXT, REPLY } from '../copy/es-MX';
+import { AFFORD, COOKBOOK, CONTEXT, REPLY, VOICE_STATE } from '../copy/es-MX';
 import { ensureFood } from '../screen/images';
 import type { App } from './app';
-import { T, foodOrGlyph } from './draw';
+import { T, foodOrGlyph, waiting } from './draw';
 import type { ScreenDef } from './screens';
 
 const SLOT_SPLIT_HOUR = 14;
@@ -34,7 +34,11 @@ async function load(app: App, tweak?: string): Promise<void> {
   app.rt.cookbook.loading = true;
   const res = await app.api.suggest(app.context(), { slot: 'cookbook', tweak });
   app.rt.cookbook.loading = false;
-  if (!res?.options.length || !app.on) return;
+  if (!res?.options.length || !app.on) {
+    // Nothing came back: take the waiting chicken down.
+    if (app.on && app.rt.screen === 'cookbook' && !app.state.cookbook) app.repaint();
+    return;
+  }
   app.noteLimit(res.limited);
   app.state.cookbook = { key, option: res.options[0], reason: res.reason };
   app.save();
@@ -60,6 +64,8 @@ export const cookbook: ScreenDef = {
   draw(p, app, body) {
     const cb = app.state.cookbook;
     const checkin = app.rt.cookbook.checkinShown;
+    // First open of the day with nothing cached yet: the chicken until today's dish arrives.
+    if (!cb && app.rt.cookbook.loading) { waiting(p, body, VOICE_STATE.thinking); return; }
     if (cb) {
       const withImage = app.variant === 'a';
       const imgBox = { x: body.x + body.w - 236, y: body.y + 22, w: 236, h: body.h - 44 };

@@ -38,8 +38,9 @@ export class Api {
     return this.post<SuggestResponse>('suggest', { context, ...opts });
   }
 
-  recipe(context: BrainContext, title: string) {
-    return this.post<RecipeResponse>('recipe', { context, title });
+  /** `tweak`: rewrite this dish with a change ("sin picante", "sin horno"). */
+  recipe(context: BrainContext, title: string, tweak?: string) {
+    return this.post<RecipeResponse>('recipe', { context, title, tweak });
   }
 
   utterance(context: BrainContext, utterance: string) {

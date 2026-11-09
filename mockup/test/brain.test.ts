@@ -19,7 +19,7 @@ describe('real brain request shape', () => {
     expect(p.model).toBe('claude-haiku-5-5');
     expect(p.max_tokens).toBe(MAX_TOKENS.suggest);
     expect(p.system).toHaveLength(1);
-    expect(p.system[0].cache_control).toEqual({ type: 'ephemeral' });
+    expect(p.system[0].cache_control).toEqual({ type: 'ephemeral', ttl: '1h' });
     expect(p.system[0].text).toContain('# SKILL.md');
     expect(p.system[0].text).toContain('# VOICE.md');
     expect(p.system[0].text).toContain('chicken-thighs-boneless');
@@ -29,7 +29,7 @@ describe('real brain request shape', () => {
     // The dynamic part carries the context, not the prefix.
     expect(p.messages[0].content).toContain('endpoint: suggest');
     expect(p.messages[0].content).toContain('ciudad: desconocida');
-    expect(MAX_TOKENS).toEqual({ utterance: 300, suggest: 300, recipe: 1800 });
+    expect(MAX_TOKENS).toEqual({ utterance: 500, suggest: 400, recipe: 3000 });
   });
 
   it('logs the four token counts and USD per call', async () => {
@@ -37,9 +37,9 @@ describe('real brain request shape', () => {
     await post(r.app, '/api/suggest', { context: ctx() });
     const rec = r.store.data.usage[0];
     expect(rec).toMatchObject({ endpoint: 'suggest', model: 'claude-haiku-5-5', input_tokens: 200, cache_creation_input_tokens: 10000, cache_read_input_tokens: 0, output_tokens: 100 });
-    expect(rec.usd).toBeCloseTo((200 * 0.1 + 10000 * 0.125 + 100 * 0.5) / 1e6, 10);
+    expect(rec.usd).toBeCloseTo((200 * 0.1 + 10000 * 0.2 + 100 * 0.5) / 1e6, 10);
     const u = await (await r.app.request('/api/usage?session=test-session-1')).json();
-    expect(u.session.tokens).toBe(10300);
+    expect(u.session.tokens).toBe(1300);
     expect(u.day.usd).toBeCloseTo(rec.usd, 10);
   });
 
@@ -74,15 +74,50 @@ describe('real brain request shape', () => {
   });
 
   it('an utterance with an invalid action falls back to not_understood', async () => {
-    const r = rig({ replies: [reply({ action: 'pick' }), reply({ action: 'dance' })] });
+    const r = rig({ replies: [reply({ actions: [{ action: 'pick' }] }), reply({ actions: [{ action: 'dance' }] })] });
     const res = await post(r.app, '/api/utterance', { context: ctx(), utterance: 'algo raro' });
-    expect(res.body.action).toEqual({ action: 'not_understood' });
+    expect(res.body.actions).toEqual([{ action: 'not_understood' }]);
+  });
+
+  it('an utterance can come back as several actions, in order', async () => {
+    const actions = [
+      { action: 'pantry', changes: [{ item: 'flat-leaf-parsley', status: 'out', display: 'perejil' }] },
+      { action: 'pick', index: 1 },
+    ];
+    const r = rig({ replies: [reply({ actions })] });
+    const res = await post(r.app, '/api/utterance', { context: ctx('choose', { options: OPTIONS.options }), utterance: 'me gusta la primera pero no tengo perejil' });
+    expect(res.body.actions).toEqual(actions);
+    expect(r.calls[0].output_config.format.schema.required).toEqual(['actions']);
+    expect(r.calls[0].max_tokens).toBe(MAX_TOKENS.utterance);
+  });
+
+  it('tells the brain which pantry items are guesses, and whether it is the first round', async () => {
+    const r = rig({ replies: [reply(OPTIONS)] });
+    const context = { ...ctx(), firstRound: true, pantry: [{ item: 'garlic', status: 'plenty', display: 'ajo', assumed: true }, { item: 'ham', status: 'plenty', display: 'jamón' }] };
+    await post(r.app, '/api/suggest', { context });
+    const user = r.calls[0].messages[0].content as string;
+    expect(user).toContain('- garlic: plenty (ajo) [supuesto]');
+    expect(user).toContain('- ham: plenty (jamón)\n');
+    expect(user).toContain('primera vez: sí');
+  });
+
+  it('a recipe can be rewritten with a change, even a sample one', async () => {
+    const tinga = { replies: [] as any[] };
+    const r = rig(tinga);
+    const plain = await post(r.app, '/api/recipe', { context: ctx(), title: 'Tinga de pollo' });
+    expect(plain.body.recipe.id).toBe('tinga-de-pollo');
+    expect(r.calls).toHaveLength(0);
+    const r2 = rig({ replies: [reply(plain.body.recipe)] });
+    await post(r2.app, '/api/recipe', { context: ctx('intro'), title: 'Tinga de pollo', tweak: 'sin picante' });
+    expect(r2.calls).toHaveLength(1);
+    expect(r2.calls[0].messages[0].content).toContain('ajuste: sin picante');
+    expect(r2.calls[0].max_tokens).toBe(MAX_TOKENS.recipe);
   });
 });
 
 describe('cost controls', () => {
-  it('session tokens count cache reads at 10%', () => {
-    expect(sessionTokens({ input_tokens: 100, cache_creation_input_tokens: 1000, cache_read_input_tokens: 10000, output_tokens: 50 })).toBe(2150);
+  it('session tokens count the cached prompt at 10%, written or read', () => {
+    expect(sessionTokens({ input_tokens: 100, cache_creation_input_tokens: 1000, cache_read_input_tokens: 10000, output_tokens: 50 })).toBe(1250);
     expect(costUsd('claude-haiku-5-5', { input_tokens: 1e6, cache_creation_input_tokens: 0, cache_read_input_tokens: 1e6, output_tokens: 1e6 })).toBeCloseTo(0.61, 6);
     expect(costUsd('claude-sonnet-5-5', { input_tokens: 1e6, cache_creation_input_tokens: 0, cache_read_input_tokens: 0, output_tokens: 1e6 })).toBeCloseTo(12, 6);
   });

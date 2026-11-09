@@ -107,9 +107,10 @@ Text plus sound, never motion:
 |---|---|---|
 | Idle | Whatever screen you're on | — |
 | Listening (star knob held) | A static listening state; LED by the knob on | Press tick |
-| Thinking (button released) | A static "thinking" state | Release tick |
+| Thinking (button released) | A static "thinking" state: the chicken on the band, or large in an empty body | Release tick |
 | Didn't understand | "No te entendí. Mantén el botón y dilo otra vez." | "Didn't understand" sound |
 | Answered | The resulting screen, repainted once | — |
+| Off | The sleep image, the red hen on yellow, painted at power-off (e-paper keeps it with no power) | — |
 
 ## Motion & refresh
 

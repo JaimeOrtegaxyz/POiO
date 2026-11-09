@@ -205,8 +205,8 @@ describe('budgets under concurrency (atomic holds)', () => {
   it('parallel tabs cannot double-spend the session cap', async () => {
     const g = gated();
     // Cap below two in-flight worst-case estimates: only one call may be in flight.
-    const r = rig({ env: { POIO_SESSION_TOKEN_CAP: '30000', POIO_IP_LIMIT: '100' }, ip: '127.0.0.1', replies: Array.from({ length: 10 }, () => g.fn) });
-    expect(r.brain.estimate('claude-haiku-5-5', 300).tokens).toBeGreaterThan(15000);
+    const r = rig({ env: { POIO_SESSION_TOKEN_CAP: '8000', POIO_IP_LIMIT: '100' }, ip: '127.0.0.1', replies: Array.from({ length: 10 }, () => g.fn) });
+    expect(r.brain.estimate('claude-haiku-5-5', 300).tokens).toBeGreaterThan(4000);
     const tabs = Array.from({ length: 10 }, () => call(r.app, '/api/suggest', { method: 'POST', session: 'one-session-xyz', body: { context: ctx() } }));
     await new Promise((res) => setTimeout(res, 20));
     g.open();
@@ -276,7 +276,7 @@ describe('budgets under concurrency (atomic holds)', () => {
     await t2.ready();
     const t = await t2.totals({ profileId: 'local', session: 's-1' });
     expect(t.dayUsd).toBeCloseTo(0.0026427, 8);
-    expect(t.sessionTokens).toBe(237 + 20736 + 54);
+    expect(t.sessionTokens).toBe(Math.round(237 + 0.1 * 20736 + 54)); // the ledger keeps whole tokens
   });
 });
 

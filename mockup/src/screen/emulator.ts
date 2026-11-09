@@ -40,6 +40,15 @@ export class Screen {
 
   /** Draw a frame and present it with a full refresh or a partial repaint. */
   render(draw: (p: Painter) => void, kind: RefreshKind): void {
+    this.display.present(this.frame(draw), kind);
+  }
+
+  /** Draw a frame the panel already holds (the sleep image at page load): no refresh. */
+  still(draw: (p: Painter) => void): void {
+    this.display.hold(this.frame(draw));
+  }
+
+  private frame(draw: (p: Painter) => void): ImageData {
     const p = this.profile;
     if (this.off.width !== p.width || this.off.height !== p.height) {
       this.off.width = p.width;
@@ -50,7 +59,7 @@ export class Screen {
     draw(painter);
     const frame = this.offCtx.getImageData(0, 0, p.width, p.height);
     panelPass(frame, p);
-    this.display.present(frame, kind);
+    return frame;
   }
 }
 

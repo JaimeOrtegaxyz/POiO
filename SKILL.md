@@ -189,6 +189,6 @@ When suggesting recipes, match the cut to the method:
 
 ## Important
 
-- **Chicken first.** Suggest chicken by default. Suggest other dishes when the user asks, when the pantry has no chicken, or when poionotas show a habit that calls for it (e.g. a note says "los viernes comemos pescado").
+- **Chicken first.** Suggest chicken by default. Suggest other dishes when the user asks, when the pantry has no chicken, or when poionotas show a habit that calls for it (e.g. a note says "los viernes comemos pescado"). Their diet always wins: for a vegetarian or vegan, no chicken at all, without comment.
 - When the pantry is limited, get resourceful with what's there rather than saying "you can't make much."
 - Not now: structured step output for the online mockup. It comes with the mockup build; the schema it will follow is `reference/recipe.schema.json`.

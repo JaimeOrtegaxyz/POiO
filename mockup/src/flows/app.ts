@@ -3,9 +3,13 @@
  * this file owns power, the runtime state, rendering (chrome + body +
  * bands), the voice pipeline (local intent parser first, then the brain),
  * the hidden scheduler (checkpoints, check-ins) and the brain context.
+ *
+ * Anything said, on any screen, can change what POiO knows and what it's
+ * doing: the brain answers an utterance with a few actions (dispatchAll),
+ * applied in order, what to remember first and then one move.
  */
 import { parsePantryTemplate, type PantryStatus, type PantryTemplateItem } from '../../shared/pantry';
-import type { Action, BrainContext, LimitReason, PantryChange, Recipe, SuggestOption } from '../../shared/types';
+import { STATE_ACTIONS, type Action, type BrainContext, type LimitReason, type PantryChange, type Recipe, type SuggestOption } from '../../shared/types';
 import pantryTemplateMd from '../../../pantry.example.md?raw';
 import type { Api } from '../api';
 import type { Sounds } from '../audio/sounds';
@@ -17,6 +21,7 @@ import { partialAllowed } from '../screen/profiles';
 import type { RefreshKind } from '../screen/refresh';
 import { newId, saveState, type DeviceState } from '../state/store';
 import { SCREENS, type ScreenId } from './screens';
+import { drawSleep } from './sleep';
 import type { Control } from './tutorial';
 
 export interface Area { x: number; y: number; w: number; h: number }
@@ -29,10 +34,11 @@ export interface PendingCheckpoint { step: number; message: string; dueAt: numbe
 export interface Runtime {
   screen: ScreenId;
   onboardingQ: number;
-  choose: { options: SuggestOption[] | null; sel: number; shown: string[]; from: ScreenId };
+  choose: { options: SuggestOption[] | null; sel: number; shown: string[]; from: ScreenId; loading: boolean };
   recipe: { recipe: Recipe; option?: SuggestOption; from: ScreenId } | null;
   check: { handled: Set<string> };
-  missing: { action: Action; sel: number } | null;
+  /** `from`: where the choice returns (the ingredient check, or the step being cooked). */
+  missing: { action: Action; sel: number; from: ScreenId } | null;
   cook: { step: number; peek: number | null; seen: Set<number>; pending: PendingCheckpoint[]; fired: FiredCheckpoint[]; animFrame: number };
   done: { phase: 'line' | 'taste' | 'diff'; enteredAt: number; tasteSel: number; diffSel: number; checked: boolean[]; animFrame: number };
   pantry: { sel: number; keys: string[] };
@@ -49,7 +55,7 @@ function freshRuntime(): Runtime {
   return {
     screen: 'off',
     onboardingQ: 0,
-    choose: { options: null, sel: 0, shown: [], from: 'cookbook' },
+    choose: { options: null, sel: 0, shown: [], from: 'cookbook', loading: false },
     recipe: null,
     check: { handled: new Set() },
     missing: null,
@@ -128,7 +134,13 @@ export class App {
     this.tickTimer = null;
     this.api.session = '';
     this.onScreen?.('off');
-    // E-paper keeps the last image with no power: nothing to repaint.
+    // E-paper keeps its last image with no power: the last thing painted is the sleep image.
+    this.screen.render(drawSleep, 'full');
+  }
+
+  /** The panel already holding the sleep image (page load, a panel swap while off): no refresh. */
+  showSleep(): void {
+    if (!this.on) this.screen.still(drawSleep);
   }
 
   // ---------------- tutorial ----------------
@@ -228,6 +240,7 @@ export class App {
     }
     if (!this.band) return;
     const b = this.band;
+    if (b.kind === 'thinking' && SCREENS[this.rt.screen].waiting?.(this)) return;
     const size = 20;
     const lines = p.wrap(b.text, b.kind === 'listening' ? 520 : 552, { kind: 'q', size, weight: 700 }).slice(0, 4);
     const h = 16 + lines.length * 25;
@@ -235,6 +248,8 @@ export class App {
     p.invert(0, y, 600, h);
     let tx = LAYOUT.pad;
     if (b.kind === 'listening') { p.dot(tx + 7, y + h / 2, 7, 'red'); tx += 24; }
+    // Thinking: the chicken, in paper on the band, where the listening dot was.
+    if (b.kind === 'thinking') tx += p.chicken('alone', tx, y + (h - 24) / 2, 24, 'paper') + 12;
     lines.forEach((l, i) => p.text(l, tx, y + 26 + i * 25, { kind: 'q', size, weight: 700, color: 'paper' }));
   }
 
@@ -364,7 +379,7 @@ export class App {
     return false;
   }
 
-  /** Send the utterance to the brain with this screen's context; dispatch the action. */
+  /** Send the utterance to the brain with this screen's context; apply what comes back. */
   async askBrain(text: string): Promise<void> {
     const epoch = this.epoch;
     const screenId = this.rt.screen;
@@ -374,21 +389,46 @@ export class App {
     this.band = null;
     if (!res) { this.notice(OFFLINE_LINE); return; }
     this.noteLimit(res.limited);
-    this.dispatch(res.action);
+    this.dispatchAll(res.actions ?? []);
     if (this.band === null) this.repaint();
+  }
+
+  /**
+   * One utterance's actions, in order: what to remember first (pantry,
+   * poionotas), quietly when a move follows, then the one move (pick,
+   * tweak, missing, answer…). "Me gusta la primera pero no tengo perejil"
+   * marks the perejil out, then opens the first option; the ingredient
+   * check offers the swap.
+   */
+  dispatchAll(actions: Action[]): void {
+    const def = SCREENS[this.rt.screen];
+    if (def.actions?.(this, actions)) return;
+    const onRecipe = ['intro', 'check', 'missing', 'cook'].includes(this.rt.screen);
+    const list = actions
+      .filter((a) => a.action !== 'not_understood')
+      // Off the recipe screens, "no hay X" is pantry news, not a move.
+      .map((a): Action => (a.action === 'missing' && a.item && !onRecipe ? { action: 'pantry', changes: [{ item: a.item, status: 'out', display: a.display }] } : a));
+    if (!list.length) { this.notUnderstood(); return; }
+    const state = list.filter((a) => STATE_ACTIONS.includes(a.action));
+    const move = list.find((a) => !STATE_ACTIONS.includes(a.action));
+    // One confirmation for several things remembered: the last one speaks.
+    state.forEach((a, i) => this.dispatch(a, !!move || i < state.length - 1));
+    if (move) this.dispatch(move);
   }
 
   noteLimit(l: LimitReason | undefined): void {
     if (l && l !== this.limited) { this.limited = l; this.band = { kind: 'notice', text: LIMIT_LINE, until: Date.now() + 8000 }; }
   }
 
-  dispatch(a: Action): void {
+  /** Apply one action. `quiet`: remember without a confirmation band (a move follows). */
+  dispatch(a: Action, quiet = false): void {
     const def = SCREENS[this.rt.screen];
     if (def.action?.(this, a)) return;
     switch (a.action) {
       case 'pantry': {
         const changes = a.changes ?? [];
         this.applyPantry(changes);
+        if (quiet) return;
         const one = changes.length === 1 ? changes[0] : null;
         if (one?.status === 'out') this.notice(REPLY.notedOut(one.display || this.displayOf(one.item)));
         else if (one?.status === 'low') this.notice(REPLY.notedLow(one.display || this.displayOf(one.item)));
@@ -398,9 +438,16 @@ export class App {
       case 'poionotas': {
         const removed = this.removeNotes(a.remove ?? []);
         this.addNotes(a.add ?? []);
-        this.notice(removed && !(a.add ?? []).length ? REPLY.forgotten : REPLY.noted);
+        if (!quiet) this.notice(removed && !(a.add ?? []).length ? REPLY.forgotten : REPLY.noted);
         return;
       }
+      case 'pick':
+        // A dish named off the options screen: open it by name.
+        if (a.title) { void this.openRecipe({ title: a.title }, this.rt.screen); return; }
+        break;
+      case 'discard':
+        void this.openChoose(this.rt.screen);
+        return;
       case 'answer':
         this.band = { kind: 'answer', text: a.text || '' };
         this.repaint();
@@ -408,9 +455,16 @@ export class App {
       case 'recipe_request':
         if (a.title) { void this.openRecipe({ title: a.title }, this.rt.screen); return; }
         break;
-      case 'tweak':
-        this.openChoose(this.rt.screen, { tweak: a.tweak });
+      case 'tweak': {
+        // On a recipe: the same dish, rewritten with the change (mid-cook, at the same step).
+        const r = this.rt.recipe;
+        if (r && ['intro', 'check', 'cook'].includes(this.rt.screen) && a.tweak) {
+          void this.openRecipe({ title: r.recipe.name, option: r.option }, r.from, { tweak: a.tweak, resume: this.rt.screen === 'cook' });
+          return;
+        }
+        void this.openChoose(this.rt.screen, { tweak: a.tweak });
         return;
+      }
       case 'missing':
         // Outside the recipe screens, "no hay X" is pantry news.
         if (a.item) { this.dispatch({ action: 'pantry', changes: [{ item: a.item, status: 'out', display: a.display }] }); return; }
@@ -463,8 +517,9 @@ export class App {
       city: this.state.prefs.city,
       servings: this.state.prefs.servings,
       poionotas: this.state.poionotas.map((n) => n.text),
-      pantry: Object.entries(this.state.pantry).map(([item, e]) => ({ item, status: e.status, display: e.display })),
+      pantry: Object.entries(this.state.pantry).map(([item, e]) => ({ item, status: e.status, display: e.display, ...(e.assumed ? { assumed: true } : {}) })),
       recentDiscards: this.state.discards.slice(-5).flatMap((d) => d.titles),
+      firstRound: this.state.history.length === 0,
       screen: {
         id: this.rt.screen === 'onboarding' ? `onboarding-${this.rt.onboardingQ + 1}` : this.rt.screen,
         contents: def.contents?.(this),
@@ -485,9 +540,11 @@ export class App {
       this.go('choose');
     }
     const epoch = this.epoch;
+    c.loading = true;
     this.setBand('thinking', VOICE_STATE.thinking);
     const res = await this.api.suggest(this.context(), { tweak: opts.tweak, exclude: c.shown });
     if (epoch !== this.epoch || !this.on) return;
+    c.loading = false;
     this.band = null;
     if (!res || !res.options.length) { this.notice(OFFLINE_LINE); return; }
     this.noteLimit(res.limited);
@@ -498,16 +555,30 @@ export class App {
     this.repaint();
   }
 
-  /** Load a recipe and open its intro. */
-  async openRecipe(pick: { title: string; option?: SuggestOption }, from: ScreenId): Promise<void> {
+  /**
+   * Load a recipe and open its intro. `tweak` rewrites it with a change
+   * ("sin picante"); `resume` goes back to the same step instead (a change
+   * asked for mid-cook).
+   */
+  async openRecipe(pick: { title: string; option?: SuggestOption }, from: ScreenId, opts: { tweak?: string; resume?: boolean } = {}): Promise<void> {
     const epoch = this.epoch;
     this.setBand('thinking', VOICE_STATE.thinking);
-    const res = await this.api.recipe(this.context(), pick.title);
+    const res = await this.api.recipe(this.context(), pick.title, opts.tweak);
     if (epoch !== this.epoch || !this.on) return;
     this.band = null;
     if (!res || !res.recipe) { this.notUnderstood(); return; }
     this.noteLimit(res.limited);
     this.rt.recipe = { recipe: res.recipe, option: pick.option, from };
+    if (opts.resume) {
+      const c = this.rt.cook;
+      c.step = Math.min(c.step, res.recipe.steps.length - 1);
+      c.peek = null;
+      c.pending = [];
+      c.fired = [];
+      this.track('recipe_changed', { cooking: true });
+      this.go('cook');
+      return;
+    }
     this.rt.check.handled = new Set();
     if (!this.state.firstRecipeAt) {
       this.state.firstRecipeAt = this.now();

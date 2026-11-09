@@ -100,7 +100,12 @@ export const PROFILES: Record<ProfileId, Profile> = {
   },
 };
 
-export const DEFAULT_PROFILE: ProfileId = 'spectra6-4in';
+/**
+ * The default follows the shell: its screen opening was modeled for the
+ * Kaleido 3 6" candidate (2026-11-08). The panel itself is still open until
+ * the bench test (hardware/PROTOTYPE.md); Spectra stays one ?profile= away.
+ */
+export const DEFAULT_PROFILE: ProfileId = 'kaleido3-6in';
 
 /** Design units are authored for 600×400; `u` scales them to the profile. */
 export function unitScale(p: Profile): number {

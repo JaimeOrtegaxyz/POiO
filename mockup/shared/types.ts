@@ -54,9 +54,11 @@ export interface BrainContext {
   city?: string;
   servings: number;
   poionotas: string[];
-  /** Known pantry items only; unknown items are simply absent. */
-  pantry: { item: string; status: PantryStatus; display?: string }[];
+  /** Known pantry items only; unknown items are simply absent. `assumed` = the device guessed it, the user never said. */
+  pantry: { item: string; status: PantryStatus; display?: string; assumed?: boolean }[];
   recentDiscards: string[];
+  /** No recipe cooked to the end yet: the brain knows almost nothing about this kitchen. */
+  firstRound?: boolean;
   screen: { id: string; contents?: unknown };
 }
 
@@ -73,7 +75,11 @@ export type ActionName =
   | 'pick' | 'discard' | 'tweak' | 'recipe_request' | 'missing'
   | 'pantry' | 'poionotas' | 'answer' | 'not_understood';
 
-/** One action per utterance. Fields beyond `action` depend on the action. */
+/**
+ * One thing an utterance asks for. An utterance becomes 1-4 actions, applied
+ * in order: what to remember (pantry, poionotas) first, then at most one
+ * thing to do. Fields beyond `action` depend on the action.
+ */
 export interface Action {
   action: ActionName;
   index?: number;
@@ -101,7 +107,10 @@ export interface BrainMeta {
 
 export interface SuggestResponse extends BrainMeta { options: SuggestOption[]; reason?: string }
 export interface RecipeResponse extends BrainMeta { recipe: Recipe | null }
-export interface UtteranceResponse extends BrainMeta { action: Action }
+export interface UtteranceResponse extends BrainMeta { actions: Action[] }
+
+/** Actions that change what POiO knows; everything else moves the device. */
+export const STATE_ACTIONS: readonly ActionName[] = ['pantry', 'poionotas'];
 
 export interface UsageSummary {
   fake: boolean;

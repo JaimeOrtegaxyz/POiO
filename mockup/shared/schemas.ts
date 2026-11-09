@@ -44,7 +44,8 @@ export function suggestValidationSchema(count: number) {
 const ACTIONS = ['pick', 'discard', 'tweak', 'recipe_request', 'missing', 'pantry', 'poionotas', 'answer', 'not_understood'];
 const STATUS = ['plenty', 'low', 'out'];
 
-export function actionApiSchema() {
+/** One action (an item of the utterance reply). */
+export function actionItemApiSchema() {
   return {
     type: 'object',
     additionalProperties: false,
@@ -94,8 +95,26 @@ export function actionApiSchema() {
   };
 }
 
-export function actionValidationSchema() {
-  const s = actionApiSchema() as any;
+/** The utterance reply: the actions it asks for, in the order the device applies them. */
+export function actionApiSchema() {
+  return {
+    type: 'object',
+    additionalProperties: false,
+    required: ['actions'],
+    properties: {
+      actions: {
+        type: 'array',
+        description: 'what to remember first (pantry, poionotas), then at most one thing to do',
+        items: actionItemApiSchema(),
+      },
+    },
+  };
+}
+
+export const MAX_ACTIONS = 4;
+
+function actionItemValidationSchema() {
+  const s = actionItemApiSchema() as any;
   s.properties.index.minimum = 1;
   s.properties.index.maximum = 10;
   s.properties.options.maxItems = 2;
@@ -109,6 +128,14 @@ export function actionValidationSchema() {
     { if: { properties: { action: { const: 'poionotas' } } }, then: { anyOf: [{ required: ['add'] }, { required: ['remove'] }] } },
     { if: { properties: { action: { const: 'answer' } } }, then: { required: ['text'] } },
   ];
+  return s;
+}
+
+export function actionValidationSchema() {
+  const s = actionApiSchema() as any;
+  s.properties.actions.minItems = 1;
+  s.properties.actions.maxItems = MAX_ACTIONS;
+  s.properties.actions.items = actionItemValidationSchema();
   return s;
 }
 

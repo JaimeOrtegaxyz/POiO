@@ -7,8 +7,8 @@
 import { agreement, pronoun } from '../../shared/grammar';
 import { matchItems } from '../../shared/match';
 import { normalizeText, slugify } from '../../shared/slug';
-import type { Action, BrainContext, MissingOption, Recipe, SuggestOption } from '../../shared/types';
-import { EXTRA_PANTRY_NAMES, PANTRY_NAMES, pantryName } from '../../src/copy/es-MX';
+import { STATE_ACTIONS, type Action, type BrainContext, type MissingOption, type Recipe, type SuggestOption } from '../../shared/types';
+import { DEFAULT_EQUIPMENT, EXTRA_PANTRY_NAMES, NOTES, PANTRY_NAMES, pantryName, sentence } from '../../src/copy/es-MX';
 import { localDate } from '../prompt';
 import caldo from '../fixtures/recipes/caldo-de-pollo.json';
 import enfrijoladas from '../fixtures/recipes/enfrijoladas.json';
@@ -107,8 +107,8 @@ export class FakeBrain {
     return this.fixtureFor(title) ?? this.fuzzyFixture(title);
   }
 
-  utterance(ctx: BrainContext, utterance: string): Action {
-    return fakeUtterance(ctx, utterance, this);
+  utterance(ctx: BrainContext, utterance: string): Action[] {
+    return fakeActions(ctx, utterance, this);
   }
 }
 
@@ -176,15 +176,80 @@ function screenOptions(ctx: BrainContext): string[] {
   return (c?.options ?? []).map((o) => o.title);
 }
 
+/** Equipment words the fake brain knows, as the note writes them. */
+const EQUIPMENT: [RegExp, string][] = [
+  [/estufa|parrilla electrica|parrilla de induccion|induccion/, 'estufa'],
+  [/horno(?! de microondas| tostador)/, 'horno'],
+  [/sarten/, 'sartén'],
+  [/licuadora/, 'licuadora'],
+  [/freidora( de aire)?|air ?fryer/, 'freidora de aire'],
+  [/olla (de presion|express?|expres)|instant ?pot/, 'olla de presión'],
+  [/microondas/, 'microondas'],
+  [/horno tostador|tostador/, 'horno tostador'],
+  [/comal/, 'comal'],
+  [/asador|parrilla(?! electrica| de induccion)/, 'asador'],
+  [/procesador/, 'procesador'],
+  [/wok/, 'wok'],
+  [/olla de coccion lenta|slow ?cooker|crock ?pot/, 'olla de cocción lenta'],
+];
+
+/** Onboarding Q4 in fake mode: the default kitchen, minus what they lack, plus what they named. */
+export function fakeEquipment(utterance: string): Action {
+  const n = normalizeText(utterance);
+  const lacks = new Set<string>();
+  const adds: string[] = [];
+  // "no tengo horno", "sin licuadora", "no hay horno ni licuadora"
+  const neg = /(no tengo|no hay|sin|me falta|no cuento con)\b(.*)/.exec(n)?.[2] ?? '';
+  for (const [re, name] of EQUIPMENT) {
+    if (neg && re.test(neg)) lacks.add(name);
+    else if (re.test(n) && !DEFAULT_EQUIPMENT.includes(name)) adds.push(name);
+  }
+  if (!lacks.size && !adds.length) return { action: 'not_understood' };
+  const have = [...DEFAULT_EQUIPMENT.filter((e) => !lacks.has(e)), ...adds];
+  return { action: 'poionotas', add: [NOTES.equipment(have, [...lacks])], reply: 'Anotado.' };
+}
+
+/** Onboarding Q3 in fake mode: a diet word becomes a clear note; anything else is kept as said. */
+export function fakeDiet(utterance: string): Action {
+  const n = normalizeText(utterance);
+  if (/vegan/.test(n)) return { action: 'poionotas', add: ['Dieta vegana: nada de origen animal.'], reply: 'Anotado.' };
+  if (/vegetarian|no como carne|no comemos carne/.test(n)) return { action: 'poionotas', add: ['Dieta vegetariana: sin carne, pollo ni pescado.'], reply: 'Anotado.' };
+  if (/pescetarian|solo pescado/.test(n)) return { action: 'poionotas', add: ['Sin carne ni pollo; pescado sí.'], reply: 'Anotado.' };
+  // Notes speak to the user: "no como cerdo" -> "No comes cerdo."
+  const note = sentence(utterance).replace(/^No como\b/, 'No comes').replace(/^No comemos\b/, 'No comen');
+  return note ? { action: 'poionotas', add: [/^no\b/i.test(note) ? note : `No comes: ${note.replace(/\.$/, '')}.`], reply: 'Anotado.' } : { action: 'not_understood' };
+}
+
+/**
+ * The fake reply: an utterance can ask for several things ("me gusta la
+ * primera pero no tengo perejil"). Each clause around "pero" is read on its
+ * own; what's understood comes back in order, state first, one move.
+ */
+export function fakeActions(ctx: BrainContext, utterance: string, brain: FakeBrain): Action[] {
+  const screen = ctx.screen.id;
+  if (screen === 'onboarding-3') return [fakeDiet(utterance)];
+  if (screen === 'onboarding-4') return [fakeEquipment(utterance)];
+  const clauses = utterance.split(/\s*,?\s+pero\s+/i).map((c) => c.trim()).filter(Boolean);
+  let got = clauses.map((c) => fakeUtterance(ctx, c, brain)).filter((a) => a.action !== 'not_understood');
+  if (clauses.length > 1 && !got.length) got = [fakeUtterance(ctx, utterance, brain)].filter((a) => a.action !== 'not_understood');
+  const state = got.filter((a) => STATE_ACTIONS.includes(a.action));
+  const move = got.find((a) => !STATE_ACTIONS.includes(a.action));
+  const out = [...state, ...(move ? [move] : [])];
+  return out.length ? out : [{ action: 'not_understood' }];
+}
+
 export function fakeUtterance(ctx: BrainContext, utterance: string, brain: FakeBrain): Action {
   const n = normalizeText(utterance);
   const screen = ctx.screen.id;
   const items = matchItems(utterance, NAMES);
 
-  // Onboarding Q4: what's at hand today.
-  if (screen === 'onboarding-4') {
-    if (!items.length) return { action: 'not_understood' };
-    return { action: 'pantry', changes: items.map((m) => ({ item: m.key, status: 'plenty' as const, display: pantryName(m.key) })), reply: 'Anotado.' };
+  // "Me gusta la primera", "quiero la dos": a pick, before "me gusta" reads as a taste note.
+  if (screen === 'choose') {
+    const ord = /\b(primera|primero|segunda|segundo|tercera|tercero|ultima|ultimo)\b|\b(?:la|el|opcion) ([123])\b/.exec(n);
+    if (ord) {
+      const idx = ord[2] ? Number(ord[2]) : ({ primera: 1, primero: 1, segunda: 2, segundo: 2, tercera: 3, tercero: 3, ultima: 3, ultimo: 3 } as Record<string, number>)[ord[1]];
+      return { action: 'pick', index: idx };
+    }
   }
 
   // Poionotas: forget something.

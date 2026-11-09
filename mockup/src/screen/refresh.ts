@@ -72,6 +72,13 @@ export class Display {
     this.shown = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
   }
 
+  /** An image the panel already holds (what it kept with the power off): shown as is, no refresh. */
+  hold(frame: ImageData): void {
+    if (this.busy) { this.pending = { frame, kind: 'full' }; return; }
+    this.ctx.putImageData(frame, 0, 0);
+    this.shown = frame;
+  }
+
   get isBusy(): boolean { return this.busy; }
 
   present(frame: ImageData, kind: RefreshKind): void {

@@ -38,6 +38,7 @@ The local Python app (the old Stage 2) is archived in `archive/stage2/`.
   mockups, the copy review, the mono prototype rig). Archived files only get a
   banner; don't rewrite them or chase their old internal links. Index:
   `archive/README.md`.
+- **Brand:** colors, marks (wordmark, the two hens) and type in [`assets/BRAND.md`](assets/BRAND.md); code reads the colors from `mockup/src/brand.css`.
 - **Fonts:** Quicksand + JetBrains Mono are canonical. The archived mockups still
   use the Google Fonts CDN; that's intentional.
 - **Build log:** `JOURNAL.md` (Jaime's personal log — read it for the *why*,

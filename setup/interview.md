@@ -38,23 +38,25 @@ Run this when any personal file is missing. Ask only what's still unknown. Each 
 |---|---|---|---|
 | 1 | "¿En qué ciudad cocinas?" | "Para sugerirte lo que está de temporada y lo que encuentras cerca." | Season inferred from the date; no regional bias |
 | 2 | "¿Para cuántas personas cocinas normalmente?" | "Para ajustar las cantidades." | 2 servings |
-| 3 | "¿Hay algo que no comas o que no te guste?" (allergies, dislikes, picante) | "Para no sugerirte algo que vas a descartar." | No restrictions; medium picante |
-| 4 | "¿Qué tienes hoy a la mano? Dime unas cosas, o sáltalo." (optional fridge photo via the app) | "Para que la primera receta use lo que ya tienes." | Assume basics (sal, aceite, cebolla, ajo) + chicken; pantry otherwise unknown |
+| 3 | "¿Comes de todo, o hay algo que no comas?" (diet: vegetarian, vegan, no pork; allergies, dislikes, picante) | "Vegetariano, sin cerdo, sin picante… Para no sugerirte algo que vas a descartar." | Eats everything; medium picante |
+| 4 | "Supongo que tienes estufa, horno, sartén y licuadora. ¿Así es?" ("sí" keeps it; "no tengo horno", "y freidora de aire" adjust it) | "Dime si te falta algo o si tienes algo más, como freidora de aire. Para no pedirte lo que no tienes." | Estufa, horno, sartén y licuadora |
 
-Then go **straight to three options** (SKILL.md, Mode 1). No summary of what was learned, no "¿listo para cocinar?".
+The pantry isn't asked: the first options don't depend on it, and the ingredient check before cooking fills it in ("no tengo perejil" marks it out and offers a swap).
+
+Then go **straight to three options** (SKILL.md, Mode 1). No summary of what was learned, no "¿listo para cocinar?". With the pantry barely known, the first round goes for range and flavor, not for what's on hand: it's how POiO learns their taste. The diet answer always wins over chicken first.
 
 ### Writing the files after the first run
 
 - **`references/regional-context.md`**
   - City given: generate it as described in [Region](#region) below.
   - Skipped: write a short file that says the region is unknown and the season comes from the date. Don't copy the example's region.
-- **`poionotas.md`**: servings (Q2) and restrictions, dislikes and picante level (Q3), or the defaults, as short dated bullets.
+- **`poionotas.md`**: servings (Q2) and diet, restrictions, dislikes and picante level (Q3), or the defaults, as short dated bullets.
 - **`pantry.md`**: copy `pantry.example.md`, set "Last updated" to today, then:
-  - Mark what the user named in Q4 as `plenty`.
-  - Skipped or partial: also mark the basics (salt, oil, onion, garlic) and chicken (the boneless thigh and boneless breast rows) as `plenty` with the note `assumed`.
+  - Mark the basics (salt, oil, onion, garlic) and chicken (the boneless thigh and boneless breast rows) as `plenty` with the note `assumed`. Skip the chicken when the diet rules it out.
+  - Assumed rows are guesses: never the reason for a suggestion.
   - Leave every other row as the template has it. The pantry is context, not a requirement: the ingredient check before cooking catches what's actually missing.
   - A fridge photo, if one arrives, goes through the [photo path](#photo-path).
-- **`references/equipment.md`**: copy `references/equipment.example.md`, assuming stovetop + oven until the equipment topic comes up.
+- **`references/equipment.md`**: copy `references/equipment.example.md` and fill it from Q4: the four defaults, minus what they lack, plus what they named.
 
 ---
 
@@ -66,7 +68,7 @@ Surface these **gradually**: one or two at a time, at a natural moment (after a 
 |---|---|---|---|
 | 1 | What to call you | "¿Cómo te llamo?" | `poionotas.md` |
 | 2 | Main goal: use up food / eat better / save money | "¿Qué te importa más: aprovechar lo que hay, comer mejor o ahorrar?" | `poionotas.md` |
-| 3 | Equipment | "¿Con qué cocinas? Horno, estufa, freidora de aire, olla de presión, licuadora…" | `references/equipment.md` ([detail](#equipment)) |
+| 3 | Equipment beyond the first-run guess | "¿Algo más en tu cocina? Olla de presión, freidora de aire, procesador…" | `references/equipment.md` ([detail](#equipment)) |
 | 4 | Weeknight time budget | "Entre semana, ¿cuánto tiempo tienes para cocinar?" | `poionotas.md` |
 | 5 | Spice / salt / sweet leanings | "¿Cómo le vas al picante, a la sal y a lo dulce?" | `poionotas.md` |
 | 6 | Household: who eats, kids, schedules | "¿Quién come en casa? ¿Hay niños, horarios distintos?" | `poionotas.md` |

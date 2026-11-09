@@ -4,6 +4,7 @@
  * panel pass then snaps it to what the panel can show.
  */
 import type { PantryStatus } from '../../shared/pantry';
+import { chicken, type ChickenKind } from './chicken';
 import { GLYPH_H, GLYPH_W, STEAM_X, glyphShape, steam, type GlyphName } from './glyphs';
 import { designHeight, unitScale, type ChromeColor, type Profile } from './profiles';
 
@@ -261,6 +262,25 @@ export class Painter {
       for (const sx of st.x) ctx.stroke(steam(sx, frame * 4));
     }
     ctx.restore();
+  }
+
+  /**
+   * The chicken, `h` design units tall with its top-left at (x, y). `as`
+   * paints every shape one color (the paper silhouette on an inverted band).
+   * Returns the drawn width.
+   */
+  chicken(kind: ChickenKind, x: number, y: number, h: number, as?: ChromeColor): number {
+    const c = chicken(kind);
+    const k = (h / c.h) * this.u;
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.setTransform(k, 0, 0, k, this.px(x), this.px(y));
+    for (const s of c.paths) {
+      ctx.fillStyle = this.color(as ?? s.fill);
+      ctx.fill(s.path, s.rule);
+    }
+    ctx.restore();
+    return (c.w / c.h) * h;
   }
 
   /** Blit a pre-processed native-resolution image at a grid-aligned position. */

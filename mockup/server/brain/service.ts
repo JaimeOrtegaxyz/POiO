@@ -10,13 +10,16 @@ import type { Action, LimitReason, Recipe, RecipeResponse, SuggestResponse, Utte
 import type { BrainFiles } from '../allowlist';
 import type { Config } from '../config';
 import { buildUserMessage, sanitizeContext } from '../prompt';
-import { costUsd } from '../pricing';
+import { costUsd, sessionTokens } from '../pricing';
 import type { IpLimiter, Spender, UsageTracker } from '../usage';
 import { FakeBrain } from './fake';
 import { RealBrain, type MessagesClient } from './real';
 
-/** max_tokens per endpoint (brief §4.4). */
-export const MAX_TOKENS = { utterance: 300, suggest: 300, recipe: 1800 } as const;
+/**
+ * max_tokens per endpoint. A recipe with a real sauce and a finish runs
+ * ~1,800 tokens of JSON, so it gets room; an utterance can be a few actions.
+ */
+export const MAX_TOKENS = { utterance: 500, suggest: 400, recipe: 3000 } as const;
 
 export interface ServiceDeps {
   config: Pick<Config, 'fake' | 'model' | 'modelRecipe' | 'timeZone'>;
@@ -68,7 +71,7 @@ export class BrainService {
   estimate(model: string, maxTokens: number): { usd: number; tokens: number } {
     const prefix = Math.ceil(this.d.prefix.length / 3.5);
     const u = { input_tokens: 3000, cache_creation_input_tokens: prefix, cache_read_input_tokens: 0, output_tokens: maxTokens };
-    return { usd: costUsd(model, u), tokens: 3000 + prefix + maxTokens };
+    return { usd: costUsd(model, u), tokens: sessionTokens(u) };
   }
 
   /** A hold id = go ahead; otherwise the response comes from fixtures, flagged. */
@@ -122,9 +125,11 @@ export class BrainService {
     const ctx = sanitizeContext(body?.context);
     const title = typeof body?.title === 'string' ? body.title.slice(0, 120) : '';
     if (!title) return { recipe: null, fake: this.isFake, fallback: true };
-    // A sample-recipe title returns its fixture, in any mode.
+    // "Hazla sin picante": the same dish, rewritten with the change.
+    const tweak = typeof body?.tweak === 'string' ? body.tweak.slice(0, 200) : undefined;
+    // A sample-recipe title returns its fixture, in any mode (unless it's being changed).
     const sample = this.fake.fixtureFor(title);
-    if (sample && (this.isFake || this.sampleIds.has(sample.id))) return { recipe: sample, fake: this.isFake };
+    if (sample && (this.isFake || (this.sampleIds.has(sample.id) && !tweak))) return { recipe: sample, fake: this.isFake };
     const gate = await this.gate(who, ip, 'recipe', this.d.config.modelRecipe, MAX_TOKENS.recipe);
     if (!('hold' in gate)) return { recipe: this.fake.recipe(title), ...gate };
     const res = await this.spend(who, 'recipe', gate.hold, () => this.real!.call<Recipe>({
@@ -133,7 +138,7 @@ export class BrainService {
       maxTokens: MAX_TOKENS.recipe,
       schema: this.recipeApiSchema,
       validate: (x) => this.validateRecipe(x),
-      user: buildUserMessage('recipe', ctx, { title }, this.d.config.timeZone),
+      user: buildUserMessage('recipe', ctx, { title, ajuste: tweak }, this.d.config.timeZone),
     }));
     if (!res.data) return { recipe: this.fake.recipe(title), fake: false, fallback: true };
     return { recipe: tidyRecipe(res.data), fake: false };
@@ -142,10 +147,10 @@ export class BrainService {
   async utterance(who: Spender, ip: string, body: any): Promise<UtteranceResponse> {
     const ctx = sanitizeContext(body?.context);
     const utterance = typeof body?.utterance === 'string' ? body.utterance.slice(0, 500) : '';
-    if (!utterance.trim()) return { action: { action: 'not_understood' }, fake: this.isFake };
+    if (!utterance.trim()) return { actions: [NOT_UNDERSTOOD], fake: this.isFake };
     const gate = await this.gate(who, ip, 'utterance', this.d.config.model, MAX_TOKENS.utterance);
-    if (!('hold' in gate)) return { action: this.fake.utterance(ctx, utterance), ...gate };
-    const res = await this.spend(who, 'utterance', gate.hold, () => this.real!.call<Action>({
+    if (!('hold' in gate)) return { actions: this.fake.utterance(ctx, utterance), ...gate };
+    const res = await this.spend(who, 'utterance', gate.hold, () => this.real!.call<{ actions: Action[] }>({
       endpoint: 'utterance',
       model: this.d.config.model,
       maxTokens: MAX_TOKENS.utterance,
@@ -153,10 +158,12 @@ export class BrainService {
       validate: (x) => (this.vAction(x) ? null : this.errors(this.vAction.errors)),
       user: buildUserMessage('utterance', ctx, { utterance }, this.d.config.timeZone),
     }));
-    if (!res.data) return { action: { action: 'not_understood' }, fake: false, fallback: true };
-    return { action: res.data, fake: false };
+    if (!res.data) return { actions: [NOT_UNDERSTOOD], fake: false, fallback: true };
+    return { actions: res.data.actions, fake: false };
   }
 }
+
+const NOT_UNDERSTOOD: Action = { action: 'not_understood' };
 
 /** Keep `uses` pointing at real ingredient keys; renumber steps 1..N. */
 export function tidyRecipe(r: Recipe): Recipe {

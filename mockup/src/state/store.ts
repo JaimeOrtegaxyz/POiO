@@ -9,7 +9,7 @@
  */
 import type { PantryStatus } from '../../shared/pantry';
 import type { SuggestOption } from '../../shared/types';
-import type { ProfileId, TimingMode } from '../screen/profiles';
+import { DEFAULT_PROFILE, type ProfileId, type TimingMode } from '../screen/profiles';
 
 export interface PantryEntry {
   status: PantryStatus;
@@ -24,6 +24,8 @@ export interface Checkin { dish: string; dueAt: number; shownAt?: number; done?:
 
 export interface Settings {
   profile: ProfileId;
+  /** Someone chose the panel (debug panel). Otherwise every load takes the current default. */
+  profilePicked?: boolean;
   timing: TimingMode;
   scale?: number;
   muted: boolean;
@@ -86,7 +88,7 @@ export function freshState(): DeviceState {
     history: [],
     checkins: [],
     cookbook: null,
-    settings: { profile: 'spectra6-4in', timing: 'fast', muted: false, speed: 1, clockOffsetMs: 0, checkinQuietMs: 10 * 60 * 1000 },
+    settings: { profile: DEFAULT_PROFILE, timing: 'fast', muted: false, speed: 1, clockOffsetMs: 0, checkinQuietMs: 10 * 60 * 1000 },
   };
 }
 
@@ -95,7 +97,10 @@ export function normalizeState(raw: unknown): DeviceState | null {
   const s = raw as DeviceState | null;
   if (!s || s.version !== 1 || !s.deviceId) return null;
   const f = freshState();
-  return { ...f, ...s, prefs: { ...f.prefs, ...s.prefs }, settings: { ...f.settings, ...s.settings } };
+  const settings = { ...f.settings, ...s.settings };
+  // Saved states all carry the old default; only a deliberate pick survives a default change.
+  if (!settings.profilePicked) settings.profile = DEFAULT_PROFILE;
+  return { ...f, ...s, prefs: { ...f.prefs, ...s.prefs }, settings };
 }
 
 export function loadState(storage: Storage = localStorage): DeviceState {

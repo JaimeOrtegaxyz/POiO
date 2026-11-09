@@ -1,21 +1,25 @@
 /*
  * Page and device chrome. The e-paper screen itself is a canvas, never DOM.
- * No CSS animations anywhere and one transition only: the star knob's short
- * turn per detent (device chrome answering a hand, never the screen, never
- * a loop). The screen's only motion is the refresh emulation (discrete
- * repaints) and variant a's frame repaints.
+ * No CSS animations and no transitions anywhere: the knob turns by swapping
+ * rendered frames, the pills by swapping rendered states. The screen's only
+ * motion is the refresh emulation (discrete repaints) and variant a's frame
+ * repaints.
  *
- * The face is the frontal render itself (public/face/, cut from
- * assets/render-frontal.png): one image with a transparent screen hole, the
- * panel behind it, and hit targets over the pills and the star. Placement
- * and scale come from device/layout.ts; everything on the face is placed in
- * percent of the face box, so it scales with it.
+ * The face is the frontal renders themselves (public/face/, cut from
+ * assets/render/ by scripts/face/build-face.py): the shell with a transparent
+ * screen opening, the panel behind it, then the pills, the knob's shadow and
+ * the knob as their own render layers, and hit targets over the pills.
+ * Placement and scale come from device/layout.ts; everything on the face is
+ * placed in percent of the face box, so it scales with it.
  */
+@import './brand.css';
+
+/* The page around the device takes the brand colors (brand.css). The panel's own colors are physical, not brand. */
 :root {
-  --ink: #1a1816;
-  --paper: #f4efe4;
-  --red: #c93b36;
-  --page: #ece8df;
+  --ink: var(--brand-ink);
+  --paper: var(--brand-white);
+  --red: var(--brand-red);
+  --page: var(--brand-grey);
   /* The panel's inactive border around the active area: the letterbox bands. */
   --panel-edge: #dcd7cb;
 }
@@ -30,34 +34,42 @@ html, body { margin: 0; background: var(--page); color: var(--ink); font-family:
 .face { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; user-select: none; -webkit-user-select: none; }
 
 /*
- * The panel sits behind the hole. The canvas keeps its native pixels and its
- * aspect (object-fit: contain): a 3:2 panel in the render's ~4:3 hole shows
- * honest bands above and below, never a stretched screen. It's drawn smooth,
- * since a 600 px panel can't land on an integer scale at these sizes.
+ * The panel sits behind the opening. The canvas keeps its native pixels and
+ * its aspect (object-fit: contain): the Kaleido panel fills the opening it
+ * was modeled for; a 3:2 panel would show honest bands above and below, never
+ * a stretched screen. It's drawn smooth, since the panel can't land on an
+ * integer scale at these sizes.
  */
 .panel { position: absolute; z-index: 1; background: var(--panel-edge); line-height: 0;
-  box-shadow: inset 0 4px 7px rgba(96, 64, 0, 0.32), inset 0 0 0 1px rgba(26, 24, 22, 0.14); }
+  box-shadow: inset 0 4px 7px rgba(96, 64, 0, 0.32), inset 0 0 0 1px rgba(26, 26, 26, 0.14); }
 .screen { display: block; width: 100% !important; height: 100% !important; object-fit: contain; image-rendering: auto; background: transparent; }
 
-/* Hit targets over the render's pills: invisible until pressed or focused. */
-.pill { position: absolute; z-index: 3; border: none; border-radius: 999px; padding: 0; margin: 0; cursor: pointer; background: transparent;
+/* The pills: the rendered pill at rest, or pushed in while its hit target is held. */
+.pill-layer { position: absolute; z-index: 3; pointer-events: none; }
+.pill-layer img { position: absolute; inset: 0; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; }
+.pill-layer .down, .pill-layer.down .up { visibility: hidden; }
+.pill-layer.down .down { visibility: visible; }
+/* Hit targets over the pills: invisible; the render layer shows the press. */
+.pill { position: absolute; z-index: 6; border: none; border-radius: 999px; padding: 0; margin: 0; cursor: pointer; background: transparent;
   touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-.pill:active { background: rgba(120, 78, 0, 0.12); box-shadow: inset 0 2px 5px rgba(110, 70, 0, 0.4); }
 
-/* The star knob: its own layer from the render, turning about its center. */
-.knob { position: absolute; z-index: 3; cursor: grab; touch-action: none;
+/*
+ * The star knob: one rendered frame per 15° detent (only one shown), over its
+ * shadow on the shell, a multiply layer per frame. Pressed or held, the knob
+ * sinks a little and its shadow tightens.
+ */
+.knob-shadow { position: absolute; z-index: 4; pointer-events: none; mix-blend-mode: multiply; }
+.knob { position: absolute; z-index: 5; cursor: grab; touch-action: none;
   user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
-.knob-turn { width: 100%; height: 100%; transition: transform 110ms ease-out; }
-.star { display: block; width: 100%; height: 100%; pointer-events: none; }
-.knob.pressed, .knob.held { transform: translateY(1.5px) scale(0.985); filter: brightness(0.94); }
-@media (prefers-reduced-motion: reduce) { .knob-turn { transition: none; } }
+.knob-shadow .kf, .knob .kf { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; visibility: hidden; }
+.knob-shadow .kf.on, .knob .kf.on { visibility: visible; }
+.knob.pressed, .knob.held { transform: translateY(1px) scale(0.985); filter: brightness(0.96); }
+.device:has(.knob.pressed, .knob.held) .knob-shadow { opacity: 0.6; }
 
-/* The listening LED, by the knob: a dark dot when off, a warm red glow while listening. */
-.led { position: absolute; z-index: 3; border-radius: 50%; min-width: 8px; min-height: 8px;
-  background: #8a6418; border: 2px solid #5a3f0c;
-  box-shadow: inset 0 1px 2px rgba(40, 24, 0, 0.6), 0 1px 0 rgba(255, 238, 180, 0.7); }
-.led.on { background: radial-gradient(circle at 40% 35%, #ffb3a0 0%, #ff4a30 45%, #e3261a 100%); border-color: #a51d14;
-  box-shadow: 0 0 0 3px rgba(255, 80, 50, 0.3), 0 0 12px 5px rgba(255, 64, 40, 0.6); }
+/* The listening LED, by the knob. The model has no LED, so nothing shows until it's listening: then a warm red glow. */
+.led { position: absolute; z-index: 5; border-radius: 50%; min-width: 7px; min-height: 7px; visibility: hidden; pointer-events: none; }
+.led.on { visibility: visible; background: radial-gradient(circle at 40% 35%, #ffb3a0 0%, #ff4a30 45%, #e3261a 100%);
+  box-shadow: 0 0 0 2px rgba(255, 80, 50, 0.3), 0 0 10px 4px rgba(255, 64, 40, 0.55); }
 
 .knob:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; border-radius: 50%; }
 .pill:focus-visible, .power:focus-visible, .typed:focus-visible, .link-button:focus-visible, .ruler-done:focus-visible, .ruler-range:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
@@ -71,8 +83,8 @@ html, body { margin: 0; background: var(--page); color: var(--ink); font-family:
   padding: 6px 18px; border-radius: 999px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
 .power.off-state { background: var(--ink); color: var(--paper); }
 .typed { width: 380px; max-width: 100%; font: 600 15px 'Quicksand', sans-serif; padding: 8px 14px; border-radius: 999px;
-  border: 1.5px solid rgba(26, 24, 22, 0.35); background: rgba(244, 239, 228, 0.7); color: var(--ink); text-align: center; }
-.typed::placeholder { color: rgba(26, 24, 22, 0.45); }
+  border: 1.5px solid rgba(26, 26, 26, 0.35); background: rgba(255, 255, 255, 0.7); color: var(--ink); text-align: center; }
+.typed::placeholder { color: rgba(26, 26, 26, 0.45); }
 .notice { font: 600 14px 'Quicksand', sans-serif; }
 .notice:empty { display: none; }
 .under-links { display: flex; justify-content: center; gap: 22px; margin-top: 4px; }
@@ -87,7 +99,7 @@ html, body { margin: 0; background: var(--page); color: var(--ink); font-family:
 /* Feedback: a text box, one line of why, a send button. */
 .feedback { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 .feedback-text { width: 100%; resize: vertical; font: 500 15px/1.4 'Quicksand', sans-serif; padding: 10px 12px; border-radius: 12px;
-  border: 1.5px solid rgba(26, 24, 22, 0.35); background: var(--paper); color: var(--ink); }
+  border: 1.5px solid rgba(26, 26, 26, 0.35); background: var(--paper); color: var(--ink); }
 .feedback-why { margin: 0; font: 500 12px 'Quicksand', sans-serif; opacity: .6; }
 .feedback-row { display: flex; align-items: center; justify-content: center; gap: 12px; }
 .feedback-send { font: 600 14px 'Quicksand', sans-serif; padding: 5px 16px; border-radius: 999px; border: 2px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer; }
@@ -134,11 +146,11 @@ html, body { margin: 0; background: var(--page); color: var(--ink); font-family:
   .typed { width: 100%; }
 }
 
-.debug { width: 300px; font: 500 12px 'JetBrains Mono', monospace; background: #fffdf8; border: 2px solid var(--ink); border-radius: 12px; padding: 12px 14px; }
+.debug { width: 300px; font: 500 12px 'JetBrains Mono', monospace; background: var(--brand-white); border: 2px solid var(--ink); border-radius: 12px; padding: 12px 14px; }
 .debug h2 { font: 700 13px 'JetBrains Mono', monospace; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .08em; }
 .debug label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0; }
 .debug select, .debug input, .debug button { font: inherit; }
 .debug button { padding: 3px 8px; border: 1.5px solid var(--ink); background: var(--paper); border-radius: 6px; cursor: pointer; }
 .debug .row { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
-.debug pre { white-space: pre-wrap; word-break: break-word; max-height: 180px; overflow: auto; background: #f4efe4; padding: 6px; border-radius: 6px; margin: 4px 0 10px; }
+.debug pre { white-space: pre-wrap; word-break: break-word; max-height: 180px; overflow: auto; background: var(--brand-grey); padding: 6px; border-radius: 6px; margin: 4px 0 10px; }
 .debug .badge { display: inline-block; padding: 1px 6px; border-radius: 4px; background: var(--ink); color: var(--paper); }

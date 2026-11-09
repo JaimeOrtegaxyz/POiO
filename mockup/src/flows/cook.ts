@@ -11,6 +11,7 @@
 import { AFFORD, COOK, pantryName } from '../copy/es-MX';
 import type { GlyphName } from '../screen/glyphs';
 import type { App } from './app';
+import { openMissing } from './check';
 import { T } from './draw';
 import type { ScreenDef } from './screens';
 
@@ -123,12 +124,13 @@ export const cook: ScreenDef = {
   },
 
   action(app, a) {
-    // Mid-cook, "no hay X" / "se acabó X" is pantry news; stay on the step.
-    if (a.action === 'missing' && a.item) {
-      app.dispatch({ action: 'pantry', changes: [{ item: a.item, status: 'out', display: a.display }] });
-      return true;
-    }
-    return false;
+    if (a.action !== 'missing' || !a.item) return false;
+    // Mid-cook, "no hay crema" for something this recipe still needs: offer the swap, then back to this step.
+    const need = app.rt.recipe?.recipe.ingredients.find((i) => i.item === a.item && i.required !== false);
+    if (need && a.options?.length) { openMissing(app, a, 'cook'); return true; }
+    // Anything else is pantry news; stay on the step.
+    app.dispatch({ action: 'pantry', changes: [{ item: a.item, status: 'out', display: a.display }] });
+    return true;
   },
 
   contents: (app) => {

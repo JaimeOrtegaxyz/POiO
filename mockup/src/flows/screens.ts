@@ -13,6 +13,7 @@ import { missing } from './missing';
 import { notes } from './notes';
 import { onboarding } from './onboarding';
 import { pantry } from './pantry';
+import { drawSleep } from './sleep';
 import { tutorial, type Control } from './tutorial';
 
 export type ScreenId = 'off' | 'onboarding' | 'choose' | 'intro' | 'check' | 'missing' | 'cook' | 'done' | 'cookbook' | 'pantry' | 'notes' | 'tutorial';
@@ -34,6 +35,10 @@ export interface ScreenDef {
   utterance?(app: App, text: string): boolean | Promise<boolean>;
   /** An action from the brain; return true if handled. */
   action?(app: App, a: Action): boolean;
+  /** Every action of one utterance at once, before any is applied; return true if handled (onboarding answers). */
+  actions?(app: App, list: Action[]): boolean;
+  /** The body itself shows a wait (the chicken), so the thinking band stays off. */
+  waiting?(app: App): boolean;
   /** What's on screen, for the brain's context. */
   contents?(app: App): unknown;
   /** Called by the scheduler; return true to repaint. */
@@ -46,7 +51,8 @@ export interface ScreenDef {
   hint?(app: App): Control | null;
 }
 
-const off: ScreenDef = { context: () => '', afford: () => '', draw: () => {} };
+/** Off: the panel holds the sleep image (flows/sleep.ts); App paints it at turn-off. */
+const off: ScreenDef = { context: () => '', afford: () => '', draw: (p) => drawSleep(p) };
 
 export const SCREENS: Record<ScreenId, ScreenDef> = {
   off, onboarding, choose, intro, check, missing, cook, done, cookbook, pantry, notes, tutorial,

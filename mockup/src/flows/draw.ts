@@ -1,6 +1,7 @@
 /** Drawing pieces shared by the screens. Design units, 600 wide. */
 import type { PantryStatus } from '../../shared/pantry';
 import { ASSUMED, STATUS_LABEL } from '../copy/es-MX';
+import { chickenAspect } from '../screen/chicken';
 import type { GlyphName } from '../screen/glyphs';
 import { foodImage } from '../screen/images';
 import type { Painter, TextOpts } from '../screen/painter';
@@ -61,4 +62,21 @@ export function recipeGlyph(steps: { glyph?: string }[] | undefined): GlyphName 
 export function pickIndex(index: number, count: number): number | null {
   const i = index === -1 ? count : index;
   return i >= 1 && i <= count ? i - 1 : null;
+}
+
+/**
+ * A wait the body shows itself (the first options loading): the ink chicken,
+ * a line under it, and an optional why-line. Static, one repaint; the
+ * thinking band stays off while this is up.
+ */
+export function waiting(p: Painter, body: Area, lead: string, why?: string): void {
+  const ch = Math.min(118, body.h * 0.34);
+  const cw = ch * chickenAspect('alone');
+  const textH = 30 + (why ? 54 : 0);
+  let y = body.y + Math.max(14, (body.h - ch - 34 - textH) / 2);
+  const cx = body.x + body.w / 2;
+  p.chicken('alone', cx - cw / 2, y, ch);
+  y += ch + 46;
+  y = p.para(lead, cx, y, body.w - 40, { ...T.row, size: 24, align: 'center' }, 30, 2);
+  if (why) p.para(why, cx, y + 2, body.w - 90, { ...T.why, align: 'center' }, 23, 3);
 }
