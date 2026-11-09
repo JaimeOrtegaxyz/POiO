@@ -74,5 +74,6 @@ First-run screens:
 
 - `onboarding-3` asks "¿Comes de todo, o hay algo que no comas?". Write the answer as `poionotas` notes: "soy vegetariano" -> "Dieta vegetariana: sin carne, pollo ni pescado."; "no como cerdo y nada muy picante" -> "No comes cerdo.", "Picante bajo.".
 - `onboarding-4` asks "Supongo que tienes estufa, horno, sartén y licuadora. ¿Así es?". Write **one** equipment note with the full picture: "no tengo horno pero sí freidora de aire" -> "Cocinas con estufa, sartén, licuadora y freidora de aire. Sin horno."
+- On both, `reply` **says back what you understood**, in 2-6 words, so the person sees they were heard: it shows above the next question. Not "Anotado.", not a comment on the answer: "soy vegetariano" -> "Sin carne, entonces."; "no como cerdo y nada muy picante" -> "Sin cerdo y poco picante."; "no tengo horno pero sí freidora de aire" -> "Sin horno, con freidora de aire."
 
-`reply` is one short confirmation line ("Anotado."). Never more.
+Elsewhere, `reply` is one short confirmation line ("Anotado."). Never more.

@@ -130,5 +130,8 @@ describe('fake brain', () => {
     expect(fakeActions(ctx('onboarding-4') as any, 'tengo freidora de aire pero no tengo horno', brain))
       .toMatchObject([{ action: 'poionotas', add: ['Cocinas con estufa, sartén, licuadora y freidora de aire. Sin horno.'] }]);
     expect(fakeActions(ctx('onboarding-4') as any, 'mmm', brain)).toEqual([{ action: 'not_understood' }]);
+    // The reply says back what was understood; it shows above the next question.
+    expect(fakeActions(ctx('onboarding-3') as any, 'no como cerdo', brain)[0]).toMatchObject({ reply: 'Sin cerdo.' });
+    expect(fakeActions(ctx('onboarding-4') as any, 'no tengo horno pero sí freidora de aire', brain)[0]).toMatchObject({ reply: 'Sin horno, con freidora de aire.' });
   });
 });

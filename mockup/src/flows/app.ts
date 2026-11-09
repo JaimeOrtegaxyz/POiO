@@ -34,6 +34,8 @@ export interface PendingCheckpoint { step: number; message: string; dueAt: numbe
 export interface Runtime {
   screen: ScreenId;
   onboardingQ: number;
+  /** What the last first-run answer was heard as, said back above the next question. */
+  onboardingHeard: string | null;
   choose: { options: SuggestOption[] | null; sel: number; shown: string[]; from: ScreenId; loading: boolean };
   recipe: { recipe: Recipe; option?: SuggestOption; from: ScreenId } | null;
   check: { handled: Set<string> };
@@ -55,6 +57,7 @@ function freshRuntime(): Runtime {
   return {
     screen: 'off',
     onboardingQ: 0,
+    onboardingHeard: null,
     choose: { options: null, sel: 0, shown: [], from: 'cookbook', loading: false },
     recipe: null,
     check: { handled: new Set() },

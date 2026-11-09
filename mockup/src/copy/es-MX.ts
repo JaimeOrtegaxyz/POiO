@@ -65,6 +65,18 @@ export const ONBOARDING = [
   { ask: `Supongo que tienes ${joinY(DEFAULT_EQUIPMENT)}. ¿Así es?`, why: 'Dime si te falta algo o si tienes algo más, como freidora de aire. Para no pedirte lo que no tienes.' },
 ];
 
+/**
+ * Onboarding: the line above the next question that says back what was
+ * heard, so an answer never vanishes into a dry next question. Diet and
+ * equipment come back from the brain (its `reply`); these are the ones the
+ * device reads itself.
+ */
+export const HEARD = {
+  city: (c: string) => `${c}, anotado.`,
+  servings: (n: number) => (n === 1 ? 'Para ti, entonces.' : `Para ${n}, entonces.`),
+  eatsAll: 'De todo, entonces.',
+};
+
 /** The first options: while they load, and once, above them. */
 export const FIRST_ROUND = {
   waiting: 'Van tres ideas para empezar.',

@@ -43,7 +43,7 @@ export const choose: ScreenDef = {
     const first = c.from === 'onboarding';
     if (!opts) {
       if (!c.loading) return;
-      if (first) waiting(p, body, FIRST_ROUND.waiting, FIRST_ROUND.waitingWhy);
+      if (first) waiting(p, body, [app.rt.onboardingHeard, FIRST_ROUND.waiting].filter(Boolean).join(' '), FIRST_ROUND.waitingWhy);
       else waiting(p, body, VOICE_STATE.thinking);
       return;
     }

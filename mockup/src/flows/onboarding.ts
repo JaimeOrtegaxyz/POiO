@@ -7,10 +7,14 @@
  * go to the brain, which writes them as poionotas; "sí", "de todo" and a
  * skip take the defaults without a call. The pantry isn't asked: the first
  * options don't depend on it, and the ingredient check fills it in.
+ *
+ * Each answer is said back in one short line above the next question
+ * ("Guadalajara, anotado."), and the last one above the first-round wait,
+ * so the person sees they were understood. A skip says nothing back.
  */
 import { normalizeText } from '../../shared/slug';
 import type { Action } from '../../shared/types';
-import { AFFORD, CONTEXT, DEFAULT_EQUIPMENT, EQUIPMENT_WHAT, NOTES, NOTHING_WORDS, ONBOARDING, pantryName, progress, sentence } from '../copy/es-MX';
+import { AFFORD, CONTEXT, DEFAULT_EQUIPMENT, EQUIPMENT_WHAT, HEARD, NOTES, NOTHING_WORDS, ONBOARDING, pantryName, progress, sentence } from '../copy/es-MX';
 import { parseServings } from '../input/intent';
 import type { App } from './app';
 import { T } from './draw';
@@ -34,7 +38,9 @@ function assumeBasics(app: App): void {
   }
 }
 
-function next(app: App): void {
+/** On to the next question (or the first options), saying back what was heard. */
+function next(app: App, heard: string | null = null): void {
+  app.rt.onboardingHeard = heard;
   if (app.rt.onboardingQ < ONBOARDING.length - 1) {
     app.rt.onboardingQ++;
     app.band = null;
@@ -67,10 +73,10 @@ function skip(app: App): void {
   next(app);
 }
 
-function answered(app: App, q: number, data: Record<string, number> = {}): void {
+function answered(app: App, q: number, data: Record<string, number> = {}, heard: string | null = null): void {
   app.track('onboarding_answer', { q: q + 1, ...data });
   app.save();
-  next(app);
+  next(app, heard);
 }
 
 export const onboarding: ScreenDef = {
@@ -78,10 +84,12 @@ export const onboarding: ScreenDef = {
   meta: (app) => progress(app.rt.onboardingQ + 1, ONBOARDING.length),
   afford: () => AFFORD.onboarding,
 
-  enter(app) { app.rt.onboardingQ = 0; },
+  enter(app) { app.rt.onboardingQ = 0; app.rt.onboardingHeard = null; },
 
   draw(p, app, body) {
     const q = ONBOARDING[app.rt.onboardingQ];
+    const heard = app.rt.onboardingHeard;
+    if (heard) p.para(heard, body.x + 8, body.y + 36, body.w - 40, T.body, 26, 1);
     let y = body.y + 82;
     y = p.para(q.ask, body.x + 8, y, body.w - 40, T.question, 36, 3);
     p.para(q.why, body.x + 8, y + 8, body.w - 60, T.why, 23, 3);
@@ -95,12 +103,12 @@ export const onboarding: ScreenDef = {
       app.state.prefs.servings = i.value;
       app.addNotes([NOTES.servings(i.value)]);
       app.track('onboarding_answer', { q: 2 });
-      next(app);
+      next(app, HEARD.servings(i.value));
       return true;
     }
     const q = app.rt.onboardingQ;
     // "¿Comes de todo…?" — "sí" or "no" (nothing I don't eat) both mean the default.
-    if ((i.kind === 'no' || i.kind === 'yes') && q === 2) { takeDefault(app, q); answered(app, q); return true; }
+    if ((i.kind === 'no' || i.kind === 'yes') && q === 2) { takeDefault(app, q); answered(app, q, {}, HEARD.eatsAll); return true; }
     // "Supongo que tienes… ¿Así es?" — "sí" keeps the guess; a bare "no" asks what's different.
     if (i.kind === 'yes' && q === 3) { takeDefault(app, q); answered(app, q); return true; }
     if (i.kind === 'no' && q === 3) { app.notice(EQUIPMENT_WHAT); return true; }
@@ -114,7 +122,7 @@ export const onboarding: ScreenDef = {
       app.state.prefs.city = city.charAt(0).toUpperCase() + city.slice(1);
       app.addNotes([NOTES.city(app.state.prefs.city)]);
       app.track('onboarding_answer', { q: 1 });
-      next(app);
+      next(app, HEARD.city(app.state.prefs.city));
       return true;
     }
     if (q === 1) {
@@ -123,10 +131,10 @@ export const onboarding: ScreenDef = {
       app.state.prefs.servings = n;
       app.addNotes([NOTES.servings(n)]);
       app.track('onboarding_answer', { q: 2 });
-      next(app);
+      next(app, HEARD.servings(n));
       return true;
     }
-    if (q === 2 && NOTHING_WORDS.includes(normalizeText(text))) { takeDefault(app, q); answered(app, q); return true; }
+    if (q === 2 && NOTHING_WORDS.includes(normalizeText(text))) { takeDefault(app, q); answered(app, q, {}, HEARD.eatsAll); return true; }
     // Q3 diet and Q4 equipment, in the user's words: the brain writes them as notes.
     return false;
   },
@@ -135,13 +143,18 @@ export const onboarding: ScreenDef = {
     const q = app.rt.onboardingQ;
     if (q < 2) return false;
     let notes = 0;
+    let heard: string | null = null;
     for (const a of list) {
-      if (a.action === 'poionotas') { app.removeNotes(a.remove ?? []); app.addNotes(a.add ?? []); notes += (a.add ?? []).length; }
+      if (a.action === 'poionotas') {
+        app.removeNotes(a.remove ?? []); app.addNotes(a.add ?? []); notes += (a.add ?? []).length;
+        // The brain says back what it understood ("Sin cerdo y poco picante."); a bare "Anotado." says nothing.
+        if (a.reply?.trim() && !/^anotado\.?$/i.test(a.reply.trim())) heard = a.reply.trim();
+      }
       // Food mentioned in passing ("no como cerdo, y tengo pollo"): it's in the kitchen.
       if (a.action === 'pantry' && a.changes?.length) app.applyPantry(a.changes);
     }
     if (!notes) { app.notUnderstood(); return true; }
-    answered(app, q, { notes });
+    answered(app, q, { notes }, heard);
     return true;
   },
 

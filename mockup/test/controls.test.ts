@@ -238,7 +238,10 @@ describe('reactive voice: anything said, anywhere, adjusts', () => {
     const { app, calls } = device(false, { utterance: [[{ action: 'poionotas', add: ['Dieta vegetariana: sin carne, pollo ni pescado.'] }]] });
     app.turnOn();
     await app.utterance('Guadalajara');
+    // Each answer is said back above the next question.
+    expect(app.rt.onboardingHeard).toBe('Guadalajara, anotado.');
     await app.utterance('para dos');
+    expect(app.rt.onboardingHeard).toBe('Para 2, entonces.');
     await app.utterance('soy vegetariano');
     expect(calls.filter((c) => c.kind === 'utterance').map((c) => c.context.screen.id)).toEqual(['onboarding-3']);
     expect(app.rt.onboardingQ).toBe(3);
